@@ -1,0 +1,407 @@
+# Meet Campus - Copilot Instructions
+
+## Project Overview
+
+This is a **Blazor WebAssembly** web application with a hosted ASP.NET Core backend using .NET 10, Entity Framework Core with PostgreSQL, and Tailwind CSS for styling. The project follows a **vertical slicing architecture** with modern C# patterns and best practices.
+
+## Technology Stack
+
+- **Framework:** Blazor WebAssembly (Interactive Mode) + ASP.NET Core Backend
+- **.NET Version:** .NET 10
+- **Database:** PostgreSQL with Entity Framework Core
+- **Styling:** Tailwind CSS (mobile-first)
+- **Authentication:** ASP.NET Core Identity with Blazor auth patterns
+- **Real-Time Messaging:** SignalR (for chat)
+- **Language:** C# 14 (prefer C# for all client-side logic; avoid JavaScript)
+
+## Project Type
+
+**Social/Dating App** with real-time friend discovery, connections, and messaging capabilities.
+
+
+## Architecture & Project Structure
+
+- Use vertical slicing: organize by feature (Auth, Users, Connections, Chat, Notifications, etc.), not by technical layer.
+- Each feature contains its own Pages, Services, DTOs, Components, and (if needed) Hubs.
+- Shared components and services go in a Shared folder.
+- Each class, interface, DTO, and component must be in its own file.
+
+## C# Coding Standards
+
+### Naming Conventions
+
+- **Classes & Interfaces:** PascalCase (`UserService`, `IUserRepository`)
+- **Methods & Properties:** PascalCase (`GetUserById()`, `IsActive`)
+- **Private fields:** `_camelCase` (e.g., `_logger`, `_userService`)
+- **Constants:** `UPPER_SNAKE_CASE` or PascalCase for well-known constants
+- **Blazor Components:** PascalCase ending in `.razor` (e.g., `UserCard.razor`, `LoadingSpinner.razor`)
+- **DTOs:** `[Entity]Dto` suffix (e.g., `UserDto`, `PostCreateDto`)
+- **Services:** `[Entity]Service` suffix (e.g., `UserService`, `PostService`)
+
+
+### File Organization
+- Use one file per class, interface, DTO, or component.
+
+
+### Modern C# 14 Patterns
+- Use file-scoped namespaces, records for DTOs, and nullable reference types.
+- Prefer `required` for mandatory properties and use async/await throughout.
+
+## Entity Framework Core & PostgreSQL
+
+
+### Core Social App Entities
+- User: profile, bio, photo, age, gender, interests, last seen, etc.
+- Connection: friend requests, matches, blocks, status, timestamps.
+- ChatMessage: sender, recipient, content, sent/read timestamps, isRead.
+
+
+**DbContext Setup:**
+- Entities go in `Data/Entities/` folder.
+- Use PostgreSQL provider and migrations for schema changes.
+
+### DTOs vs Entities
+
+- **Entities:** Only in `Data/Entities/`. Used by EF Core and database layer only.
+- **DTOs:** In `Features/[Feature]/DTOs/`. Used for API responses and service communication.
+- **Never expose entities directly** from APIs or services; always map to DTOs.
+
+
+**DTOs:**
+- Use DTOs for all API/service communication. Never expose entities directly.
+
+### Async All the Way
+
+- All database operations must be **async**
+- Use `async`/`await` end-to-end
+- Use `CancellationToken` parameter (default: `CancellationToken ct = default`)
+- Example:
+
+```csharp
+public async Task<UserDto?> GetUserByIdAsync(int id, CancellationToken ct = default)
+{
+    var user = await _context.Users
+        .AsNoTracking()
+        .FirstOrDefaultAsync(u => u.Id == id, ct);
+    
+    return user == null ? null : MapToDto(user);
+}
+```
+
+## Blazor WebAssembly & Interactive Mode
+
+### Component Organization
+
+**Interactive WebAssembly Components:**
+- Location: `Features/[Feature]/Components/`
+- Render mode: Add `@rendermode InteractiveWebAssembly` to components that need interactivity
+- Use static rendering for layout/non-interactive components
+
+**Component Structure:**
+
+```razor
+@page "/users/{UserId:int}"
+@rendermode InteractiveWebAssembly
+@using MeetCampus.Features.Users.Services
+@using MeetCampus.Features.Users.DTOs
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<div class="container mx-auto p-4">
+    @if (user == null)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        <h1 class="text-2xl font-bold">@user.FirstName @user.LastName</h1>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private UserDto? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserService.GetUserByIdAsync(UserId);
+    }
+}
+```
+
+
+### Authentication in Blazor
+- Use CascadingAuthenticationState and AuthorizeView for authentication.
+
+```razor
+<AuthorizeView>
+    <Authorized>
+        <p>Welcome, @context.User.Identity?.Name</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not authorized</p>
+    </NotAuthorized>
+</AuthorizeView>
+```
+
+
+### Prefer C# Over JavaScript
+- Use C# for all client-side logic. Avoid JavaScript unless absolutely necessary.
+
+
+## SignalR for Real-Time Chat
+- Use SignalR for all real-time chat and notifications.
+- Place server-side hubs in each feature's Hubs folder.
+- Use a client-side wrapper service for SignalR in Blazor.
+- Use group management for targeted message delivery.
+
+
+## Styling with Tailwind CSS
+- Use Tailwind CSS for all styling.
+- Design mobile-first, then add responsive breakpoints.
+- Use reusable components for common UI patterns.
+
+## Dependency Injection
+
+
+### Service Registration Pattern
+- Register all services and SignalR hubs using dependency injection in Program.cs.
+
+
+### Injecting into Components
+- Use constructor or property injection for services in Blazor components.
+
+
+### Service Design
+- Keep services focused on one responsibility. Use scoped lifetime by default.
+
+## Error Handling & Validation
+
+
+### Null Checks
+- Use ArgumentNullException and input validation for all parameters.
+
+
+### Exception Types
+- Use specific exceptions and provide meaningful error messages.
+
+
+### Async Exception Handling
+- Log and handle exceptions gracefully in async code.
+
+
+## Logging
+- Use ILogger<T> for logging. Use appropriate log levels and structured data.
+
+
+## API Layer (Backend)
+- Group endpoints by feature. Use DTOs for all input/output.
+
+
+## Testing Best Practices
+- Create a separate test project. Test public APIs and services. Use xUnit or similar.
+
+## Security Best Practices
+
+### Social App Specific
+
+- **User Privacy:** Never expose user data (email, phone) without explicit permission
+- **Block List:** Always check if users have blocked each other before showing profiles or allowing chat
+- **Message Encryption:** Consider end-to-end encryption for private messages in future versions
+- **Report/Abuse:** Implement reporting mechanism for inappropriate behavior
+- **Age Verification:** Validate user age claims (for dating app context)
+- **Photo Moderation:** Implement photo review before public visibility
+- **Rate Limiting:** Implement rate limiting on:
+  - Connection requests (e.g., max 50 per day)
+  - Message sending (e.g., max 100 per hour)
+  - Profile views logging
+
+### General Best Practices
+
+- **Never** expose database entities in API responses; use DTOs
+- Validate all user input server-side
+- Use `[Authorize]` attributes on protected endpoints
+- Hash passwords with Identity Core (built-in)
+- Use `CancellationToken` to prevent long-running operations
+- Store secrets in `appsettings.json` (local dev) or environment variables (production)
+- Enable HTTPS everywhere
+- Use CSRF protection (already enabled with `app.UseAntiforgery()`)
+
+
+## Real-Time Notifications
+- Use SignalR for new match alerts, message notifications, typing indicators, online/offline status, and connection requests.
+
+## Project Structure Example (Social/Dating App)
+
+```
+MeetCampus/
+├── Features/
+│   ├── Auth/
+│   │   ├── Components/
+│   │   │   └── LoginForm.razor
+│   │   ├── Pages/
+│   │   │   ├── Login.razor
+│   │   │   └── Register.razor
+│   │   ├── Services/
+│   │   │   └── AuthenticationService.cs
+│   │   └── DTOs/
+│   │       ├── LoginRequest.cs
+│   │       └── RegisterRequest.cs
+│   │
+│   ├── Users/
+│   │   ├── Components/
+│   │   │   ├── UserCard.razor
+│   │   │   └── ProfileEditor.razor
+│   │   ├── Pages/
+│   │   │   ├── UserDiscovery.razor
+│   │   │   └── UserProfile.razor
+│   │   ├── Services/
+│   │   │   └── UserService.cs
+│   │   └── DTOs/
+│   │       ├── UserProfileDto.cs
+│   │       ├── UserDiscoveryDto.cs
+│   │       └── UpdateProfileRequest.cs
+│   │
+│   ├── Connections/
+│   │   ├── Components/
+│   │   │   ├── ConnectionRequestCard.razor
+│   │   │   └── MatchList.razor
+│   │   ├── Pages/
+│   │   │   ├── Matches.razor
+│   │   │   └── Requests.razor
+│   │   ├── Services/
+│   │   │   └── ConnectionService.cs
+│   │   └── DTOs/
+│   │       ├── ConnectionRequestDto.cs
+│   │       ├── MatchDto.cs
+│   │       └── SendConnectionRequest.cs
+│   │
+│   ├── Chat/
+│   │   ├── Components/
+│   │   │   ├── ChatWindow.razor
+│   │   │   ├── MessageList.razor
+│   │   │   ├── MessageInput.razor
+│   │   │   ├── OnlineUsersList.razor
+│   │   │   └── ConversationList.razor
+│   │   ├── Pages/
+│   │   │   ├── ChatRoom.razor
+│   │   │   └── Messages.razor
+│   │   ├── Services/
+│   │   │   ├── ChatService.cs
+│   │   │   └── ChatHubClient.cs
+│   │   ├── Hubs/
+│   │   │   └── ChatHub.cs
+│   │   └── DTOs/
+│   │       ├── ChatMessageDto.cs
+│   │       ├── SendMessageRequest.cs
+│   │       ├── ConversationDto.cs
+│   │       └── UserPresenceDto.cs
+│   │
+│   └── Notifications/
+│       ├── Components/
+│       │   └── NotificationBell.razor
+│       ├── Services/
+│       │   └── NotificationService.cs
+│       └── DTOs/
+│           └── NotificationDto.cs
+│
+├── Shared/
+│   ├── Components/
+│   │   ├── Layout/
+│   │   │   ├── MainLayout.razor
+│   │   │   └── Sidebar.razor
+│   │   └── Common/
+│   │       ├── LoadingSpinner.razor
+│   │       ├── ErrorAlert.razor
+│   │       └── Button.razor
+│   ├── Services/
+│   │   └── [Shared services]
+│   └── DTOs/
+│       └── [Shared DTOs]
+│
+├── Data/
+│   ├── ApplicationDbContext.cs
+│   ├── Entities/
+│   │   ├── User.cs
+│   │   ├── Connection.cs
+│   │   └── ChatMessage.cs
+│   └── Migrations/
+│
+├── Pages/
+│   ├── App.razor
+│   ├── Home.razor
+│   ├── Layout/
+│   │   └── MainLayout.razor
+│   ├── Routes.razor
+│   └── NotFound.razor
+│
+├── Program.cs
+├── appsettings.json
+├── appsettings.Development.json
+└── Styles/
+    └── tailwind.css
+```
+
+## Development Workflow
+
+
+## Development Workflow
+- Create entities and DTOs for each feature.
+- Implement services and register with DI.
+- Add endpoints or hubs as needed.
+- Build UI components and pages.
+- Style with Tailwind (mobile-first).
+- Write tests for all public methods.
+
+
+## Quick Checklist for New Features
+- Entity and DTOs created for each feature
+- Service created with async/await and CancellationToken
+- Components are interactive with InteractiveWebAssembly if needed
+- Styling uses Tailwind (mobile-first)
+- DI configured in Program.cs
+- API endpoints or hubs mapped (if applicable)
+- Error handling with specific exceptions
+- Unit tests written
+- Null checks and input validation
+- Logging for important operations
+
+## Real-Time Features (Chat, Notifications)
+- SignalR hub and client wrapper created
+- Connection/disconnection and group management handled
+- User authentication verified in hub
+- Component subscribes/unsubscribes to events
+- Proper disposal and reconnection logic
+- Typing indicators and presence updates working
+
+## Social App Security
+- User privacy checks
+- Block list verified before showing profiles
+- Connection requests validated
+- Chat messages only between connected users
+- Age/gender filtering applied
+- Rate limiting for sensitive actions
+- Reported content flagged for moderation
+
+---
+
+**Last Updated:** Based on .NET 10 and modern Blazor patterns.
+
+
+## Important NuGet Packages
+- Microsoft.AspNetCore.SignalR.Client
+- Microsoft.AspNetCore.SignalR
+- Npgsql.EntityFrameworkCore.PostgreSQL
+- AutoMapper (optional)
+- FluentValidation (optional)
+- Serilog (optional)
+
+
+## Troubleshooting
+- Check SignalR hub URL and CORS settings
+- Ensure authentication tokens are valid
+- Apply EF Core migrations for schema changes
+- Use InteractiveWebAssembly for interactive components
+- Ensure backend is running and HTTPS is configured

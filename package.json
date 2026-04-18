@@ -1,0 +1,17 @@
+{
+  "name": "meetcampus",
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "npx @tailwindcss/cli -i ./MeetCampus/wwwroot/site.css -o ./MeetCampus/wwwroot/app.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./MeetCampus/wwwroot/site.css -o ./MeetCampus/wwwroot/app.css --watch",
+    "dev": "npm run watch:css"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "daisyui": "^5.5.14"
+  }
+}
