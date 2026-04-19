@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
+@using MeetCampus.Client.Shared.Components
 
-<div class="min-h-screen bg-white font-sans text-gray-900 antialiased">
+<Navbar />
+<div class="min-h-screen pt-16 font-sans text-base-content bg-base-100 antialiased">
     @Body
 </div>
-<footer class="footer bg-neutral text-neutral-content fixed bottom-0 flex items-baseline justify-center p-2">
+<footer class="footer text-neutral-content fixed bottom-0 flex items-baseline justify-center p-2">
     <div>
         <p>Copyright © @(DateTime.Today.Year) - All right reserved</p>
     </div>

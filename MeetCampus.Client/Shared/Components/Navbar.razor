@@ -1,0 +1,156 @@
+@rendermode InteractiveWebAssembly
+@using System.Globalization
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<nav class="navbar bg-base-100 shadow-sm border-b border-base-300 sticky top-0 z-50">
+    <div class="flex-1 px-6">
+        <!-- Logo/Brand -->
+        <a href="/" class="flex items-center gap-3 text-2xl font-bold text-base-content hover:opacity-80 transition">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold">
+                MC
+            </div>
+            <span>MeetCampus</span>
+        </a>
+    </div>
+
+    <!-- Desktop Menu (Hidden on mobile) -->
+    <div class="flex-none hidden lg:flex items-center gap-1">
+        <!-- Navigation Links -->
+        <ul class="menu menu-horizontal px-1 gap-1">
+            <li>
+                <a href="/mission" class="rounded-full">Mission</a>
+            </li>
+            <li>
+                <a href="/stories" class="rounded-full">Stories</a>
+            </li>
+            <li>
+                <a href="/events" class="rounded-full">Events</a>
+            </li>
+            <li>
+                <a href="/contact" class="rounded-full">Contact</a>
+            </li>
+        </ul>
+
+        <!-- Theme Selector Dropdown -->
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" title="Toggle theme" tabindex="0">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 rounded-2xl z-1 w-52 p-2 shadow border border-base-300" tabindex="0">
+                <li><button @onclick="@(() => SetTheme("light"))" class="rounded-lg">☀️ Light</button></li>
+                <li><button @onclick="@(() => SetTheme("dark"))" class="rounded-lg">🌙 Dark</button></li>
+                <li><button @onclick="@(() => SetTheme("system"))" class="rounded-lg">🖥️ System</button></li>
+            </ul>
+        </div>
+
+        <!-- Language Selector Dropdown -->
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" title="Select language" tabindex="0">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.26 10.558a2 2 0 11 2.828 2.829L9.172 10M2.519 11.726a2 2 0 01.106-2.552l2.828-2.829a2 2 0 11 2.828 2.829l-.976.976a2 2 0 01-2.836.034L2.52 11.726z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 rounded-2xl z-1 w-52 p-2 shadow border border-base-300" tabindex="0">
+                <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
+                <li><button @onclick="@(() => SetLanguage("es"))" class="rounded-lg">🇪🇸 Español</button></li>
+                <li><button @onclick="@(() => SetLanguage("fr"))" class="rounded-lg">🇫🇷 Français</button></li>
+                <li><button @onclick="@(() => SetLanguage("de"))" class="rounded-lg">🇩🇪 Deutsch</button></li>
+            </ul>
+        </div>
+
+        <!-- Sign In Button -->
+        <a href="/login" class="btn btn-primary btn-sm rounded-full px-6">
+            Sign In
+        </a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <div class="flex-none lg:hidden">
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" aria-label="Menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 rounded-2xl w-52 p-2 shadow border border-base-300">
+                <li><a href="/mission" class="rounded-lg">Mission</a></li>
+                <li><a href="/stories" class="rounded-lg">Stories</a></li>
+                <li><a href="/events" class="rounded-lg">Events</a></li>
+                <li><a href="/contact" class="rounded-lg">Contact</a></li>
+                <li class="divider my-1"></li>
+                <li>
+                    <details>
+                        <summary class="rounded-lg">🎨 Theme</summary>
+                        <ul class="p-2 rounded-lg bg-base-200">
+                            <li><button @onclick="@(() => SetTheme("light"))" class="rounded-lg">☀️ Light</button></li>
+                            <li><button @onclick="@(() => SetTheme("dark"))" class="rounded-lg">🌙 Dark</button></li>
+                            <li><button @onclick="@(() => SetTheme("system"))" class="rounded-lg">🖥️ System</button></li>
+                        </ul>
+                    </details>
+                </li>
+                <li>
+                    <details>
+                        <summary class="rounded-lg">🌍 Language</summary>
+                        <ul class="p-2 rounded-lg bg-base-200">
+                            <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
+                            <li><button @onclick="@(() => SetLanguage("es"))" class="rounded-lg">🇪🇸 Español</button></li>
+                            <li><button @onclick="@(() => SetLanguage("fr"))" class="rounded-lg">🇫🇷 Français</button></li>
+                            <li><button @onclick="@(() => SetLanguage("de"))" class="rounded-lg">🇩🇪 Deutsch</button></li>
+                        </ul>
+                    </details>
+                </li>
+                <li class="divider my-1"></li>
+                <li><a href="/login" class="btn btn-primary btn-sm rounded-full">Sign In</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private async Task SetTheme(string theme)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "theme", theme);
+            await JS.InvokeVoidAsync("applyTheme", theme);
+            Console.WriteLine($"Theme changed to: {theme}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting theme: {ex.Message}");
+        }
+    }
+
+    private async Task SetLanguage(string language)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "language", language);
+            await JS.InvokeVoidAsync("console.log", $"Language changed to: {language}");
+            Console.WriteLine($"Language changed to: {language}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting language: {ex.Message}");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Initialize theme on component load
+                await JS.InvokeVoidAsync("initializeTheme");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing theme: {ex.Message}");
+            }
+        }
+    }
+}
