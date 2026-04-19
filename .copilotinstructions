@@ -9,7 +9,7 @@ This is a **Blazor WebAssembly** web application with a hosted ASP.NET Core back
 - **Framework:** Blazor WebAssembly (Interactive Mode) + ASP.NET Core Backend
 - **.NET Version:** .NET 10
 - **Database:** PostgreSQL with Entity Framework Core
-- **Styling:** Tailwind CSS (mobile-first)
+- **Styling:** Tailwind CSS (mobile-first) + Daisy UI components
 - **Authentication:** ASP.NET Core Identity with Blazor auth patterns
 - **Real-Time Messaging:** SignalR (for chat)
 - **Language:** C# 14 (prefer C# for all client-side logic; avoid JavaScript)
@@ -158,10 +158,82 @@ public async Task<UserDto?> GetUserByIdAsync(int id, CancellationToken ct = defa
 - Use group management for targeted message delivery.
 
 
-## Styling with Tailwind CSS
-- Use Tailwind CSS for all styling.
-- Design mobile-first, then add responsive breakpoints.
-- Use reusable components for common UI patterns.
+## Styling with Tailwind CSS & Daisy UI
+
+### Design Language: Soft Campus
+The "Soft Campus" aesthetic prioritizes **approachable sophistication**—reducing anxiety through comfort, accessibility, and generosity of space. It replaces aggressive design with a calming, open experience.
+
+#### Typography: Simple & Human
+- **Primary Font:** Inter (clean, slightly rounded, exceptionally readable)
+- **Secondary Font (Headings):** Poppins or Quicksand (geometric, rounded bowls for softness)
+- **Rules:**
+  - Maintain strict font size hierarchy (DaisyUI defaults work well)
+  - Increase line-height for body text: use `leading-relaxed` or `leading-loose` for generous feel
+  - Use letter spacing sparingly; never over-tighten text
+  - Example: `<p class="leading-relaxed tracking-normal">Readable, generous body text</p>`
+
+#### Color Palette: Calm Contrast
+- **Base (Backdrop):** Soft cream/off-white instead of pure white (DaisyUI `bg-base-100`)
+- **Secondary Base:** Soft beige/taupe for containers (DaisyUI `bg-base-200`)
+- **Primary Brand Color:** Single, friendly accent—Sage Green (growth), Muted Coral (warmth), or Dusty Sky Blue (calm)
+  - Use sparingly for active states and primary CTAs only
+- **Text Color:** Dark brown-gray or charcoal instead of pure black (DaisyUI `text-base-content`)
+  - Reduces eye strain and feels gentler
+
+#### Whitespace & Layout: The "Bento Box" Feel
+- **Generous Spacing:** Use Tailwind spacing scale religiously (`p-4`, `p-6`, `p-8`). When in doubt, add padding.
+- **Card-Based Layout:** Group related information in distinctly rounded, soft-colored cards (`bg-base-200 rounded-3xl`)
+  - Example: Separate cards for "Matched in the Last Hour," "Events," "Messages"
+  - Makes interface scannable and digestible
+- **Shadows:** Subtle depth only; use `shadow-sm` sparingly on important containers only
+- **No Sharp Corners:** Every interactive element and container must be rounded
+
+#### Component Patterns: Soft Elements
+- **Curve Rule:** All interactive elements use `rounded-lg`, `rounded-xl`, or `rounded-full`
+- **Buttons:**
+  - Primary: Solid-color button (`btn btn-primary`)
+  - Secondary: Outlined button (`btn btn-outline btn-neutral`)
+  - Avoid aggressive gradients; maintain clarity and hierarchy
+- **Badges:** Use soft, low-contrast badges (`badge badge-neutral` or `badge badge-ghost`)
+  - Provides information without demanding attention
+  - For verification or category tags
+- **Cards (Core Component):**
+  - Profile cards: Large photo + name + one key detail (e.g., "Verified")
+  - Hide additional details (Major, About Me) until user taps
+  - Keep initial view clean and uncluttered
+  - Use `card bg-base-100 shadow-sm rounded-2xl p-6`
+- **Modals & Dropdowns:** Use DaisyUI components with rounded corners and soft backgrounds
+- **Forms:** Use DaisyUI form components (`input`, `textarea`, `select`) with consistent padding and rounded borders
+
+#### Implementation Checklist
+- ✅ Use Inter for body, Poppins/Quicksand for headings
+- ✅ Every component has rounded corners (no sharp edges)
+- ✅ Generous padding and whitespace throughout
+- ✅ Soft shadows (`shadow-sm`) only on key containers
+- ✅ Muted, friendly color palette (avoid aggressive colors)
+- ✅ Cards use Bento Box layout for information grouping
+- ✅ Buttons avoid gradients; use solid or outline styles
+- ✅ Text has relaxed line-height for readability
+- ✅ All interactive elements feel approachable, not competitive
+
+### Daisy UI Components
+- **Primary component library:** Use Daisy UI components whenever possible
+- Daisy UI provides pre-built, accessible components built on Tailwind CSS
+- Common components: buttons, cards, modals, dropdowns, alerts, badges, avatars, etc.
+- Documentation: https://daisyui.com/
+
+### Usage Examples
+- Buttons: `<button class="btn btn-primary">Click me</button>`
+- Cards: `<div class="card bg-base-100 shadow-xl rounded-2xl"></div>`
+- Alerts: `<div class="alert alert-info"><span>Info message</span></div>`
+- Modals: Use Daisy UI modal components with Blazor event handlers
+- Forms: Use Daisy UI form components (`input`, `textarea`, `select` with Daisy classes)
+
+### Tailwind CSS Customization
+- Use Tailwind for custom styling and spacing when Daisy UI doesn't cover it
+- Design mobile-first, then add responsive breakpoints
+- Use reusable components for common UI patterns
+- All custom styles should complement, not conflict with, Daisy UI theme and Soft Campus aesthetic
 
 ## Dependency Injection
 
@@ -360,7 +432,7 @@ MeetCampus/
 - Entity and DTOs created for each feature
 - Service created with async/await and CancellationToken
 - Components are interactive with InteractiveWebAssembly if needed
-- Styling uses Tailwind (mobile-first)
+- Styling uses Daisy UI components where applicable, Tailwind for custom needs (mobile-first)
 - DI configured in Program.cs
 - API endpoints or hubs mapped (if applicable)
 - Error handling with specific exceptions
@@ -394,6 +466,7 @@ MeetCampus/
 - Microsoft.AspNetCore.SignalR.Client
 - Microsoft.AspNetCore.SignalR
 - Npgsql.EntityFrameworkCore.PostgreSQL
+- daisyui (npm package)
 - AutoMapper (optional)
 - FluentValidation (optional)
 - Serilog (optional)
