@@ -2,8 +2,8 @@
   "name": "meetcampus",
   "version": "1.0.0",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./MeetCampus/site.css -o ./MeetCampus/wwwroot/app.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i ./MeetCampus/site.css -o ./MeetCampus/wwwroot/app.css --watch",
+    "build:css": "npx @tailwindcss/cli -i ./MeetCampus/tailwind.css -o ./MeetCampus/wwwroot/app.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./MeetCampus/tailwind.css -o ./MeetCampus/wwwroot/app.css --watch",
     "dev": "npm run watch:css"
   },
   "dependencies": {

@@ -1,6 +1,9 @@
 ﻿@page "/"
+@using MeetCampus.Client.Resources
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>MeetCampus — Connection, Not Competition</PageTitle>
+<PageTitle>@L["Home_PageTitle"]</PageTitle>
 
 <main class="bg-base-100 relative">
   <!-- Hero Section: The Hook -->
@@ -11,27 +14,27 @@
         <div class="space-y-8">
           <div class="space-y-4">
             <h1 class="text-base-content text-5xl leading-tight font-bold sm:text-6xl">
-              Connection, not competition.
+              @L["Home_HeroTitle"]
             </h1>
             <p class="text-base-content/70 text-xl leading-relaxed">
-              MeetCampus is a non-profit, open-source dating platform built by students, for students. No pay-to-win algorithms, no hidden fees—just your campus community, exactly as it is.
+              @L["Home_HeroSubtitle"]
             </p>
           </div>
 
           <div class="flex flex-col gap-4 sm:flex-row">
             <a href="/register" class="btn btn-lg btn-primary rounded-full px-8">
-              Join MeetCampus
+              @L["Home_JoinButton"]
             </a>
             <a href="https://github.com/clock1998/MeetCampus" target="_blank" rel="noopener noreferrer" class="btn btn-lg btn-outline btn-neutral gap-2 rounded-full px-8">
-              <span class="text-lg">→</span> View on GitHub
+              <span class="text-lg">→</span> @L["Home_GitHubButton"]
             </a>
           </div>
 
           <!-- Trust Badges -->
           <div class="flex flex-wrap gap-3 pt-4">
-            <span class="badge badge-ghost gap-1 rounded-full">🔒 Privacy First</span>
-            <span class="badge badge-ghost gap-1 rounded-full">✓ 100% Free</span>
-            <span class="badge badge-ghost gap-1 rounded-full">📖 Open Source</span>
+            <span class="badge badge-ghost gap-1 rounded-full">@L["Home_BadgePrivacy"]</span>
+            <span class="badge badge-ghost gap-1 rounded-full">@L["Home_Badge100Free"]</span>
+            <span class="badge badge-ghost gap-1 rounded-full">@L["Home_BadgeOpenSource"]</span>
           </div>
         </div>
 
@@ -41,7 +44,7 @@
             <figure class="from-base-300 to-base-200 text-base-content/40 mb-6 flex h-80 items-center justify-center rounded-2xl bg-gradient-to-br">
               <div class="text-center">
                 <div class="bg-base-100 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full text-2xl">👥</div>
-                <p class="text-sm font-medium">Your campus community awaits</p>
+                <p class="text-sm font-medium">@L["Home_CommunityAwaits"]</p>
               </div>
             </figure>
           </div>
@@ -56,14 +59,14 @@
       <div class="card bg-base-100 border-base-300 rounded-3xl border p-8 shadow-sm lg:p-12">
         <div class="space-y-6">
           <h2 class="text-base-content text-4xl font-bold">
-            A space built on trust, not data.
+            @L["Home_ManifestoTitle"]
           </h2>
           <p class="text-base-content/70 text-lg leading-relaxed">
-            We believe you shouldn't have to sacrifice your privacy for a connection. By combining academic verification with user anonymity, we've created the first dating space where you can be yourself, safely.
+            @L["Home_ManifestoBody"]
           </p>
           <div class="divider my-4"></div>
           <p class="text-base-content/60 italic">
-            "The best connections happen when people feel secure enough to show up as their authentic selves."
+            @L["Home_ManifestoQuote"]
           </p>
         </div>
       </div>
@@ -74,66 +77,51 @@
   <section class="bg-base-100 px-6 py-20">
     <div class="mx-auto max-w-6xl">
       <div class="mb-12">
-        <h2 class="text-base-content mb-4 text-4xl font-bold">Our Promise</h2>
+        <h2 class="text-base-content mb-4 text-4xl font-bold">@L["Home_PromiseTitle"]</h2>
         <p class="text-base-content/70 text-lg leading-relaxed">
-          Built on principles, not profit. Here's what makes MeetCampus different.
+          @L["Home_PromiseSubtitle"]
         </p>
       </div>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        <!-- Box A: Zero Profit, All Purpose -->
         <div class="card bg-base-200 border-base-300 rounded-3xl border p-8 shadow-sm transition hover:shadow-md">
           <div class="mb-4 flex items-start gap-4">
             <div class="text-3xl">💚</div>
-            <h3 class="text-base-content text-2xl font-bold">Zero Profit, All Purpose</h3>
+            <h3 class="text-base-content text-2xl font-bold">@L["Home_Promise1Title"]</h3>
           </div>
-          <p class="text-base-content/70 leading-relaxed">
-            MeetCampus is 100% free. We don't have investors to satisfy or ads to show you. We exist solely to help you find that person in your 10:00 AM lecture or your favorite study spot.
-          </p>
+          <p class="text-base-content/70 leading-relaxed">@L["Home_Promise1Body"]</p>
         </div>
 
-        <!-- Box B: No "Pay-to-Win" -->
         <div class="card bg-base-200 border-base-300 rounded-3xl border p-8 shadow-sm transition hover:shadow-md">
           <div class="mb-4 flex items-start gap-4">
             <div class="text-3xl">⚖️</div>
-            <h3 class="text-base-content text-2xl font-bold">No "Pay-to-Win"</h3>
+            <h3 class="text-base-content text-2xl font-bold">@L["Home_Promise2Title"]</h3>
           </div>
-          <p class="text-base-content/70 leading-relaxed">
-            On other apps, you pay to be seen. Here, everyone is equal. Our algorithm doesn't prioritize "boosts" or "super-likes"—it simply connects you based on who you are and what you care about.
-          </p>
+          <p class="text-base-content/70 leading-relaxed">@L["Home_Promise2Body"]</p>
         </div>
 
-        <!-- Box C: Community Owned -->
         <div class="card bg-base-200 border-base-300 rounded-3xl border p-8 shadow-sm transition hover:shadow-md">
           <div class="mb-4 flex items-start gap-4">
             <div class="text-3xl">🤝</div>
-            <h3 class="text-base-content text-2xl font-bold">Community Owned</h3>
+            <h3 class="text-base-content text-2xl font-bold">@L["Home_Promise3Title"]</h3>
           </div>
-          <p class="text-base-content/70 leading-relaxed">
-            We are open-source. This app is maintained and managed by student developers and campus communities. Transparency isn't just a feature; it's our foundation.
-          </p>
+          <p class="text-base-content/70 leading-relaxed">@L["Home_Promise3Body"]</p>
         </div>
 
-        <!-- Box D: Purely Peers -->
         <div class="card bg-base-200 border-base-300 rounded-3xl border p-8 shadow-sm transition hover:shadow-md">
           <div class="mb-4 flex items-start gap-4">
             <div class="text-3xl">✓</div>
-            <h3 class="text-base-content text-2xl font-bold">Purely Peers</h3>
+            <h3 class="text-base-content text-2xl font-bold">@L["Home_Promise4Title"]</h3>
           </div>
-          <p class="text-base-content/70 leading-relaxed">
-            No bots. No scammers. No fake "influencer" accounts. By requiring a .edu or university-issued email for every single registration, we ensure that the person you're chatting with actually goes to your school.
-          </p>
+          <p class="text-base-content/70 leading-relaxed">@L["Home_Promise4Body"]</p>
         </div>
 
-        <!-- Box E: Your Identity, Your Choice -->
         <div class="card bg-base-200 border-base-300 rounded-3xl border p-8 shadow-sm transition hover:shadow-md md:col-span-2 lg:col-span-1">
           <div class="mb-4 flex items-start gap-4">
             <div class="text-3xl">🎭</div>
-            <h3 class="text-base-content text-2xl font-bold">Your Identity, Your Choice</h3>
+            <h3 class="text-base-content text-2xl font-bold">@L["Home_Promise5Title"]</h3>
           </div>
-          <p class="text-base-content/70 leading-relaxed">
-            While we verify your status as a student, we respect your privacy. You have total control over your profile—choose to display your legal name or pick a preferred nickname. You decide how you want to be known on campus.
-          </p>
+          <p class="text-base-content/70 leading-relaxed">@L["Home_Promise5Body"]</p>
         </div>
       </div>
     </div>
@@ -142,51 +130,36 @@
   <!-- How It Works: Minimalist List -->
   <section class="bg-base-200/20 px-6 py-20">
     <div class="mx-auto max-w-4xl">
-      <h2 class="text-base-content mb-12 text-4xl font-bold">How It Works</h2>
+      <h2 class="text-base-content mb-12 text-4xl font-bold">@L["Home_HowTitle"]</h2>
 
       <div class="space-y-8">
-        <!-- Step 1 -->
         <div class="flex items-start gap-6">
           <div class="flex-shrink-0">
-            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">
-              1
-            </div>
+            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">1</div>
           </div>
           <div>
-            <h3 class="text-base-content mb-2 text-xl font-semibold">Verified for Safety</h3>
-            <p class="text-base-content/70 leading-relaxed">
-              Sign in with your university email. We ensure every profile belongs to a real student on your campus.
-            </p>
+            <h3 class="text-base-content mb-2 text-xl font-semibold">@L["Home_Step1Title"]</h3>
+            <p class="text-base-content/70 leading-relaxed">@L["Home_Step1Body"]</p>
           </div>
         </div>
 
-        <!-- Step 2 -->
         <div class="flex items-start gap-6">
           <div class="flex-shrink-0">
-            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">
-              2
-            </div>
+            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">2</div>
           </div>
           <div>
-            <h3 class="text-base-content mb-2 text-xl font-semibold">Student-Led Governance</h3>
-            <p class="text-base-content/70 leading-relaxed">
-              Our features and community guidelines are shaped by student moderators, not a corporate board.
-            </p>
+            <h3 class="text-base-content mb-2 text-xl font-semibold">@L["Home_Step2Title"]</h3>
+            <p class="text-base-content/70 leading-relaxed">@L["Home_Step2Body"]</p>
           </div>
         </div>
 
-        <!-- Step 3 -->
         <div class="flex items-start gap-6">
           <div class="flex-shrink-0">
-            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">
-              3
-            </div>
+            <div class="bg-base-300 text-base-content flex h-12 w-12 items-center justify-center rounded-full font-bold">3</div>
           </div>
           <div>
-            <h3 class="text-base-content mb-2 text-xl font-semibold">Transparent Matching</h3>
-            <p class="text-base-content/70 leading-relaxed">
-              Curious how you were matched? You can literally check our code. No "hotness scores," no secrets.
-            </p>
+            <h3 class="text-base-content mb-2 text-xl font-semibold">@L["Home_Step3Title"]</h3>
+            <p class="text-base-content/70 leading-relaxed">@L["Home_Step3Body"]</p>
           </div>
         </div>
       </div>
@@ -197,25 +170,22 @@
   <section class="bg-base-100 border-base-300 border-t px-6 py-16">
     <div class="mx-auto max-w-6xl">
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <!-- Trust Item 1 -->
         <div class="flex flex-col items-center text-center">
           <div class="mb-4 text-5xl">🛡️</div>
-          <h3 class="text-base-content mb-2 text-lg font-semibold">100% Verified</h3>
-          <p class="text-base-content/70">Every user is a student. Period.</p>
+          <h3 class="text-base-content mb-2 text-lg font-semibold">@L["Home_Trust1Title"]</h3>
+          <p class="text-base-content/70">@L["Home_Trust1Body"]</p>
         </div>
 
-        <!-- Trust Item 2 -->
         <div class="flex flex-col items-center text-center">
           <div class="mb-4 text-5xl">🔐</div>
-          <h3 class="text-base-content mb-2 text-lg font-semibold">Privacy First</h3>
-          <p class="text-base-content/70">Your true name is only shared if you want it to be.</p>
+          <h3 class="text-base-content mb-2 text-lg font-semibold">@L["Home_Trust2Title"]</h3>
+          <p class="text-base-content/70">@L["Home_Trust2Body"]</p>
         </div>
 
-        <!-- Trust Item 3 -->
         <div class="flex flex-col items-center text-center">
           <div class="mb-4 text-5xl">💻</div>
-          <h3 class="text-base-content mb-2 text-lg font-semibold">Open Governance</h3>
-          <p class="text-base-content/70">No hidden algorithms tracking your behavior.</p>
+          <h3 class="text-base-content mb-2 text-lg font-semibold">@L["Home_Trust3Title"]</h3>
+          <p class="text-base-content/70">@L["Home_Trust3Body"]</p>
         </div>
       </div>
     </div>
@@ -225,18 +195,18 @@
   <section class="bg-base-200/40 px-6 py-20">
     <div class="mx-auto max-w-4xl space-y-8 text-center">
       <div>
-        <h2 class="text-base-content mb-4 text-4xl font-bold">Ready to find your person?</h2>
+        <h2 class="text-base-content mb-4 text-4xl font-bold">@L["Home_CtaTitle"]</h2>
         <p class="text-base-content/70 text-lg leading-relaxed">
-          Join thousands of students discovering genuine connections at their campus.
+          @L["Home_CtaSubtitle"]
         </p>
       </div>
 
       <div class="flex flex-col justify-center gap-4 sm:flex-row">
         <a href="/register" class="btn btn-lg btn-primary rounded-full px-8">
-          Get Started Free
+          @L["Home_CtaGetStarted"]
         </a>
         <a href="/about" class="btn btn-lg btn-ghost btn-outline rounded-full px-8">
-          Learn More
+          @L["Home_CtaLearnMore"]
         </a>
       </div>
     </div>

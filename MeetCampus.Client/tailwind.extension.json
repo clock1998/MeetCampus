@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/theron-wang/Tailwind-CSS-for-Visual-Studio/refs/heads/main/tailwind.extension.schema.json",
   "BuildFiles": [
     {
-      "Input": "..\\meetcampus\\wwwroot\\site.css",
-      "Output": "",
+      "Input": "..\\MeetCampus\\tailwind.css",
+      "Output": "..\\MeetCampus\\wwwroot\\app.css",
       "Behavior": "Default"
     }
   ],

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Navbar -->
+  <data name="Nav_Mission" xml:space="preserve"><value>Mission</value></data>
+  <data name="Nav_Stories" xml:space="preserve"><value>Stories</value></data>
+  <data name="Nav_Events" xml:space="preserve"><value>Events</value></data>
+  <data name="Nav_Contact" xml:space="preserve"><value>Contact</value></data>
+  <data name="Nav_SignIn" xml:space="preserve"><value>Sign In</value></data>
+  <data name="Nav_Theme" xml:space="preserve"><value>Theme</value></data>
+  <data name="Nav_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Nav_ThemeLight" xml:space="preserve"><value>☀️ Light</value></data>
+  <data name="Nav_ThemeDark" xml:space="preserve"><value>🌙 Dark</value></data>
+  <data name="Nav_ThemeSystem" xml:space="preserve"><value>🖥️ System</value></data>
+
+  <!-- Home — Hero -->
+  <data name="Home_PageTitle" xml:space="preserve"><value>MeetCampus — Connection, Not Competition</value></data>
+  <data name="Home_HeroTitle" xml:space="preserve"><value>Connection, not competition.</value></data>
+  <data name="Home_HeroSubtitle" xml:space="preserve"><value>MeetCampus is a non-profit, open-source dating platform built by students, for students. No pay-to-win algorithms, no hidden fees—just your campus community, exactly as it is.</value></data>
+  <data name="Home_JoinButton" xml:space="preserve"><value>Join MeetCampus</value></data>
+  <data name="Home_GitHubButton" xml:space="preserve"><value>View on GitHub</value></data>
+  <data name="Home_BadgePrivacy" xml:space="preserve"><value>🔒 Privacy First</value></data>
+  <data name="Home_Badge100Free" xml:space="preserve"><value>✓ 100% Free</value></data>
+  <data name="Home_BadgeOpenSource" xml:space="preserve"><value>📖 Open Source</value></data>
+  <data name="Home_CommunityAwaits" xml:space="preserve"><value>Your campus community awaits</value></data>
+
+  <!-- Home — Manifesto -->
+  <data name="Home_ManifestoTitle" xml:space="preserve"><value>A space built on trust, not data.</value></data>
+  <data name="Home_ManifestoBody" xml:space="preserve"><value>We believe you shouldn't have to sacrifice your privacy for a connection. By combining academic verification with user anonymity, we've created the first dating space where you can be yourself, safely.</value></data>
+  <data name="Home_ManifestoQuote" xml:space="preserve"><value>"The best connections happen when people feel secure enough to show up as their authentic selves."</value></data>
+
+  <!-- Home — Our Promise -->
+  <data name="Home_PromiseTitle" xml:space="preserve"><value>Our Promise</value></data>
+  <data name="Home_PromiseSubtitle" xml:space="preserve"><value>Built on principles, not profit. Here's what makes MeetCampus different.</value></data>
+  <data name="Home_Promise1Title" xml:space="preserve"><value>Zero Profit, All Purpose</value></data>
+  <data name="Home_Promise1Body" xml:space="preserve"><value>MeetCampus is 100% free. We don't have investors to satisfy or ads to show you. We exist solely to help you find that person in your 10:00 AM lecture or your favorite study spot.</value></data>
+  <data name="Home_Promise2Title" xml:space="preserve"><value>No "Pay-to-Win"</value></data>
+  <data name="Home_Promise2Body" xml:space="preserve"><value>On other apps, you pay to be seen. Here, everyone is equal. Our algorithm doesn't prioritize "boosts" or "super-likes"—it simply connects you based on who you are and what you care about.</value></data>
+  <data name="Home_Promise3Title" xml:space="preserve"><value>Community Owned</value></data>
+  <data name="Home_Promise3Body" xml:space="preserve"><value>We are open-source. This app is maintained and managed by student developers and campus communities. Transparency isn't just a feature; it's our foundation.</value></data>
+  <data name="Home_Promise4Title" xml:space="preserve"><value>Purely Peers</value></data>
+  <data name="Home_Promise4Body" xml:space="preserve"><value>No bots. No scammers. No fake "influencer" accounts. By requiring a .edu or university-issued email for every single registration, we ensure that the person you're chatting with actually goes to your school.</value></data>
+  <data name="Home_Promise5Title" xml:space="preserve"><value>Your Identity, Your Choice</value></data>
+  <data name="Home_Promise5Body" xml:space="preserve"><value>While we verify your status as a student, we respect your privacy. You have total control over your profile—choose to display your legal name or pick a preferred nickname. You decide how you want to be known on campus.</value></data>
+
+  <!-- Home — How It Works -->
+  <data name="Home_HowTitle" xml:space="preserve"><value>How It Works</value></data>
+  <data name="Home_Step1Title" xml:space="preserve"><value>Verified for Safety</value></data>
+  <data name="Home_Step1Body" xml:space="preserve"><value>Sign in with your university email. We ensure every profile belongs to a real student on your campus.</value></data>
+  <data name="Home_Step2Title" xml:space="preserve"><value>Student-Led Governance</value></data>
+  <data name="Home_Step2Body" xml:space="preserve"><value>Our features and community guidelines are shaped by student moderators, not a corporate board.</value></data>
+  <data name="Home_Step3Title" xml:space="preserve"><value>Transparent Matching</value></data>
+  <data name="Home_Step3Body" xml:space="preserve"><value>Curious how you were matched? You can literally check our code. No "hotness scores," no secrets.</value></data>
+
+  <!-- Home — Trust -->
+  <data name="Home_Trust1Title" xml:space="preserve"><value>100% Verified</value></data>
+  <data name="Home_Trust1Body" xml:space="preserve"><value>Every user is a student. Period.</value></data>
+  <data name="Home_Trust2Title" xml:space="preserve"><value>Privacy First</value></data>
+  <data name="Home_Trust2Body" xml:space="preserve"><value>Your true name is only shared if you want it to be.</value></data>
+  <data name="Home_Trust3Title" xml:space="preserve"><value>Open Governance</value></data>
+  <data name="Home_Trust3Body" xml:space="preserve"><value>No hidden algorithms tracking your behavior.</value></data>
+
+  <!-- Home — CTA -->
+  <data name="Home_CtaTitle" xml:space="preserve"><value>Ready to find your person?</value></data>
+  <data name="Home_CtaSubtitle" xml:space="preserve"><value>Join thousands of students discovering genuine connections at their campus.</value></data>
+  <data name="Home_CtaGetStarted" xml:space="preserve"><value>Get Started Free</value></data>
+  <data name="Home_CtaLearnMore" xml:space="preserve"><value>Learn More</value></data>
+</root>

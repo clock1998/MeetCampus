@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/theron-wang/VS2022-Editor-Support-for-Tailwind-CSS/refs/heads/main/tailwind.extension.schema.json",
   "BuildFiles": [
     {
-      "Input": "wwwroot\\site.css",
-      "Output": ""
+      "Input": "MeetCampus\\site.css",
+      "Output": "MeetCampus\\wwwroot\\app.css"
     }
   ],
   "PackageConfigurationFile": null,
