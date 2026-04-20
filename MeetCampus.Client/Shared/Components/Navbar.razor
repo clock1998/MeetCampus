@@ -42,10 +42,8 @@
 
         <!-- Language Selector Dropdown -->
         <div class="dropdown dropdown-end">
-            <button class="btn btn-ghost btn-circle" title="@L["Nav_Language"]" tabindex="0">
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4.26 10.558a2 2 0 11 2.828 2.829L9.172 10M2.519 11.726a2 2 0 01.106-2.552l2.828-2.829a2 2 0 11 2.828 2.829l-.976.976a2 2 0 01-2.836.034L2.52 11.726z" clip-rule="evenodd"></path>
-                </svg>
+            <button class="btn btn-ghost btn-circle" title="@L["Nav_Language"]" tabindex="0" aria-label="@L["Nav_Language"]">
+                <svg class="text-base-content/70 size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"></path></svg>
             </button>
             <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
                 <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
