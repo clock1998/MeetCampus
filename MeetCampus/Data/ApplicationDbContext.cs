@@ -6,10 +6,6 @@ namespace MeetCampus.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
-        internal const string AdminRoleId = "10000000-0000-0000-0000-000000000001";
-        internal const string PowerUserRoleId = "10000000-0000-0000-0000-000000000002";
-        internal const string UserRoleId = "10000000-0000-0000-0000-000000000003";
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -23,23 +19,23 @@ namespace MeetCampus.Data
             {
                 new IdentityRole
                 {
-                    Id = AdminRoleId,
-                    Name = "Admin",
-                    NormalizedName = "ADMIN",
+                    Id = IdentityRoles.AdminRoleId,
+                    Name = IdentityRoles.Admin,
+                    NormalizedName = IdentityRoles.Admin.ToUpperInvariant(),
                     ConcurrencyStamp = "6ed3e4b6-231f-41dd-9403-1595f6b8e73d"
                 },
                 new IdentityRole
                 {
-                    Id = PowerUserRoleId,
-                    Name = "PowerUser",
-                    NormalizedName = "POWERUSER",
+                    Id = IdentityRoles.PowerUserRoleId,
+                    Name = IdentityRoles.PowerUser,
+                    NormalizedName = IdentityRoles.PowerUser.ToUpperInvariant(),
                     ConcurrencyStamp = "8f3ec64a-af77-4f56-82f4-c9cea9eebd89"
                 },
                 new IdentityRole
                 {
-                    Id = UserRoleId,
-                    Name = "User",
-                    NormalizedName = "USER",
+                    Id = IdentityRoles.UserRoleId,
+                    Name = IdentityRoles.User,
+                    NormalizedName = IdentityRoles.User.ToUpperInvariant(),
                     ConcurrencyStamp = "b7d5672e-24dc-4c11-a948-6c89de8c3a40"
                 }
             };

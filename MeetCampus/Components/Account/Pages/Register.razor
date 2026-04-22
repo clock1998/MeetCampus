@@ -17,39 +17,40 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<div class="bg-base-100 px-6 py-12 lg:py-20">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12">
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:col-span-12 lg:p-8">
+            <div class="mb-6 space-y-2">
+                <h1 class="text-base-content text-3xl font-bold">Register</h1>
+                <p class="text-base-content/70">Create your MeetCampus account.</p>
+            </div>
 
-<div class="row">
-    <div class="col-lg-6">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
+            <StatusMessage Message="@Message" />
+
+            <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="space-y-5">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-error text-sm" role="alert" />
+
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Email</legend>
+                    <InputText @bind-Value="Input.Email" id="Input.Email" class="input input-bordered w-full" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <ValidationMessage For="() => Input.Email" class="text-error text-sm" />
+                </fieldset>
+
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Password</legend>
+                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="input input-bordered w-full" autocomplete="new-password" aria-required="true" placeholder="password" />
+                    <ValidationMessage For="() => Input.Password" class="text-error text-sm" />
+                </fieldset>
+
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Confirm Password</legend>
+                    <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="input input-bordered w-full" autocomplete="new-password" aria-required="true" placeholder="password" />
+                    <ValidationMessage For="() => Input.ConfirmPassword" class="text-error text-sm" />
+                </fieldset>
+
+                <button type="submit" class="btn btn-primary w-full rounded-full">Register</button>
+            </EditForm>
         </section>
     </div>
 </div>
@@ -82,6 +83,13 @@
         if (!result.Succeeded)
         {
             identityErrors = result.Errors;
+            return;
+        }
+
+        var roleResult = await UserManager.AddToRoleAsync(user, IdentityRoles.User);
+        if (!roleResult.Succeeded)
+        {
+            identityErrors = roleResult.Errors;
             return;
         }
 
@@ -135,6 +143,7 @@
     {
         [Required]
         [EmailAddress]
+        [AllowedEmailDomains("mail.mcgill.ca", "live.concordia.ca", "umontreal.ca", "courrier.uqam.ca", ErrorMessage = "Use a McGill, Concordia, Université de Montréal, or UQAM email address.")]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
@@ -148,5 +157,29 @@
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+    }
+
+    private sealed class AllowedEmailDomainsAttribute(params string[] allowedDomains) : ValidationAttribute
+    {
+        private readonly HashSet<string> allowedDomains = new(allowedDomains, StringComparer.OrdinalIgnoreCase);
+
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        {
+            if (value is not string email || string.IsNullOrWhiteSpace(email))
+            {
+                return ValidationResult.Success;
+            }
+
+            var atIndex = email.LastIndexOf('@');
+            if (atIndex < 0 || atIndex == email.Length - 1)
+            {
+                return new ValidationResult(ErrorMessage ?? "Invalid email address.");
+            }
+
+            var domain = email[(atIndex + 1)..];
+            return allowedDomains.Contains(domain)
+                ? ValidationResult.Success
+                : new ValidationResult(ErrorMessage ?? "Invalid email domain.");
+        }
     }
 }

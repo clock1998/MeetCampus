@@ -1925,6 +1925,11 @@
       grid-column: span 7 / span 7;
     }
   }
+  .lg\:col-span-12 {
+    @media (width >= 64rem) {
+      grid-column: span 12 / span 12;
+    }
+  }
   .lg\:flex {
     @media (width >= 64rem) {
       display: flex;

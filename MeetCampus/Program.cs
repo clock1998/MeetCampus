@@ -92,7 +92,7 @@ static async Task SeedIdentityDataAsync(
     ArgumentNullException.ThrowIfNull(roleManager);
     ArgumentNullException.ThrowIfNull(userManager);
 
-    var requiredRoles = new[] { "Admin", "PowerUser", "User" };
+    var requiredRoles = new[] { IdentityRoles.Admin, IdentityRoles.PowerUser, IdentityRoles.User };
     foreach (var roleName in requiredRoles)
     {
         if (!await roleManager.RoleExistsAsync(roleName))
@@ -124,12 +124,14 @@ static async Task SeedIdentityDataAsync(
         throw new InvalidOperationException("Seed admin password is missing. Configure 'Seed:AdminUser:Password'.");
     }
 
+    const string adminUserId = "20000000-0000-0000-0000-000000000001";
+
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
     if (adminUser is null)
     {
         adminUser = new ApplicationUser
         {
-            Id = "20000000-0000-0000-0000-000000000001",
+            Id = adminUserId,
             UserName = adminUserName,
             Email = adminEmail,
             EmailConfirmed = true
@@ -142,12 +144,12 @@ static async Task SeedIdentityDataAsync(
         }
     }
 
-    if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+    if (!await userManager.IsInRoleAsync(adminUser, IdentityRoles.Admin))
     {
-        var addRoleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+        var addRoleResult = await userManager.AddToRoleAsync(adminUser, IdentityRoles.Admin);
         if (!addRoleResult.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to add admin user to role 'Admin': {string.Join(", ", addRoleResult.Errors.Select(e => e.Description))}");
+            throw new InvalidOperationException($"Failed to add admin user to role '{IdentityRoles.Admin}': {string.Join(", ", addRoleResult.Errors.Select(e => e.Description))}");
         }
     }
 }
