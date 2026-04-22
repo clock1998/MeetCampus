@@ -13,60 +13,71 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
+<div class="bg-base-100 px-6 py-12 lg:py-20">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-12">
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:col-span-7 lg:p-8">
+            <div class="mb-6 space-y-2">
+                <h1 class="text-base-content text-3xl font-bold">Log in</h1>
+                <p class="text-base-content/70">Use your local account to access MeetCampus.</p>
+            </div>
+
             <StatusMessage Message="@errorMessage" />
-            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+
+            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login" class="space-y-5">
                 <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                <ValidationSummary class="text-error text-sm" role="alert" />
+
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Email</legend>
+                    <InputText @bind-Value="Input.Email" id="Input.Email" class="input input-bordered w-full" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
+                    <ValidationMessage For="() => Input.Email" class="text-error text-sm" />
+                </fieldset>
+
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Password</legend>
+                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="input input-bordered w-full" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <ValidationMessage For="() => Input.Password" class="text-error text-sm" />
+                </fieldset>
+
+                <label class="label cursor-pointer justify-start gap-3">
+                    <InputCheckbox @bind-Value="Input.RememberMe" class="checkbox checkbox-primary" />
+                    <span class="label-text">Remember me</span>
+                </label>
+
+                <button type="submit" class="btn btn-primary w-full rounded-full">Log in</button>
+
+                <div class="divider">OR</div>
+
+                <div class="text-center">
+                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-outline rounded-full">
+                        Log in with a passkey
+                    </PasskeySubmit>
                 </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <hr />
-                <div class="d-flex flex-column">
-                    <span class="text-secondary mx-auto mt-2">OR</span>
-                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link mx-auto">Log in with a passkey</PasskeySubmit>
-                </div>
-                <hr />
-                <div>
+
+                <div class="divider"></div>
+
+                <div class="space-y-2 text-sm">
                     <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
+                        <a class="link link-hover" href="Account/ForgotPassword">Forgot your password?</a>
                     </p>
                     <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                        <a class="link link-hover" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
                     </p>
                     <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                        <a class="link link-hover" href="Account/ResendEmailConfirmation">Resend email confirmation</a>
                     </p>
                 </div>
             </EditForm>
         </section>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
+
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:col-span-5 lg:p-8">
+            <div class="mb-4 space-y-2">
+                <h2 class="text-base-content text-2xl font-bold">Use another service</h2>
+                <p class="text-base-content/70">Choose an external provider to continue.</p>
+            </div>
+            <div class="border-base-300 border-t pt-4">
+                <ExternalLoginPicker />
+            </div>
         </section>
     </div>
 </div>

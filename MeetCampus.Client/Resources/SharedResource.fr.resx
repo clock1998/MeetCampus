@@ -93,4 +93,10 @@
   <data name="Home_CtaSubtitle" xml:space="preserve"><value>Rejoignez des milliers d'étudiants qui découvrent de vraies connexions sur leur campus.</value></data>
   <data name="Home_CtaGetStarted" xml:space="preserve"><value>Commencer gratuitement</value></data>
   <data name="Home_CtaLearnMore" xml:space="preserve"><value>En savoir plus</value></data>
+
+  <!-- Testing -->
+  <data name="Nav_Testing" xml:space="preserve"><value>Test</value></data>
+  <data name="Testing_PageTitle" xml:space="preserve"><value>Test</value></data>
+  <data name="Testing_Title" xml:space="preserve"><value>Page de test</value></data>
+  <data name="Testing_Description" xml:space="preserve"><value>Cette page est accessible uniquement aux utilisateurs authentifiés.</value></data>
 </root>
