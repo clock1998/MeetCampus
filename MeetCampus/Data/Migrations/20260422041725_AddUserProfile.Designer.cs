@@ -3,6 +3,7 @@ using System;
 using MeetCampus.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MeetCampus.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422041725_AddUserProfile")]
+    partial class AddUserProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,180 +138,6 @@ namespace MeetCampus.Data.Migrations
                     b.ToTable("StudyDomains");
                 });
 
-            modelBuilder.Entity("MeetCampus.Data.UserEthnicity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("DisplayKey")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("UserEthnicities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Code = "prefer-not-to-say",
-                            DisplayKey = "Profile_Ethnicity_PreferNotToSay",
-                            Name = "Prefer not to say"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Code = "arab",
-                            DisplayKey = "Profile_Ethnicity_Arab",
-                            Name = "Arab"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Code = "black",
-                            DisplayKey = "Profile_Ethnicity_Black",
-                            Name = "Black"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Code = "east-asian",
-                            DisplayKey = "Profile_Ethnicity_EastAsian",
-                            Name = "East Asian"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Code = "indigenous",
-                            DisplayKey = "Profile_Ethnicity_Indigenous",
-                            Name = "Indigenous"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000006"),
-                            Code = "latino",
-                            DisplayKey = "Profile_Ethnicity_Latino",
-                            Name = "Latino"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000007"),
-                            Code = "middle-eastern",
-                            DisplayKey = "Profile_Ethnicity_MiddleEastern",
-                            Name = "Middle Eastern"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000008"),
-                            Code = "south-asian",
-                            DisplayKey = "Profile_Ethnicity_SouthAsian",
-                            Name = "South Asian"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000009"),
-                            Code = "southeast-asian",
-                            DisplayKey = "Profile_Ethnicity_SoutheastAsian",
-                            Name = "Southeast Asian"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000010"),
-                            Code = "white",
-                            DisplayKey = "Profile_Ethnicity_White",
-                            Name = "White"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000011"),
-                            Code = "mixed",
-                            DisplayKey = "Profile_Ethnicity_Mixed",
-                            Name = "Mixed"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000012"),
-                            Code = "other",
-                            DisplayKey = "Profile_Ethnicity_Other",
-                            Name = "Other"
-                        });
-                });
-
-            modelBuilder.Entity("MeetCampus.Data.UserIntention", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("DisplayKey")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("UserIntentions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
-                            Code = "friendship",
-                            DisplayKey = "Profile_Intention_Friendship",
-                            Name = "Friendship"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000002"),
-                            Code = "dating",
-                            DisplayKey = "Profile_Intention_Dating",
-                            Name = "Dating"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000003"),
-                            Code = "relationship",
-                            DisplayKey = "Profile_Intention_Relationship",
-                            Name = "Relationship"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000004"),
-                            Code = "networking",
-                            DisplayKey = "Profile_Intention_Networking",
-                            Name = "Networking"
-                        });
-                });
-
             modelBuilder.Entity("MeetCampus.Data.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -319,15 +148,19 @@ namespace MeetCampus.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("EthnicityId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Ethnicity")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("Gender")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<Guid>("IntentionId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Intention")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<Guid>("LanguageId")
                         .HasColumnType("uuid");
@@ -346,10 +179,6 @@ namespace MeetCampus.Data.Migrations
 
                     b.HasIndex("ApplicationUserId")
                         .IsUnique();
-
-                    b.HasIndex("EthnicityId");
-
-                    b.HasIndex("IntentionId");
 
                     b.HasIndex("LanguageId");
 
@@ -544,18 +373,6 @@ namespace MeetCampus.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MeetCampus.Data.UserEthnicity", "Ethnicity")
-                        .WithMany()
-                        .HasForeignKey("EthnicityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("MeetCampus.Data.UserIntention", "Intention")
-                        .WithMany()
-                        .HasForeignKey("IntentionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MeetCampus.Data.CampusLanguage", "Language")
                         .WithMany()
                         .HasForeignKey("LanguageId")
@@ -575,10 +392,6 @@ namespace MeetCampus.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
-
-                    b.Navigation("Ethnicity");
-
-                    b.Navigation("Intention");
 
                     b.Navigation("Language");
 

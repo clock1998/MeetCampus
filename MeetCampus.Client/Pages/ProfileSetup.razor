@@ -1,0 +1,202 @@
+@page "/profile/setup"
+@attribute [Authorize]
+@using MeetCampus.Client.Services.Profile
+@using MeetCampus.Shared.Models
+@using MeetCampus.Shared.Services.Http
+@using MeetCampus.Client.Resources
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@inject IProfileSetupClient ProfileClient
+@inject IStringLocalizer<SharedResource> L
+
+<PageTitle>@L["ProfileSetup_PageTitle"]</PageTitle>
+
+<div class="bg-base-100 px-6 py-12 lg:py-20">
+    <div class="mx-auto max-w-4xl">
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:p-8">
+            <div class="mb-6 space-y-2">
+                <h1 class="text-base-content text-3xl font-bold">@L["ProfileSetup_Title"]</h1>
+                <p class="text-base-content/70">@L["ProfileSetup_Description"]</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-error mb-4">@errorMessage</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(successMessage))
+            {
+                <div class="alert alert-success mb-4">@successMessage</div>
+            }
+
+            @if (isLoading)
+            {
+                <div class="text-base-content/70">@L["ProfileSetup_Loading"]</div>
+            }
+            else
+            {
+                <EditForm Model="profile" OnValidSubmit="SaveAsync" class="space-y-5">
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_Gender"]</legend>
+                        <InputText @bind-Value="profile.Gender" class="input input-bordered w-full" />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_Sexuality"]</legend>
+                        <InputText @bind-Value="profile.Sexuality" class="input input-bordered w-full" />
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_StudyDomain"]</legend>
+                        <InputSelect @bind-Value="profile.StudyDomainId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in studyDomains)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_School"]</legend>
+                        <InputSelect @bind-Value="profile.SchoolId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in schools)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_Language"]</legend>
+                        <InputSelect @bind-Value="profile.LanguageId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in languages)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_Intention"]</legend>
+                        <InputSelect @bind-Value="profile.IntentionId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in intentions)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="fieldset-legend">@L["Profile_Ethnicity"]</legend>
+                        <InputSelect @bind-Value="profile.EthnicityId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in ethnicities)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
+                    </fieldset>
+
+                    <button class="btn btn-primary rounded-full" type="submit">@L["ProfileSetup_SaveButton"]</button>
+                </EditForm>
+            }
+        </section>
+    </div>
+</div>
+
+@code {
+    private UserProfileSetupForm profile = new();
+    private IReadOnlyList<ProfileLookupOption> studyDomains = [];
+    private IReadOnlyList<ProfileLookupOption> schools = [];
+    private IReadOnlyList<ProfileLookupOption> languages = [];
+    private IReadOnlyList<ProfileLookupOption> intentions = [];
+    private IReadOnlyList<ProfileLookupOption> ethnicities = [];
+    private string? errorMessage;
+    private string? successMessage;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        errorMessage = null;
+        successMessage = null;
+        isLoading = true;
+
+        try
+        {
+            var response = await ProfileClient.GetSetupAsync();
+            profile = response.Profile;
+            studyDomains = response.StudyDomains;
+            schools = response.Schools;
+            languages = response.Languages;
+            intentions = response.Intentions;
+            ethnicities = response.Ethnicities;
+        }
+        catch (ApiClientException)
+        {
+            errorMessage = L["ProfileSetup_LoadError"];
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        if (profile.StudyDomainId is null ||
+            profile.SchoolId is null ||
+            profile.LanguageId is null ||
+            profile.IntentionId is null ||
+            profile.EthnicityId is null)
+        {
+            errorMessage = L["ProfileSetup_RequiredSelections"];
+            return;
+        }
+
+        var request = new UpdateUserProfileRequest
+        {
+            Gender = profile.Gender,
+            Sexuality = profile.Sexuality,
+            StudyDomainId = profile.StudyDomainId.Value,
+            SchoolId = profile.SchoolId.Value,
+            LanguageId = profile.LanguageId.Value,
+            IntentionId = profile.IntentionId.Value,
+            EthnicityId = profile.EthnicityId.Value,
+        };
+
+        try
+        {
+            await ProfileClient.UpdateSetupAsync(request);
+            successMessage = L["ProfileSetup_SaveSuccess"];
+            return;
+        }
+        catch (ApiClientException)
+        {
+            errorMessage = L["ProfileSetup_SaveError"];
+        }
+
+    }
+
+    private string GetDisplay(ProfileLookupOption option)
+    {
+        if (string.IsNullOrWhiteSpace(option.DisplayKey))
+        {
+            return option.Name;
+        }
+
+        var localized = L[option.DisplayKey];
+        return localized.ResourceNotFound ? option.Name : localized.Value;
+    }
+}

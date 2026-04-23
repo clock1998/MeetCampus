@@ -238,6 +238,11 @@ The "Soft Campus" aesthetic prioritizes **approachable sophistication**—reduci
 ## Dependency Injection
 
 
+### HTTP Client Pattern
+- Always use typed `HttpClient` with an interface abstraction (e.g., `IProfileSetupClient` + `ProfileSetupClient`).
+- Register typed clients via DI using `AddHttpClient<Interface, Implementation>()`.
+
+
 ### Service Registration Pattern
 - Register all services and SignalR hubs using dependency injection in Program.cs.
 

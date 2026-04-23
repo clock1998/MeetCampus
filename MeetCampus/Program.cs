@@ -81,6 +81,12 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
+var profileApi = app.MapGroup("/api/profile")
+    .RequireAuthorization();
+
+profileApi.MapGet("/setup", MeetCampus.Endpoints.ProfileApiHandlers.GetProfileSetupAsync);
+profileApi.MapPut("/setup", MeetCampus.Endpoints.ProfileApiHandlers.UpdateUserProfileAsync);
+
 app.Run();
 
 static async Task SeedIdentityDataAsync(

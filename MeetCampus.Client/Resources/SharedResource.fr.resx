@@ -99,4 +99,41 @@
   <data name="Testing_PageTitle" xml:space="preserve"><value>Test</value></data>
   <data name="Testing_Title" xml:space="preserve"><value>Page de test</value></data>
   <data name="Testing_Description" xml:space="preserve"><value>Cette page est accessible uniquement aux utilisateurs authentifiés.</value></data>
+
+  <!-- Profile -->
+  <data name="Profile_Gender" xml:space="preserve"><value>Genre</value></data>
+  <data name="Profile_Sexuality" xml:space="preserve"><value>Sexualité</value></data>
+  <data name="Profile_StudyDomain" xml:space="preserve"><value>Domaine d’études</value></data>
+  <data name="Profile_School" xml:space="preserve"><value>École</value></data>
+  <data name="Profile_Language" xml:space="preserve"><value>Langue</value></data>
+  <data name="Profile_Intention" xml:space="preserve"><value>Intention</value></data>
+  <data name="Profile_Ethnicity" xml:space="preserve"><value>Origine ethnique</value></data>
+  <data name="Profile_Intention_Friendship" xml:space="preserve"><value>Amitié</value></data>
+  <data name="Profile_Intention_Dating" xml:space="preserve"><value>Rencontres</value></data>
+  <data name="Profile_Intention_Relationship" xml:space="preserve"><value>Relation sérieuse</value></data>
+  <data name="Profile_Intention_Networking" xml:space="preserve"><value>Réseautage</value></data>
+  <data name="Profile_Ethnicity_PreferNotToSay" xml:space="preserve"><value>Préfère ne pas le dire</value></data>
+  <data name="Profile_Ethnicity_Arab" xml:space="preserve"><value>Arabe</value></data>
+  <data name="Profile_Ethnicity_Black" xml:space="preserve"><value>Noir</value></data>
+  <data name="Profile_Ethnicity_EastAsian" xml:space="preserve"><value>Est-asiatique</value></data>
+  <data name="Profile_Ethnicity_Indigenous" xml:space="preserve"><value>Autochtone</value></data>
+  <data name="Profile_Ethnicity_Latino" xml:space="preserve"><value>Latino</value></data>
+  <data name="Profile_Ethnicity_MiddleEastern" xml:space="preserve"><value>Moyen-Oriental</value></data>
+  <data name="Profile_Ethnicity_SouthAsian" xml:space="preserve"><value>Sud-asiatique</value></data>
+  <data name="Profile_Ethnicity_SoutheastAsian" xml:space="preserve"><value>Asie du Sud-Est</value></data>
+  <data name="Profile_Ethnicity_White" xml:space="preserve"><value>Blanc</value></data>
+  <data name="Profile_Ethnicity_Mixed" xml:space="preserve"><value>Métis</value></data>
+  <data name="Profile_Ethnicity_Other" xml:space="preserve"><value>Autre</value></data>
+
+  <!-- Profile setup -->
+  <data name="ProfileSetup_PageTitle" xml:space="preserve"><value>Configuration du profil</value></data>
+  <data name="ProfileSetup_Title" xml:space="preserve"><value>Configurez votre profil</value></data>
+  <data name="ProfileSetup_Description" xml:space="preserve"><value>Vous seul pouvez modifier ces informations de profil.</value></data>
+  <data name="ProfileSetup_Loading" xml:space="preserve"><value>Chargement de votre profil...</value></data>
+  <data name="ProfileSetup_SelectPlaceholder" xml:space="preserve"><value>Sélectionnez une option</value></data>
+  <data name="ProfileSetup_SaveButton" xml:space="preserve"><value>Enregistrer le profil</value></data>
+  <data name="ProfileSetup_LoadError" xml:space="preserve"><value>Impossible de charger votre profil. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_SaveSuccess" xml:space="preserve"><value>Votre profil a été enregistré.</value></data>
+  <data name="ProfileSetup_SaveError" xml:space="preserve"><value>Impossible d’enregistrer votre profil. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_RequiredSelections" xml:space="preserve"><value>Veuillez compléter toutes les sélections requises avant d’enregistrer.</value></data>
 </root>

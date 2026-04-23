@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MeetCampus.Client\MeetCampus.Client.csproj" />
+    <ProjectReference Include="..\MeetCampus.Shared\MeetCampus.Shared.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.6" />
