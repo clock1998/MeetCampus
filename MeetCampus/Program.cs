@@ -1,6 +1,7 @@
 using MeetCampus.Components;
 using MeetCampus.Components.Account;
 using MeetCampus.Data;
+using MeetCampus.Services.Profile;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
+
+builder.Services.AddControllers();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -41,7 +44,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddLocalization();
-
+builder.Services.AddScoped<ProfileSetupService>();
 var app = builder.Build();
 
 // Apply pending migrations and seed Identity data.
@@ -81,11 +84,7 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-var profileApi = app.MapGroup("/api/profile")
-    .RequireAuthorization();
-
-profileApi.MapGet("/setup", MeetCampus.Endpoints.ProfileApiHandlers.GetProfileSetupAsync);
-profileApi.MapPut("/setup", MeetCampus.Endpoints.ProfileApiHandlers.UpdateUserProfileAsync);
+app.MapControllers();
 
 app.Run();
 

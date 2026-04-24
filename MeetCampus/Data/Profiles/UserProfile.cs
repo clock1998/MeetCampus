@@ -7,8 +7,11 @@ public sealed class UserProfile
     public string ApplicationUserId { get; set; } = string.Empty;
     public ApplicationUser ApplicationUser { get; set; } = default!;
 
-    public string? Gender { get; set; }
-    public string? Sexuality { get; set; }
+    public Guid? GenderId { get; set; }
+    public Gender? Gender { get; set; }
+
+    public Guid? SexualityId { get; set; }
+    public Sexuality? Sexuality { get; set; }
 
     public Guid StudyDomainId { get; set; }
     public StudyDomain StudyDomain { get; set; } = default!;

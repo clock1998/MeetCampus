@@ -1,8 +1,8 @@
 using MeetCampus.Shared.Models;
 
-namespace MeetCampus.Client.Services.Profile;
+namespace MeetCampus.Shared.Services.Profile;
 
-internal interface IProfileSetupClient
+public interface IProfileSetupClient
 {
     Task<UserProfileSetupResponse> GetSetupAsync(CancellationToken cancellationToken = default);
 

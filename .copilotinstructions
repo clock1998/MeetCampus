@@ -467,6 +467,15 @@ MeetCampus/
 **Last Updated:** Based on .NET 10 and modern Blazor patterns.
 
 
+## Localization
+
+- Each new feature area gets its own resource marker class and `.resx` file pair — never add keys to `SharedResource` for new components.
+- File naming: `[Feature]Resource.cs` + `[Feature]Resource.resx` + `[Feature]Resource.fr.resx` (and any other supported cultures).
+- Place all resource files in `MeetCampus.Client/Resources/`.
+- Inject the specific localizer: `@inject IStringLocalizer<[Feature]Resource> L`
+- `SharedResource` is reserved for truly global, cross-feature keys (currently only `Testing_*`).
+- No additional DI registration needed — `AddLocalization()` resolves all `IStringLocalizer<T>` automatically.
+
 ## Important NuGet Packages
 - Microsoft.AspNetCore.SignalR.Client
 - Microsoft.AspNetCore.SignalR

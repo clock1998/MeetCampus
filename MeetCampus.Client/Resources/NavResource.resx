@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -29,8 +29,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
-  <!-- Testing -->
-  <data name="Testing_PageTitle" xml:space="preserve"><value>Test</value></data>
-  <data name="Testing_Title" xml:space="preserve"><value>Page de test</value></data>
-  <data name="Testing_Description" xml:space="preserve"><value>Cette page est accessible uniquement aux utilisateurs authentifiés.</value></data>
+  <data name="Nav_Mission" xml:space="preserve"><value>Mission</value></data>
+  <data name="Nav_Stories" xml:space="preserve"><value>Stories</value></data>
+  <data name="Nav_Events" xml:space="preserve"><value>Events</value></data>
+  <data name="Nav_Contact" xml:space="preserve"><value>Contact</value></data>
+  <data name="Nav_SignIn" xml:space="preserve"><value>Sign In</value></data>
+  <data name="Nav_Theme" xml:space="preserve"><value>Theme</value></data>
+  <data name="Nav_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Nav_ThemeLight" xml:space="preserve"><value>☀️ Light</value></data>
+  <data name="Nav_ThemeDark" xml:space="preserve"><value>🌙 Dark</value></data>
+  <data name="Nav_ThemeSystem" xml:space="preserve"><value>🖥️ System</value></data>
+  <data name="Nav_Testing" xml:space="preserve"><value>Testing</value></data>
 </root>

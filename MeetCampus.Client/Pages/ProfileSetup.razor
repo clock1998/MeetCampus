@@ -1,13 +1,12 @@
 @page "/profile/setup"
 @attribute [Authorize]
-@using MeetCampus.Client.Services.Profile
 @using MeetCampus.Shared.Models
 @using MeetCampus.Shared.Services.Http
 @using MeetCampus.Client.Resources
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
-@inject IProfileSetupClient ProfileClient
-@inject IStringLocalizer<SharedResource> L
+@inject MeetCampus.Shared.Services.Profile.IProfileSetupClient ProfileClient
+@inject IStringLocalizer<ProfileResource> L
 
 <PageTitle>@L["ProfileSetup_PageTitle"]</PageTitle>
 
@@ -38,12 +37,24 @@
                 <EditForm Model="profile" OnValidSubmit="SaveAsync" class="space-y-5">
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Gender"]</legend>
-                        <InputText @bind-Value="profile.Gender" class="input input-bordered w-full" />
+                        <InputSelect @bind-Value="profile.GenderId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in genders)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Sexuality"]</legend>
-                        <InputText @bind-Value="profile.Sexuality" class="input input-bordered w-full" />
+                        <InputSelect @bind-Value="profile.SexualityId" class="select select-bordered w-full">
+                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                            @foreach (var option in sexualities)
+                            {
+                                <option value="@option.Id">@GetDisplay(option)</option>
+                            }
+                        </InputSelect>
                     </fieldset>
 
                     <fieldset class="fieldset">
@@ -110,6 +121,8 @@
 
 @code {
     private UserProfileSetupForm profile = new();
+    private IReadOnlyList<ProfileLookupOption> genders = [];
+    private IReadOnlyList<ProfileLookupOption> sexualities = [];
     private IReadOnlyList<ProfileLookupOption> studyDomains = [];
     private IReadOnlyList<ProfileLookupOption> schools = [];
     private IReadOnlyList<ProfileLookupOption> languages = [];
@@ -134,6 +147,8 @@
         {
             var response = await ProfileClient.GetSetupAsync();
             profile = response.Profile;
+            genders = response.Genders;
+            sexualities = response.Sexualities;
             studyDomains = response.StudyDomains;
             schools = response.Schools;
             languages = response.Languages;
@@ -167,8 +182,8 @@
 
         var request = new UpdateUserProfileRequest
         {
-            Gender = profile.Gender,
-            Sexuality = profile.Sexuality,
+            GenderId = profile.GenderId,
+            SexualityId = profile.SexualityId,
             StudyDomainId = profile.StudyDomainId.Value,
             SchoolId = profile.SchoolId.Value,
             LanguageId = profile.LanguageId.Value,

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Profile field labels -->
+  <data name="Profile_Gender" xml:space="preserve"><value>Genre</value></data>
+  <data name="Profile_Sexuality" xml:space="preserve"><value>Sexualité</value></data>
+  <data name="Profile_StudyDomain" xml:space="preserve"><value>Domaine d'études</value></data>
+  <data name="Profile_School" xml:space="preserve"><value>École</value></data>
+  <data name="Profile_Language" xml:space="preserve"><value>Langue</value></data>
+  <data name="Profile_Intention" xml:space="preserve"><value>Intention</value></data>
+  <data name="Profile_Ethnicity" xml:space="preserve"><value>Origine ethnique</value></data>
+
+  <!-- Intention options -->
+  <data name="Profile_Intention_Friendship" xml:space="preserve"><value>Amitié</value></data>
+  <data name="Profile_Intention_Dating" xml:space="preserve"><value>Rencontres</value></data>
+  <data name="Profile_Intention_Relationship" xml:space="preserve"><value>Relation sérieuse</value></data>
+  <data name="Profile_Intention_Networking" xml:space="preserve"><value>Réseautage</value></data>
+
+  <!-- Ethnicity options -->
+  <data name="Profile_Ethnicity_PreferNotToSay" xml:space="preserve"><value>Préfère ne pas le dire</value></data>
+  <data name="Profile_Ethnicity_Arab" xml:space="preserve"><value>Arabe</value></data>
+  <data name="Profile_Ethnicity_Black" xml:space="preserve"><value>Noir</value></data>
+  <data name="Profile_Ethnicity_EastAsian" xml:space="preserve"><value>Est-asiatique</value></data>
+  <data name="Profile_Ethnicity_Indigenous" xml:space="preserve"><value>Autochtone</value></data>
+  <data name="Profile_Ethnicity_Latino" xml:space="preserve"><value>Latino</value></data>
+  <data name="Profile_Ethnicity_MiddleEastern" xml:space="preserve"><value>Moyen-Oriental</value></data>
+  <data name="Profile_Ethnicity_SouthAsian" xml:space="preserve"><value>Sud-asiatique</value></data>
+  <data name="Profile_Ethnicity_SoutheastAsian" xml:space="preserve"><value>Asie du Sud-Est</value></data>
+  <data name="Profile_Ethnicity_White" xml:space="preserve"><value>Blanc</value></data>
+  <data name="Profile_Ethnicity_Mixed" xml:space="preserve"><value>Métis</value></data>
+  <data name="Profile_Ethnicity_Other" xml:space="preserve"><value>Autre</value></data>
+
+  <!-- Gender options -->
+  <data name="Profile_Gender_Man" xml:space="preserve"><value>Homme</value></data>
+  <data name="Profile_Gender_Woman" xml:space="preserve"><value>Femme</value></data>
+  <data name="Profile_Gender_Other" xml:space="preserve"><value>Autre</value></data>
+
+  <!-- Sexuality options -->
+  <data name="Profile_Sexuality_Straight" xml:space="preserve"><value>Hétérosexuel(le)</value></data>
+  <data name="Profile_Sexuality_Gay" xml:space="preserve"><value>Gay</value></data>
+  <data name="Profile_Sexuality_Lesbian" xml:space="preserve"><value>Lesbienne</value></data>
+  <data name="Profile_Sexuality_Bisexual" xml:space="preserve"><value>Bisexuel(le)</value></data>
+  <data name="Profile_Sexuality_Pansexual" xml:space="preserve"><value>Pansexuel(le)</value></data>
+  <data name="Profile_Sexuality_Asexual" xml:space="preserve"><value>Asexuel(le)</value></data>
+  <data name="Profile_Sexuality_Queer" xml:space="preserve"><value>Queer</value></data>
+  <data name="Profile_Sexuality_PreferNotToSay" xml:space="preserve"><value>Préfère ne pas le dire</value></data>
+
+  <!-- Profile setup page -->
+  <data name="ProfileSetup_PageTitle" xml:space="preserve"><value>Configuration du profil</value></data>
+  <data name="ProfileSetup_Title" xml:space="preserve"><value>Configurez votre profil</value></data>
+  <data name="ProfileSetup_Description" xml:space="preserve"><value>Vous seul pouvez modifier ces informations de profil.</value></data>
+  <data name="ProfileSetup_Loading" xml:space="preserve"><value>Chargement de votre profil...</value></data>
+  <data name="ProfileSetup_SelectPlaceholder" xml:space="preserve"><value>Sélectionnez une option</value></data>
+  <data name="ProfileSetup_SaveButton" xml:space="preserve"><value>Enregistrer le profil</value></data>
+  <data name="ProfileSetup_LoadError" xml:space="preserve"><value>Impossible de charger votre profil. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_SaveSuccess" xml:space="preserve"><value>Votre profil a été enregistré.</value></data>
+  <data name="ProfileSetup_SaveError" xml:space="preserve"><value>Impossible d'enregistrer votre profil. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_RequiredSelections" xml:space="preserve"><value>Veuillez compléter toutes les sélections requises avant d'enregistrer.</value></data>
+</root>

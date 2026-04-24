@@ -3,20 +3,17 @@ using System;
 using MeetCampus.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MeetCampus.Data.Migrations
+namespace MeetCampus.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260422051617_ReplaceProfileEnumsWithEntities")]
-    partial class ReplaceProfileEnumsWithEntities
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,7 +87,59 @@ namespace MeetCampus.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("MeetCampus.Data.CampusLanguage", b =>
+            modelBuilder.Entity("MeetCampus.Data.Gender", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("DisplayKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Genders");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000001"),
+                            Code = "man",
+                            DisplayKey = "Profile_Gender_Man",
+                            Name = "Man"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000002"),
+                            Code = "woman",
+                            DisplayKey = "Profile_Gender_Woman",
+                            Name = "Woman"
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000003"),
+                            Code = "other",
+                            DisplayKey = "Profile_Gender_Other",
+                            Name = "Other"
+                        });
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Language", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,6 +169,93 @@ namespace MeetCampus.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Schools");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Sexuality", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("DisplayKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Sexualities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000001"),
+                            Code = "straight",
+                            DisplayKey = "Profile_Sexuality_Straight",
+                            Name = "Straight"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000002"),
+                            Code = "gay",
+                            DisplayKey = "Profile_Sexuality_Gay",
+                            Name = "Gay"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000003"),
+                            Code = "lesbian",
+                            DisplayKey = "Profile_Sexuality_Lesbian",
+                            Name = "Lesbian"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000004"),
+                            Code = "bisexual",
+                            DisplayKey = "Profile_Sexuality_Bisexual",
+                            Name = "Bisexual"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000005"),
+                            Code = "pansexual",
+                            DisplayKey = "Profile_Sexuality_Pansexual",
+                            Name = "Pansexual"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000006"),
+                            Code = "asexual",
+                            DisplayKey = "Profile_Sexuality_Asexual",
+                            Name = "Asexual"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000007"),
+                            Code = "queer",
+                            DisplayKey = "Profile_Sexuality_Queer",
+                            Name = "Queer"
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000008"),
+                            Code = "prefer-not-to-say",
+                            DisplayKey = "Profile_Sexuality_PreferNotToSay",
+                            Name = "Prefer not to say"
+                        });
                 });
 
             modelBuilder.Entity("MeetCampus.Data.StudyDomain", b =>
@@ -325,9 +461,8 @@ namespace MeetCampus.Data.Migrations
                     b.Property<Guid>("EthnicityId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Gender")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                    b.Property<Guid?>("GenderId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("IntentionId")
                         .HasColumnType("uuid");
@@ -338,9 +473,8 @@ namespace MeetCampus.Data.Migrations
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Sexuality")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                    b.Property<Guid?>("SexualityId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("StudyDomainId")
                         .HasColumnType("uuid");
@@ -352,11 +486,15 @@ namespace MeetCampus.Data.Migrations
 
                     b.HasIndex("EthnicityId");
 
+                    b.HasIndex("GenderId");
+
                     b.HasIndex("IntentionId");
 
                     b.HasIndex("LanguageId");
 
                     b.HasIndex("SchoolId");
+
+                    b.HasIndex("SexualityId");
 
                     b.HasIndex("StudyDomainId");
 
@@ -553,13 +691,18 @@ namespace MeetCampus.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("MeetCampus.Data.Gender", "Gender")
+                        .WithMany()
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MeetCampus.Data.UserIntention", "Intention")
                         .WithMany()
                         .HasForeignKey("IntentionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MeetCampus.Data.CampusLanguage", "Language")
+                    b.HasOne("MeetCampus.Data.Language", "Language")
                         .WithMany()
                         .HasForeignKey("LanguageId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -571,6 +714,11 @@ namespace MeetCampus.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("MeetCampus.Data.Sexuality", "Sexuality")
+                        .WithMany()
+                        .HasForeignKey("SexualityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MeetCampus.Data.StudyDomain", "StudyDomain")
                         .WithMany()
                         .HasForeignKey("StudyDomainId")
@@ -581,11 +729,15 @@ namespace MeetCampus.Data.Migrations
 
                     b.Navigation("Ethnicity");
 
+                    b.Navigation("Gender");
+
                     b.Navigation("Intention");
 
                     b.Navigation("Language");
 
                     b.Navigation("School");
+
+                    b.Navigation("Sexuality");
 
                     b.Navigation("StudyDomain");
                 });

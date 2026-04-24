@@ -12,6 +12,8 @@ namespace MeetCampus.Data
         public DbSet<Language> CampusLanguages => Set<Language>();
         public DbSet<UserIntention> UserIntentions => Set<UserIntention>();
         public DbSet<UserEthnicity> UserEthnicities => Set<UserEthnicity>();
+        public DbSet<Gender> Genders => Set<Gender>();
+        public DbSet<Sexuality> Sexualities => Set<Sexuality>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -28,11 +30,17 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(profile => profile.Id);
 
-                entity.Property(profile => profile.Gender)
-                    .HasMaxLength(64);
+                entity.HasOne(profile => profile.Gender)
+                    .WithMany()
+                    .HasForeignKey(profile => profile.GenderId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
-                entity.Property(profile => profile.Sexuality)
-                    .HasMaxLength(64);
+                entity.HasOne(profile => profile.Sexuality)
+                    .WithMany()
+                    .HasForeignKey(profile => profile.SexualityId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
                 entity.HasOne(profile => profile.ApplicationUser)
                     .WithOne(user => user.UserProfile)
@@ -93,6 +101,24 @@ namespace MeetCampus.Data
             });
 
             builder.Entity<UserEthnicity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Code).HasMaxLength(64);
+                entity.Property(item => item.Name).HasMaxLength(128);
+                entity.Property(item => item.DisplayKey).HasMaxLength(128);
+                entity.HasIndex(item => item.Code).IsUnique();
+            });
+
+            builder.Entity<Gender>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Code).HasMaxLength(64);
+                entity.Property(item => item.Name).HasMaxLength(128);
+                entity.Property(item => item.DisplayKey).HasMaxLength(128);
+                entity.HasIndex(item => item.Code).IsUnique();
+            });
+
+            builder.Entity<Sexuality>(entity =>
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.Code).HasMaxLength(64);
@@ -219,6 +245,21 @@ namespace MeetCampus.Data
                     Name = "Other",
                     DisplayKey = "Profile_Ethnicity_Other"
                 });
+
+            builder.Entity<Gender>().HasData(
+                new Gender { Id = Guid.Parse("50000000-0000-0000-0000-000000000001"), Code = "man", Name = "Man", DisplayKey = "Profile_Gender_Man" },
+                new Gender { Id = Guid.Parse("50000000-0000-0000-0000-000000000002"), Code = "woman", Name = "Woman", DisplayKey = "Profile_Gender_Woman" },
+                new Gender { Id = Guid.Parse("50000000-0000-0000-0000-000000000003"), Code = "other", Name = "Other", DisplayKey = "Profile_Gender_Other" });
+
+            builder.Entity<Sexuality>().HasData(
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000001"), Code = "straight", Name = "Straight", DisplayKey = "Profile_Sexuality_Straight" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000002"), Code = "gay", Name = "Gay", DisplayKey = "Profile_Sexuality_Gay" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000003"), Code = "lesbian", Name = "Lesbian", DisplayKey = "Profile_Sexuality_Lesbian" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000004"), Code = "bisexual", Name = "Bisexual", DisplayKey = "Profile_Sexuality_Bisexual" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000005"), Code = "pansexual", Name = "Pansexual", DisplayKey = "Profile_Sexuality_Pansexual" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000006"), Code = "asexual", Name = "Asexual", DisplayKey = "Profile_Sexuality_Asexual" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000007"), Code = "queer", Name = "Queer", DisplayKey = "Profile_Sexuality_Queer" },
+                new Sexuality { Id = Guid.Parse("60000000-0000-0000-0000-000000000008"), Code = "prefer-not-to-say", Name = "Prefer not to say", DisplayKey = "Profile_Sexuality_PreferNotToSay" });
         }
 
         private static void SeedRoles(ModelBuilder builder)

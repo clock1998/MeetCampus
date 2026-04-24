@@ -4,9 +4,9 @@ public sealed record ProfileLookupOption(Guid Id, string? DisplayKey, string Nam
 
 public sealed record UserProfileSetupForm
 {
-    public string? Gender { get; set; }
+    public Guid? GenderId { get; set; }
 
-    public string? Sexuality { get; set; }
+    public Guid? SexualityId { get; set; }
 
     public Guid? StudyDomainId { get; set; }
 
@@ -23,6 +23,10 @@ public sealed record UserProfileSetupResponse
 {
     public UserProfileSetupForm Profile { get; set; } = new();
 
+    public IReadOnlyList<ProfileLookupOption> Genders { get; set; } = [];
+
+    public IReadOnlyList<ProfileLookupOption> Sexualities { get; set; } = [];
+
     public IReadOnlyList<ProfileLookupOption> StudyDomains { get; set; } = [];
 
     public IReadOnlyList<ProfileLookupOption> Schools { get; set; } = [];
@@ -36,9 +40,9 @@ public sealed record UserProfileSetupResponse
 
 public sealed record UpdateUserProfileRequest
 {
-    public string? Gender { get; set; }
+    public Guid? GenderId { get; set; }
 
-    public string? Sexuality { get; set; }
+    public Guid? SexualityId { get; set; }
 
     public Guid StudyDomainId { get; set; }
 

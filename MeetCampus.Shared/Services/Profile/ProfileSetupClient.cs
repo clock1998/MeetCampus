@@ -1,9 +1,9 @@
 using MeetCampus.Shared.Models;
 using MeetCampus.Shared.Services.Http;
 
-namespace MeetCampus.Client.Services.Profile;
+namespace MeetCampus.Shared.Services.Profile;
 
-internal sealed class ProfileSetupClient(HttpClient httpClient) : BaseApiClient(httpClient), IProfileSetupClient
+public class ProfileSetupClient(HttpClient httpClient) : BaseApiClient(httpClient), IProfileSetupClient
 {
     private const string ProfileSetupEndpoint = "/api/profile/setup";
 
