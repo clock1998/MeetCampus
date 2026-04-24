@@ -5,8 +5,10 @@
 @using MeetCampus.Client.Resources
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
+@using System.Linq.Expressions
 @inject MeetCampus.Shared.Services.Profile.IProfileSetupClient ProfileClient
 @inject IStringLocalizer<ProfileResource> L
+@implements IDisposable
 
 <PageTitle>@L["ProfileSetup_PageTitle"]</PageTitle>
 
@@ -34,7 +36,8 @@
             }
             else
             {
-                <EditForm Model="profile" OnValidSubmit="SaveAsync" class="space-y-5">
+                <EditForm EditContext="editContext" OnValidSubmit="SaveAsync" class="space-y-5">
+                    <DataAnnotationsValidator />
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Gender"]</legend>
                         <InputSelect @bind-Value="profile.GenderId" class="select select-bordered w-full">
@@ -59,57 +62,62 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_StudyDomain"]</legend>
-                        <InputSelect @bind-Value="profile.StudyDomainId" class="select select-bordered w-full">
+                        <InputSelect @bind-Value="profile.StudyDomainId" class="@SelectClass(() => profile.StudyDomainId)">
                             <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
                             @foreach (var option in studyDomains)
                             {
                                 <option value="@option.Id">@GetDisplay(option)</option>
                             }
                         </InputSelect>
+                        <ValidationMessage For="() => profile.StudyDomainId" class="text-error text-sm mt-1" />
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_School"]</legend>
-                        <InputSelect @bind-Value="profile.SchoolId" class="select select-bordered w-full">
+                        <InputSelect @bind-Value="profile.SchoolId" class="@SelectClass(() => profile.SchoolId)">
                             <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
                             @foreach (var option in schools)
                             {
                                 <option value="@option.Id">@GetDisplay(option)</option>
                             }
                         </InputSelect>
+                        <ValidationMessage For="() => profile.SchoolId" class="text-error text-sm mt-1" />
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Language"]</legend>
-                        <InputSelect @bind-Value="profile.LanguageId" class="select select-bordered w-full">
+                        <InputSelect @bind-Value="profile.LanguageId" class="@SelectClass(() => profile.LanguageId)">
                             <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
                             @foreach (var option in languages)
                             {
                                 <option value="@option.Id">@GetDisplay(option)</option>
                             }
                         </InputSelect>
+                        <ValidationMessage For="() => profile.LanguageId" class="text-error text-sm mt-1" />
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Intention"]</legend>
-                        <InputSelect @bind-Value="profile.IntentionId" class="select select-bordered w-full">
+                        <InputSelect @bind-Value="profile.IntentionId" class="@SelectClass(() => profile.IntentionId)">
                             <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
                             @foreach (var option in intentions)
                             {
                                 <option value="@option.Id">@GetDisplay(option)</option>
                             }
                         </InputSelect>
+                        <ValidationMessage For="() => profile.IntentionId" class="text-error text-sm mt-1" />
                     </fieldset>
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Ethnicity"]</legend>
-                        <InputSelect @bind-Value="profile.EthnicityId" class="select select-bordered w-full">
+                        <InputSelect @bind-Value="profile.EthnicityId" class="@SelectClass(() => profile.EthnicityId)">
                             <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
                             @foreach (var option in ethnicities)
                             {
                                 <option value="@option.Id">@GetDisplay(option)</option>
                             }
                         </InputSelect>
+                        <ValidationMessage For="() => profile.EthnicityId" class="text-error text-sm mt-1" />
                     </fieldset>
 
                     <button class="btn btn-primary rounded-full" type="submit">@L["ProfileSetup_SaveButton"]</button>
@@ -121,6 +129,7 @@
 
 @code {
     private UserProfileSetupForm profile = new();
+    private EditContext editContext = default!;
     private IReadOnlyList<ProfileLookupOption> genders = [];
     private IReadOnlyList<ProfileLookupOption> sexualities = [];
     private IReadOnlyList<ProfileLookupOption> studyDomains = [];
@@ -132,10 +141,27 @@
     private string? successMessage;
     private bool isLoading = true;
 
+    protected override void OnInitialized()
+    {
+        InitEditContext();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadAsync();
     }
+
+    private void InitEditContext()
+    {
+        if (editContext is not null)
+            editContext.OnValidationStateChanged -= HandleValidationStateChanged;
+
+        editContext = new EditContext(profile);
+        editContext.OnValidationStateChanged += HandleValidationStateChanged;
+    }
+
+    private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs e)
+        => StateHasChanged();
 
     private async Task LoadAsync()
     {
@@ -147,6 +173,7 @@
         {
             var response = await ProfileClient.GetSetupAsync();
             profile = response.Profile;
+            InitEditContext();
             genders = response.Genders;
             sexualities = response.Sexualities;
             studyDomains = response.StudyDomains;
@@ -170,48 +197,55 @@
         errorMessage = null;
         successMessage = null;
 
-        if (profile.StudyDomainId is null ||
-            profile.SchoolId is null ||
-            profile.LanguageId is null ||
-            profile.IntentionId is null ||
-            profile.EthnicityId is null)
-        {
-            errorMessage = L["ProfileSetup_RequiredSelections"];
-            return;
-        }
-
         var request = new UpdateUserProfileRequest
         {
             GenderId = profile.GenderId,
             SexualityId = profile.SexualityId,
-            StudyDomainId = profile.StudyDomainId.Value,
-            SchoolId = profile.SchoolId.Value,
-            LanguageId = profile.LanguageId.Value,
-            IntentionId = profile.IntentionId.Value,
-            EthnicityId = profile.EthnicityId.Value,
+            StudyDomainId = profile.StudyDomainId!.Value,
+            SchoolId = profile.SchoolId!.Value,
+            LanguageId = profile.LanguageId!.Value,
+            IntentionId = profile.IntentionId!.Value,
+            EthnicityId = profile.EthnicityId!.Value,
         };
 
         try
         {
             await ProfileClient.UpdateSetupAsync(request);
             successMessage = L["ProfileSetup_SaveSuccess"];
-            return;
         }
         catch (ApiClientException)
         {
             errorMessage = L["ProfileSetup_SaveError"];
         }
+    }
 
+    private string SelectClass(Expression<Func<Guid?>> accessor)
+    {
+        var fi = FieldIdentifier.Create(accessor);
+        var hasError = editContext.GetValidationMessages(fi).Any();
+        return hasError
+            ? "select select-bordered w-full select-error"
+            : "select select-bordered w-full";
     }
 
     private string GetDisplay(ProfileLookupOption option)
     {
         if (string.IsNullOrWhiteSpace(option.DisplayKey))
-        {
             return option.Name;
-        }
 
         var localized = L[option.DisplayKey];
         return localized.ResourceNotFound ? option.Name : localized.Value;
+    }
+
+    private string GetValidationMessage(string key)
+    {
+        var localized = L[key];
+        return localized.ResourceNotFound ? key : localized.Value;
+    }
+
+    public void Dispose()
+    {
+        if (editContext is not null)
+            editContext.OnValidationStateChanged -= HandleValidationStateChanged;
     }
 }

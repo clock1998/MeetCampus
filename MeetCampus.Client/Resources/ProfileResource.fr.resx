@@ -84,4 +84,9 @@
   <data name="ProfileSetup_SaveSuccess" xml:space="preserve"><value>Votre profil a été enregistré.</value></data>
   <data name="ProfileSetup_SaveError" xml:space="preserve"><value>Impossible d'enregistrer votre profil. Veuillez réessayer.</value></data>
   <data name="ProfileSetup_RequiredSelections" xml:space="preserve"><value>Veuillez compléter toutes les sélections requises avant d'enregistrer.</value></data>
+  <data name="ProfileSetup_Required_StudyDomain" xml:space="preserve"><value>Veuillez sélectionner un domaine d'études.</value></data>
+  <data name="ProfileSetup_Required_School" xml:space="preserve"><value>Veuillez sélectionner une école.</value></data>
+  <data name="ProfileSetup_Required_Language" xml:space="preserve"><value>Veuillez sélectionner une langue.</value></data>
+  <data name="ProfileSetup_Required_Intention" xml:space="preserve"><value>Veuillez sélectionner une intention.</value></data>
+  <data name="ProfileSetup_Required_Ethnicity" xml:space="preserve"><value>Veuillez sélectionner une origine ethnique.</value></data>
 </root>

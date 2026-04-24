@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace MeetCampus.Shared.Models;
 
 public sealed record ProfileLookupOption(Guid Id, string? DisplayKey, string Name);
@@ -8,14 +10,19 @@ public sealed record UserProfileSetupForm
 
     public Guid? SexualityId { get; set; }
 
+    [Required(ErrorMessage = "ProfileSetup_Required_StudyDomain")]
     public Guid? StudyDomainId { get; set; }
 
+    [Required(ErrorMessage = "ProfileSetup_Required_School")]
     public Guid? SchoolId { get; set; }
 
+    [Required(ErrorMessage = "ProfileSetup_Required_Language")]
     public Guid? LanguageId { get; set; }
 
+    [Required(ErrorMessage = "ProfileSetup_Required_Intention")]
     public Guid? IntentionId { get; set; }
 
+    [Required(ErrorMessage = "ProfileSetup_Required_Ethnicity")]
     public Guid? EthnicityId { get; set; }
 }
 

@@ -84,4 +84,9 @@
   <data name="ProfileSetup_SaveSuccess" xml:space="preserve"><value>Your profile was saved.</value></data>
   <data name="ProfileSetup_SaveError" xml:space="preserve"><value>Could not save your profile. Please try again.</value></data>
   <data name="ProfileSetup_RequiredSelections" xml:space="preserve"><value>Please complete all required selections before saving.</value></data>
+  <data name="ProfileSetup_Required_StudyDomain" xml:space="preserve"><value>Please select a study domain.</value></data>
+  <data name="ProfileSetup_Required_School" xml:space="preserve"><value>Please select a school.</value></data>
+  <data name="ProfileSetup_Required_Language" xml:space="preserve"><value>Please select a language.</value></data>
+  <data name="ProfileSetup_Required_Intention" xml:space="preserve"><value>Please select an intention.</value></data>
+  <data name="ProfileSetup_Required_Ethnicity" xml:space="preserve"><value>Please select an ethnicity.</value></data>
 </root>
