@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MeetCampus.Shared\MeetCampus.Shared.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.11" />
   </ItemGroup>
 
 </Project>
