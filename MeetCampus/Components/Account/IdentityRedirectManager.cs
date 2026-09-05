@@ -2,11 +2,11 @@ using MeetCampus.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 
-namespace MeetCampus.Components.Account
+namespace MeetCampus.Components.Account;
+
+internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {
-    internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
-    {
-        public const string StatusCookieName = "Identity.StatusMessage";
+    public const string StatusCookieName = "Identity.StatusMessage";
 
         private static readonly CookieBuilder StatusCookieBuilder = new()
         {
@@ -51,5 +51,4 @@ namespace MeetCampus.Components.Account
 
         public void RedirectToInvalidUser(UserManager<ApplicationUser> userManager, HttpContext context)
             => RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
-    }
 }

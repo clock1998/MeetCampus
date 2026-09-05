@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeetCampus.Data
+namespace MeetCampus.Data;
+
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
-    {
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<StudyDomain> StudyDomains => Set<StudyDomain>();
         public DbSet<School> Schools => Set<School>();
@@ -355,6 +355,5 @@ namespace MeetCampus.Data
             };
 
             builder.Entity<IdentityRole>().HasData(roles);
-        }
     }
 }
