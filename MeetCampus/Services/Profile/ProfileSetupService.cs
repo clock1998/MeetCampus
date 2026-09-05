@@ -1,5 +1,5 @@
 using MeetCampus.Data;
-using MeetCampus.Shared.Models;
+using MeetCampus.Contracts.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Services.Profile;

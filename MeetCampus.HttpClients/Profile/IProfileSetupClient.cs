@@ -1,6 +1,6 @@
-using MeetCampus.Shared.Models;
+using MeetCampus.Contracts.Models;
 
-namespace MeetCampus.Shared.Services.Profile;
+namespace MeetCampus.HttpClients.Profile;
 
 public interface IProfileSetupClient
 {

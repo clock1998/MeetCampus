@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MeetCampus.Shared.Models;
+namespace MeetCampus.Contracts.Models;
 
 public sealed record ProfileLookupOption(Guid Id, string? DisplayKey, string Name);
 

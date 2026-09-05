@@ -1,12 +1,13 @@
 @page "/profile/setup"
 @attribute [Authorize]
-@using MeetCampus.Shared.Models
-@using MeetCampus.Shared.Services.Http
+@using MeetCampus.Contracts.Models
+@using MeetCampus.HttpClients.Http
+@using MeetCampus.HttpClients.Profile
 @using MeetCampus.Client.Resources
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
 @using System.Linq.Expressions
-@inject MeetCampus.Shared.Services.Profile.IProfileSetupClient ProfileClient
+@inject IProfileSetupClient ProfileClient
 @inject IStringLocalizer<ProfileResource> L
 @implements IDisposable
 

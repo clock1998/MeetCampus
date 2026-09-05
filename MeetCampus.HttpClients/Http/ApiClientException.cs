@@ -1,11 +1,13 @@
 using System.Net;
 
-namespace MeetCampus.Shared.Services.Http;
+namespace MeetCampus.HttpClients.Http;
 
 public sealed class ApiClientException : Exception
 {
     public HttpStatusCode? StatusCode { get; }
+
     public string? ResponseContent { get; }
+
     public bool IsNetworkError { get; }
 
     private ApiClientException(

@@ -1,5 +1,5 @@
 using System.Globalization;
-using MeetCampus.Shared.Services.Profile;
+using MeetCampus.HttpClients.Profile;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 

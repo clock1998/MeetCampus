@@ -1,6 +1,6 @@
 using MeetCampus.Data;
+using MeetCampus.Contracts.Models;
 using MeetCampus.Services.Profile;
-using MeetCampus.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
