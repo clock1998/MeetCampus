@@ -2,6 +2,7 @@ using MeetCampus;
 using MeetCampus.Components;
 using MeetCampus.Data;
 using MeetCampus.Features.Auth.Infrastructure;
+using MeetCampus.Features.Auth.Services;
 using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,15 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<EmailConfirmationService>();
+builder.Services.AddScoped<PasswordRecoveryService>();
+builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddAuthentication(options =>
     {

@@ -1,6 +1,4 @@
 using MeetCampus.Data;
-using MeetCampus.Features.Auth.Pages;
-using MeetCampus.Features.Auth.Pages.Manage;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -15,7 +13,7 @@ namespace Microsoft.AspNetCore.Routing;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
-        // These endpoints are required by the Identity Razor components defined in the auth feature pages.
+        // These endpoints support the server-side Identity protocols used by client authentication UI.
         public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
         {
             ArgumentNullException.ThrowIfNull(endpoints);
@@ -30,7 +28,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             {
                 IEnumerable<KeyValuePair<string, StringValues>> query = [
                     new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                    new("Action", "LoginCallback")];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -102,7 +100,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
                     "/Account/Manage/ExternalLogins",
-                    QueryString.Create("Action", ExternalLogins.LinkLoginCallbackAction));
+                    QueryString.Create("Action", "LinkLoginCallback"));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
                 return TypedResults.Challenge(properties, [provider]);

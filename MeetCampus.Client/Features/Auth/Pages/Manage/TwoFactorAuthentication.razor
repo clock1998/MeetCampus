@@ -1,0 +1,43 @@
+@page "/auth/manage/2fa"
+@attribute [Authorize]
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Two-factor authentication</PageTitle>
+<h1>Two-factor authentication</h1>
+@if (status is null)
+{
+    <p>Loading...</p>
+}
+else if (!status.CanTrack)
+{
+    <p>Privacy and cookie policy have not been accepted.</p>
+}
+else
+{
+    <p>2FA is @(status.IsEnabled ? "enabled" : "disabled").</p>
+    <p>Recovery codes left: @status.RecoveryCodesLeft</p>
+    @if (status.IsEnabled)
+    {
+        <a href="/auth/manage/disable-2fa">Disable 2FA</a>
+        <a href="/auth/manage/recovery-codes">Reset recovery codes</a>
+        @if (status.IsMachineRemembered) { <button @onclick="ForgetBrowserAsync">Forget this browser</button> }
+    }
+    <a href="/auth/manage/authenticator">@(status.HasAuthenticator ? "Set up authenticator app" : "Add authenticator app")</a>
+}
+@if (message is not null) { <p role="status">@message</p> }
+
+@code {
+    private TwoFactorStatusResponse? status;
+    private string? message;
+
+    protected override async Task OnInitializedAsync() => status = await AuthClient.GetTwoFactorStatusAsync();
+
+    private async Task ForgetBrowserAsync()
+    {
+        var result = await AuthClient.ForgetTwoFactorBrowserAsync();
+        message = result.Succeeded ? "The current browser has been forgotten." : string.Join(", ", result.Errors ?? []);
+        status = await AuthClient.GetTwoFactorStatusAsync();
+    }
+}

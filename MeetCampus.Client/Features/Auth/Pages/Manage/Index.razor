@@ -1,0 +1,71 @@
+@page "/auth/manage"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@using MeetCampus.HttpClients.Infrastructure.Http
+@inject IAuthClient AuthClient
+
+<PageTitle>Profile</PageTitle>
+<h1>Profile</h1>
+@if (profile is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="input" OnValidSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <p>Username and email: @profile.Email</p>
+        <InputText @bind-Value="input.PhoneNumber" placeholder="Phone number" />
+        <ValidationMessage For="() => input.PhoneNumber" />
+        <button type="submit" disabled="@busy">Save</button>
+    </EditForm>
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p role="status">@message</p>
+    }
+    <nav>
+        <a href="/auth/manage/change-password">Change password</a>
+        <a href="/auth/manage/email">Manage email</a>
+        <a href="/auth/manage/2fa">Two-factor authentication</a>
+        <a href="/auth/external-login">External logins</a>
+        <a href="/auth/manage/passkeys">Passkeys</a>
+        <a href="/auth/manage/delete">Delete personal data</a>
+    </nav>
+}
+
+@code {
+    private AccountProfileResponse? profile;
+    private readonly InputModel input = new();
+    private string? message;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await AuthClient.GetAccountAsync();
+            input.PhoneNumber = profile.PhoneNumber;
+        }
+        catch (ApiClientException)
+        {
+            profile = null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        var result = await AuthClient.UpdatePhoneAsync(new UpdatePhoneNumberRequest(input.PhoneNumber));
+        message = result.Succeeded ? "Your profile has been updated." : string.Join(", ", result.Errors ?? []);
+        busy = false;
+    }
+
+    private sealed class InputModel
+    {
+        [Phone]
+        public string? PhoneNumber { get; set; }
+    }
+}
