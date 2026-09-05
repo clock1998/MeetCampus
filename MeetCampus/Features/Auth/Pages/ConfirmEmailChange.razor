@@ -1,13 +1,9 @@
 ﻿@page "/Account/ConfirmEmailChange"
 
-@using System.Text
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
-@using MeetCampus.Data
+@using MeetCampus.Features.Auth.Services
 
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
+@inject EmailConfirmationService EmailConfirmationService
 
 <PageTitle>Confirm email change</PageTitle>
 
@@ -39,31 +35,18 @@
             return;
         }
 
-        var user = await UserManager.FindByIdAsync(UserId);
-        if (user is null)
+        var result = await EmailConfirmationService.ConfirmEmailChangeAsync(UserId, Email, Code);
+        if (result.UserNotFound)
         {
             message = "Unable to find user with Id '{userId}'";
             return;
         }
 
-        var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-        var result = await UserManager.ChangeEmailAsync(user, Email, code);
         if (!result.Succeeded)
         {
             message = "Error changing email.";
             return;
         }
-
-        // In our UI email and user name are one and the same, so when we update the email
-        // we need to update the user name.
-        var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
-        if (!setUserNameResult.Succeeded)
-        {
-            message = "Error changing user name.";
-            return;
-        }
-
-        await SignInManager.RefreshSignInAsync(user);
         message = "Thank you for confirming your email change.";
     }
 }

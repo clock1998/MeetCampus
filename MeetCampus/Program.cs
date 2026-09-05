@@ -20,6 +20,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<EmailConfirmationService>();
+builder.Services.AddScoped<PasswordRecoveryService>();
 
 builder.Services.AddAuthentication(options =>
     {
