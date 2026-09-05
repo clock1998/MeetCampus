@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace MeetCampus.HttpClients.Http;
+namespace MeetCampus.HttpClients.Infrastructure.Http;
 
 public sealed class ApiClientException : Exception
 {

@@ -1,9 +1,9 @@
 @page "/testing"
 @attribute [Authorize]
+@using MeetCampus.Client.Features.Testing.Resources
 @using Microsoft.AspNetCore.Authorization
-@using MeetCampus.Client.Resources
 @using Microsoft.Extensions.Localization
-@inject IStringLocalizer<SharedResource> L
+@inject IStringLocalizer<TestingResource> L
 
 <PageTitle>@L["Testing_PageTitle"]</PageTitle>
 
