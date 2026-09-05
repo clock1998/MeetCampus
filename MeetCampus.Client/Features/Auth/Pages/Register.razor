@@ -1,0 +1,106 @@
+@page "/auth/register"
+
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.Client.Features.Auth
+@using MeetCampus.HttpClients.Features.Auth
+@using MeetCampus.HttpClients.Infrastructure.Http
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Register</PageTitle>
+
+<div class="bg-base-100 px-6 py-12 lg:py-20">
+    <div class="mx-auto max-w-lg">
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:p-8">
+            <h1 class="text-base-content mb-6 text-3xl font-bold">Register</h1>
+
+            @if (errors is not null)
+            {
+                <div class="alert alert-error mb-4" role="alert">@string.Join(", ", errors)</div>
+            }
+
+            <EditForm Model="input" OnValidSubmit="RegisterAsync" class="space-y-5">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-error text-sm" role="alert" />
+
+                <InputText @bind-Value="input.Email" class="input input-bordered w-full" autocomplete="username" placeholder="name@example.com" />
+                <ValidationMessage For="() => input.Email" class="text-error text-sm" />
+
+                <InputText type="password" @bind-Value="input.Password" class="input input-bordered w-full" autocomplete="new-password" placeholder="password" />
+                <ValidationMessage For="() => input.Password" class="text-error text-sm" />
+
+                <InputText type="password" @bind-Value="input.ConfirmPassword" class="input input-bordered w-full" autocomplete="new-password" placeholder="confirm password" />
+                <ValidationMessage For="() => input.ConfirmPassword" class="text-error text-sm" />
+
+                <button type="submit" class="btn btn-primary w-full rounded-full" disabled="@isBusy">Register</button>
+            </EditForm>
+        </section>
+    </div>
+</div>
+
+@code {
+    private readonly InputModel input = new();
+    private IReadOnlyList<string>? errors;
+    private bool isBusy;
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    private string? ReturnUrl { get; set; }
+
+    private async Task RegisterAsync()
+    {
+        isBusy = true;
+        errors = null;
+
+        try
+        {
+            var result = await AuthClient.RegisterAsync(new RegisterRequest(input.Email, input.Password, GetSafeReturnUrl()));
+            if (!result.Succeeded)
+            {
+                errors = result.Errors ?? ["Unable to create the account."];
+                return;
+            }
+
+            if (!result.RequiresConfirmedAccount)
+            {
+                await ((ClientAuthenticationStateProvider)AuthenticationStateProvider).RefreshAsync();
+            }
+
+            NavigationManager.NavigateTo(result.RequiresConfirmedAccount
+                ? $"/Account/RegisterConfirmation?email={Uri.EscapeDataString(input.Email)}&returnUrl={Uri.EscapeDataString(GetSafeReturnUrl())}"
+                : GetSafeReturnUrl(),
+                forceLoad: result.RequiresConfirmedAccount);
+        }
+        catch (ApiClientException)
+        {
+            errors = ["Unable to create the account. Please try again."];
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private string GetSafeReturnUrl() =>
+        string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith('/') || ReturnUrl.StartsWith("//")
+            ? "/"
+            : ReturnUrl;
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [StringLength(100, MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Required]
+        [Compare(nameof(Password))]
+        [DataType(DataType.Password)]
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

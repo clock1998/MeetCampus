@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace MeetCampus.Features.Auth.Services;
 
-internal sealed class PasswordRecoveryService(
+public sealed class PasswordRecoveryService(
     UserManager<ApplicationUser> userManager,
     IEmailSender<ApplicationUser> emailSender)
 {

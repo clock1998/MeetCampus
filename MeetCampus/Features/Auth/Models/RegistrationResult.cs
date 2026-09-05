@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace MeetCampus.Features.Auth.Models;
 
-internal sealed record RegistrationResult
+public sealed record RegistrationResult
 {
     public bool Succeeded { get; init; }
 

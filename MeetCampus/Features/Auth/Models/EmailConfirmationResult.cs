@@ -1,6 +1,6 @@
 namespace MeetCampus.Features.Auth.Models;
 
-internal sealed record EmailConfirmationResult
+public sealed record EmailConfirmationResult
 {
     public bool UserNotFound { get; init; }
 

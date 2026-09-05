@@ -1,6 +1,6 @@
 namespace MeetCampus.Features.Auth.Models;
 
-internal sealed record LoginResult
+public sealed record LoginResult
 {
     public bool Succeeded { get; init; }
 

@@ -19,6 +19,9 @@ public abstract class BaseApiClient
         return await ReadAsJsonAsync<TResponse>(response, cancellationToken);
     }
 
+    protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default) =>
+        SendCoreAsync(request, cancellationToken);
+
     protected async Task PutAsync<TRequest>(string requestUri, TRequest requestBody, CancellationToken cancellationToken = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Put, requestUri)
@@ -28,6 +31,27 @@ public abstract class BaseApiClient
 
         using var response = await SendCoreAsync(request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    protected async Task<TResponse> PostAsync<TRequest, TResponse>(string requestUri, TRequest requestBody, CancellationToken cancellationToken = default)
+    {
+        return await PostAsync<TRequest, TResponse>(requestUri, requestBody, null, cancellationToken);
+    }
+
+    protected async Task<TResponse> PostAsync<TRequest, TResponse>(
+        string requestUri,
+        TRequest requestBody,
+        Action<HttpRequestMessage>? configureRequest,
+        CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+        {
+            Content = JsonContent.Create(requestBody),
+        };
+        configureRequest?.Invoke(request);
+
+        using var response = await SendCoreAsync(request, cancellationToken);
+        return await ReadAsJsonAsync<TResponse>(response, cancellationToken);
     }
 
     private async Task<HttpResponseMessage> SendCoreAsync(HttpRequestMessage request, CancellationToken cancellationToken)

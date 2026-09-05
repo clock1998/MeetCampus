@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace MeetCampus.Features.Auth.Services;
 
-internal sealed class EmailConfirmationService(
+public sealed class EmailConfirmationService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IEmailSender<ApplicationUser> emailSender)

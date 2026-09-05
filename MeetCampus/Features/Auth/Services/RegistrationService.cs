@@ -7,7 +7,7 @@ using System.Text.Encodings.Web;
 
 namespace MeetCampus.Features.Auth.Services;
 
-internal sealed class RegistrationService(
+public sealed class RegistrationService(
     UserManager<ApplicationUser> userManager,
     IUserStore<ApplicationUser> userStore,
     SignInManager<ApplicationUser> signInManager,

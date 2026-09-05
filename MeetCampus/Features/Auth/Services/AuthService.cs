@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace MeetCampus.Features.Auth.Services;
 
-internal sealed class AuthService(
+public sealed class AuthService(
     SignInManager<ApplicationUser> signInManager,
     ILogger<AuthService> logger)
 {

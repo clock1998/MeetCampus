@@ -1,6 +1,6 @@
 namespace MeetCampus.Features.Auth.Models;
 
-internal sealed record PasswordResetResult
+public sealed record PasswordResetResult
 {
     public bool UserNotFound { get; init; }
 
