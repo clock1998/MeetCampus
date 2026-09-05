@@ -1,8 +1,8 @@
-using MeetCampus.Data;
 using MeetCampus.Contracts.Models;
+using MeetCampus.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeetCampus.Services.Profile;
+namespace MeetCampus.Features.Profile.Services;
 
 public sealed class ProfileSetupService(ApplicationDbContext dbContext)
 {

@@ -1,4 +1,4 @@
-namespace MeetCampus.Components.Account;
+namespace MeetCampus.Features.Auth.Models;
 
 public class PasskeyInputModel
 {

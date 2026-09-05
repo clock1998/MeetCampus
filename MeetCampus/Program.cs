@@ -1,8 +1,8 @@
 using MeetCampus;
 using MeetCampus.Components;
-using MeetCampus.Components.Account;
 using MeetCampus.Data;
-using MeetCampus.Services.Profile;
+using MeetCampus.Features.Auth.Infrastructure;
+using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

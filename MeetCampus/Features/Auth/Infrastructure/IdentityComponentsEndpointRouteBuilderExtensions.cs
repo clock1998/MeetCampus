@@ -1,6 +1,6 @@
-using MeetCampus.Components.Account.Pages;
-using MeetCampus.Components.Account.Pages.Manage;
 using MeetCampus.Data;
+using MeetCampus.Features.Auth.Pages;
+using MeetCampus.Features.Auth.Pages.Manage;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Routing;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
-        // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
+        // These endpoints are required by the Identity Razor components defined in the auth feature pages.
         public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
         {
             ArgumentNullException.ThrowIfNull(endpoints);

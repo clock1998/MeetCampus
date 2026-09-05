@@ -1,11 +1,11 @@
-using MeetCampus.Data;
 using MeetCampus.Contracts.Models;
-using MeetCampus.Services.Profile;
+using MeetCampus.Data;
+using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeetCampus.Controllers;
+namespace MeetCampus.Features.Profile.Controllers;
 
 [ApiController]
 [Authorize]

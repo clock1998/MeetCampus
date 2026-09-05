@@ -2,7 +2,7 @@ using MeetCampus.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 
-namespace MeetCampus.Components.Account;
+namespace MeetCampus.Features.Auth.Infrastructure;
 
 internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {
