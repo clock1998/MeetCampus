@@ -1,0 +1,60 @@
+@page "/auth/manage/email"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Manage email</PageTitle>
+<h1>Manage email</h1>
+@if (profile is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>Current email: @profile.Email @(profile.EmailConfirmed ? "(confirmed)" : "(unconfirmed)")</p>
+    @if (!profile.EmailConfirmed)
+    {
+        <button @onclick="SendVerificationAsync" disabled="@busy">Send verification email</button>
+    }
+    <EditForm Model="input" OnValidSubmit="ChangeEmailAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <InputText @bind-Value="input.NewEmail" type="email" placeholder="New email" />
+        <ValidationMessage For="() => input.NewEmail" />
+        <button type="submit" disabled="@busy">Change email</button>
+    </EditForm>
+}
+@if (message is not null) { <p role="status">@message</p> }
+
+@code {
+    private AccountProfileResponse? profile;
+    private readonly InputModel input = new();
+    private string? message;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => profile = await AuthClient.GetAccountAsync();
+
+    private async Task ChangeEmailAsync()
+    {
+        busy = true;
+        var result = await AuthClient.ChangeEmailAsync(new ChangeEmailRequest(input.NewEmail));
+        message = result.Succeeded ? "Confirmation link sent. Please check your email." : string.Join(", ", result.Errors ?? []);
+        busy = false;
+    }
+
+    private async Task SendVerificationAsync()
+    {
+        busy = true;
+        var result = await AuthClient.SendEmailVerificationAsync();
+        message = result.Succeeded ? "Verification email sent. Please check your email." : string.Join(", ", result.Errors ?? []);
+        busy = false;
+    }
+
+    private sealed class InputModel
+    {
+        [Required, EmailAddress]
+        public string NewEmail { get; set; } = "";
+    }
+}

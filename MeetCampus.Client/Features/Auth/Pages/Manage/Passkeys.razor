@@ -1,0 +1,15 @@
+@page "/auth/manage/passkeys"
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Manage your passkeys</PageTitle>
+<h1>Manage your passkeys</h1>
+<p>Passkey registration and management continue through the server-owned WebAuthn flow.</p>
+<button @onclick="OpenServerFlow">Manage passkeys</button>
+
+@code {
+    private void OpenServerFlow()
+    {
+        NavigationManager.NavigateTo("/Account/Manage/Passkeys", forceLoad: true);
+    }
+}

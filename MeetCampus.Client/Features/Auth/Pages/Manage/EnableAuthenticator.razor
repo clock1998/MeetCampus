@@ -1,0 +1,60 @@
+@page "/auth/manage/authenticator"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Configure authenticator app</PageTitle>
+<h1>Configure authenticator app</h1>
+@if (setup is null)
+{
+    <p>Loading...</p>
+}
+else if (codes is null)
+{
+    <p>Enter this key in your authenticator app: <kbd>@setup.SharedKey</kbd></p>
+    <p>@setup.AuthenticatorUri</p>
+    <EditForm Model="input" OnValidSubmit="VerifyAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <InputText @bind-Value="input.Code" autocomplete="one-time-code" placeholder="Verification code" />
+        <button type="submit" disabled="@busy">Verify</button>
+    </EditForm>
+}
+else
+{
+    <p>Your authenticator app has been verified. Save these recovery codes:</p>
+    <ul>
+        @foreach (var recoveryCode in codes)
+        {
+            <li>@recoveryCode</li>
+        }
+    </ul>
+}
+@if (message is not null) { <p role="alert">@message</p> }
+
+@code {
+    private AuthenticatorSetupResponse? setup;
+    private IReadOnlyList<string>? codes;
+    private readonly InputModel input = new();
+    private string? message;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => setup = await AuthClient.GetAuthenticatorSetupAsync();
+
+    private async Task VerifyAsync()
+    {
+        busy = true;
+        var result = await AuthClient.VerifyAuthenticatorAsync(new VerifyAuthenticatorRequest(input.Code));
+        if (result.Codes.Count == 0) { message = "Verification code is invalid or no new recovery codes were required."; }
+        else { codes = result.Codes; }
+        busy = false;
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string Code { get; set; } = "";
+    }
+}

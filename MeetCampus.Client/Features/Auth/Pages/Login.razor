@@ -71,7 +71,7 @@
 
             if (result.RequiresTwoFactor)
             {
-                NavigationManager.NavigateTo($"/Account/LoginWith2fa?returnUrl={Uri.EscapeDataString(GetSafeReturnUrl())}", forceLoad: true);
+                NavigationManager.NavigateTo($"/auth/login-2fa?returnUrl={Uri.EscapeDataString(GetSafeReturnUrl())}");
                 return;
             }
 

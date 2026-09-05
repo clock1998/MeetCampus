@@ -1,0 +1,37 @@
+@page "/auth/confirm-email"
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Confirm email</PageTitle>
+<h1>Confirm email</h1>
+<p>@message</p>
+
+@code {
+    private string message = "Confirming your email...";
+    private bool confirmed;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (confirmed)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Code))
+        {
+            message = "Invalid email confirmation link.";
+            return;
+        }
+
+        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId, Code, null));
+        message = response.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+        confirmed = true;
+    }
+}

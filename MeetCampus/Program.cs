@@ -22,6 +22,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<EmailConfirmationService>();
 builder.Services.AddScoped<PasswordRecoveryService>();
+builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddAuthentication(options =>
     {

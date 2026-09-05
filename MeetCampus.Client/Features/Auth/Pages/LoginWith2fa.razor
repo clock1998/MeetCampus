@@ -1,0 +1,64 @@
+@page "/auth/login-2fa"
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Two-factor authentication</PageTitle>
+<h1>Two-factor authentication</h1>
+<p>Your login is protected with an authenticator app.</p>
+<EditForm Model="input" OnValidSubmit="SubmitAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <InputText @bind-Value="input.Code" autocomplete="one-time-code" placeholder="Authenticator code" />
+    <InputCheckbox @bind-Value="input.RememberMachine" /> Remember this machine
+    <button type="submit" disabled="@busy">Log in</button>
+</EditForm>
+<p><a href="/auth/login-recovery-code?returnUrl=@Uri.EscapeDataString(ReturnUrl ?? "/")">Use a recovery code</a></p>
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p role="alert">@message</p>
+}
+
+@code {
+    private readonly InputModel input = new();
+    private string? message;
+    private bool busy;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery]
+    private bool RememberMe { get; set; }
+
+    private async Task SubmitAsync()
+    {
+        busy = true;
+        var result = await AuthClient.LoginWithTwoFactorAsync(new TwoFactorLoginRequest(input.Code, RememberMe, input.RememberMachine));
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo(GetSafeReturnUrl());
+        }
+        else if (result.IsLockedOut)
+        {
+            NavigationManager.NavigateTo("/auth/lockout");
+        }
+        else
+        {
+            message = result.ErrorMessage ?? "Invalid authenticator code.";
+        }
+
+        busy = false;
+    }
+
+    private string GetSafeReturnUrl() =>
+        string.IsNullOrWhiteSpace(ReturnUrl) || !ReturnUrl.StartsWith('/') || ReturnUrl.StartsWith("//") ? "/" : ReturnUrl;
+
+    private sealed class InputModel
+    {
+        [Required]
+        public string Code { get; set; } = "";
+        public bool RememberMachine { get; set; }
+    }
+}
