@@ -1,0 +1,189 @@
+@using System.Globalization
+@using MeetCampus.Client.Features.Auth
+@using MeetCampus.Client.Features.Navigation.Resources
+@using MeetCampus.HttpClients.Features.Auth
+@using Microsoft.Extensions.Localization
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IStringLocalizer<NavResource> L
+@inject IAuthClient AuthClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<nav class="navbar bg-base-100 border-base-300 sticky top-0 z-50 border-b shadow-sm">
+    <div class="flex-1 px-6">
+        <!-- Logo/Brand -->
+        <a href="/" class="text-base-content flex items-center gap-3 text-2xl font-bold transition hover:opacity-80">
+            <div class="bg-primary text-primary-content flex h-8 w-8 items-center justify-center rounded-full font-bold">
+                MC
+            </div>
+            <span>MeetCampus</span>
+        </a>
+    </div>
+
+    <!-- Desktop Menu (Hidden on mobile) -->
+    <div class="hidden flex-none items-center gap-1 lg:flex">
+        <!-- Navigation Links -->
+        <ul class="menu menu-horizontal gap-1 px-1">
+            <li><a href="/mission" class="rounded-full">@L["Nav_Mission"]</a></li>
+            <li><a href="/stories" class="rounded-full">@L["Nav_Stories"]</a></li>
+            <li><a href="/events" class="rounded-full">@L["Nav_Events"]</a></li>
+            <li><a href="/contact" class="rounded-full">@L["Nav_Contact"]</a></li>
+            <li><a href="/testing" class="rounded-full">@L["Nav_Testing"]</a></li>
+        </ul>
+
+        <!-- Theme Selector Dropdown -->
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" title="@L["Nav_Theme"]" tabindex="0">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
+                <li><button @onclick="@(() => SetTheme("light"))" class="rounded-lg">@L["Nav_ThemeLight"]</button></li>
+                <li><button @onclick="@(() => SetTheme("dark"))" class="rounded-lg">@L["Nav_ThemeDark"]</button></li>
+                <li><button @onclick="@(() => SetTheme("system"))" class="rounded-lg">@L["Nav_ThemeSystem"]</button></li>
+            </ul>
+        </div>
+
+        <!-- Language Selector Dropdown -->
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" title="@L["Nav_Language"]" tabindex="0" aria-label="@L["Nav_Language"]">
+                <svg class="text-base-content/70 size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"></path></svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
+                <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
+                <li><button @onclick="@(() => SetLanguage("fr"))" class="rounded-lg">🇫🇷 Français</button></li>
+            </ul>
+        </div>
+
+        <!-- Authentication Button -->
+        <AuthorizeView>
+            <Authorized>
+                <button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full px-6" disabled="@isSigningOut">
+                    Sign out
+                </button>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/auth/login" class="btn btn-primary btn-sm rounded-full px-6">
+                    @L["Nav_SignIn"]
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <div class="flex-none lg:hidden">
+        <div class="dropdown dropdown-end">
+            <button class="btn btn-ghost btn-circle" aria-label="Menu">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <ul class="dropdown-content menu bg-base-100 border-base-300 w-52 rounded-2xl border p-2 shadow">
+                <li><a href="/mission" class="rounded-lg">@L["Nav_Mission"]</a></li>
+                <li><a href="/stories" class="rounded-lg">@L["Nav_Stories"]</a></li>
+                <li><a href="/events" class="rounded-lg">@L["Nav_Events"]</a></li>
+                <li><a href="/contact" class="rounded-lg">@L["Nav_Contact"]</a></li>
+                <li><a href="/testing" class="rounded-lg">@L["Nav_Testing"]</a></li>
+                <li class="divider my-1"></li>
+                <li>
+                    <details>
+                        <summary class="rounded-lg">🎨 @L["Nav_Theme"]</summary>
+                        <ul class="bg-base-200 rounded-lg p-2">
+                            <li><button @onclick="@(() => SetTheme("light"))" class="rounded-lg">@L["Nav_ThemeLight"]</button></li>
+                            <li><button @onclick="@(() => SetTheme("dark"))" class="rounded-lg">@L["Nav_ThemeDark"]</button></li>
+                            <li><button @onclick="@(() => SetTheme("system"))" class="rounded-lg">@L["Nav_ThemeSystem"]</button></li>
+                        </ul>
+                    </details>
+                </li>
+                <li>
+                    <details>
+                        <summary class="rounded-lg">🌍 @L["Nav_Language"]</summary>
+                        <ul class="bg-base-200 rounded-lg p-2">
+                            <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
+                            <li><button @onclick="@(() => SetLanguage("fr"))" class="rounded-lg">🇫🇷 Français</button></li>
+                        </ul>
+                    </details>
+                </li>
+                <li class="divider my-1"></li>
+                <li>
+                    <AuthorizeView>
+                        <Authorized>
+                            <button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full" disabled="@isSigningOut">Sign out</button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a href="/auth/login" class="btn btn-primary btn-sm rounded-full">@L["Nav_SignIn"]</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private bool isSigningOut;
+
+    private async Task SignOutAsync()
+    {
+        if (isSigningOut)
+        {
+            return;
+        }
+
+        isSigningOut = true;
+        try
+        {
+            await AuthClient.LogoutAsync();
+            await ((ClientAuthenticationStateProvider)AuthenticationStateProvider).RefreshAsync();
+            Navigation.NavigateTo("/");
+        }
+        finally
+        {
+            isSigningOut = false;
+        }
+    }
+
+    private async Task SetTheme(string theme)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "theme", theme);
+            await JS.InvokeVoidAsync("applyTheme", theme);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting theme: {ex.Message}");
+        }
+    }
+
+    // Saves the chosen culture and reloads the page so Program.cs can apply
+    // the new CultureInfo before any component renders.
+    private async Task SetLanguage(string culture)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "language", culture);
+            await JS.InvokeVoidAsync("location.reload");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting language: {ex.Message}");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("initializeTheme");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing theme: {ex.Message}");
+            }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+@page "/auth/confirm-email-change"
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Confirm email change</PageTitle>
+<h1>Confirm email change</h1>
+<p>@message</p>
+
+@code {
+    private string message = "Confirming your email change...";
+    private bool confirmed;
+
+    [SupplyParameterFromQuery]
+    private string? UserId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? Code { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (confirmed)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Code))
+        {
+            message = "Invalid email change confirmation link.";
+            return;
+        }
+
+        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId, Code, Email));
+        message = response.Succeeded ? "Thank you for confirming your email change." : "Error changing email.";
+        confirmed = true;
+    }
+}

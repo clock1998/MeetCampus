@@ -1,0 +1,35 @@
+@page "/auth/manage/recovery-codes"
+@attribute [Authorize]
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+
+<PageTitle>Generate recovery codes</PageTitle>
+<h1>Generate recovery codes</h1>
+@if (codes is null)
+{
+    <p>Generating new codes replaces your previous recovery codes.</p>
+    <button @onclick="GenerateAsync" disabled="@busy">Generate recovery codes</button>
+}
+else
+{
+    <p>Store these codes in a safe place.</p>
+    <ul>
+        @foreach (var recoveryCode in codes)
+        {
+            <li>@recoveryCode</li>
+        }
+    </ul>
+}
+
+@code {
+    private IReadOnlyList<string>? codes;
+    private bool busy;
+
+    private async Task GenerateAsync()
+    {
+        busy = true;
+        codes = (await AuthClient.GenerateRecoveryCodesAsync()).Codes;
+        busy = false;
+    }
+}

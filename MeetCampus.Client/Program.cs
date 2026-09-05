@@ -1,4 +1,7 @@
 using System.Globalization;
+using MeetCampus.Client.Features.Auth;
+using MeetCampus.HttpClients.Features.Auth;
+using MeetCampus.HttpClients.Features.Profile;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 
@@ -7,7 +10,16 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
+builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider, ClientAuthenticationStateProvider>();
 builder.Services.AddLocalization();
+builder.Services.AddHttpClient<IProfileSetupClient, ProfileSetupClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
+builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
 
 var host = builder.Build();
 

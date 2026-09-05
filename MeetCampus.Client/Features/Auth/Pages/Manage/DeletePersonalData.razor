@@ -1,0 +1,38 @@
+@page "/auth/manage/delete"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using MeetCampus.Contracts.Features.Auth.Contracts
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete personal data</PageTitle>
+<h1>Delete personal data</h1>
+<p class="text-warning">Deleting your data permanently removes your account and cannot be recovered.</p>
+<EditForm Model="input" OnValidSubmit="DeleteAsync">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <InputText @bind-Value="input.Password" type="password" autocomplete="current-password" placeholder="Password (if required)" />
+    <button type="submit" disabled="@busy">Delete data and close my account</button>
+</EditForm>
+@if (message is not null) { <p role="alert">@message</p> }
+
+@code {
+    private readonly InputModel input = new();
+    private string? message;
+    private bool busy;
+
+    private async Task DeleteAsync()
+    {
+        busy = true;
+        var result = await AuthClient.DeleteAccountAsync(new DeleteAccountRequest(input.Password));
+        if (result.Succeeded) { NavigationManager.NavigateTo("/"); }
+        else { message = string.Join(", ", result.Errors ?? []); }
+        busy = false;
+    }
+
+    private sealed class InputModel
+    {
+        public string? Password { get; set; }
+    }
+}

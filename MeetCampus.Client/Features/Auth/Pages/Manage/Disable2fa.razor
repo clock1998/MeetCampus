@@ -1,0 +1,25 @@
+@page "/auth/manage/disable-2fa"
+@attribute [Authorize]
+@using MeetCampus.HttpClients.Features.Auth
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Disable two-factor authentication</PageTitle>
+<h1>Disable two-factor authentication</h1>
+<p>This action only disables 2FA. It does not reset your authenticator key.</p>
+<button @onclick="DisableAsync" disabled="@busy">Disable 2FA</button>
+@if (message is not null) { <p role="status">@message</p> }
+
+@code {
+    private bool busy;
+    private string? message;
+
+    private async Task DisableAsync()
+    {
+        busy = true;
+        var result = await AuthClient.DisableTwoFactorAsync();
+        if (result.Succeeded) { NavigationManager.NavigateTo("/auth/manage/2fa"); }
+        else { message = string.Join(", ", result.Errors ?? []); }
+        busy = false;
+    }
+}

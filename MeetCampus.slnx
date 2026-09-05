@@ -6,5 +6,7 @@
     <File Path="tailwind.extension.json" />
   </Folder>
   <Project Path="MeetCampus.Client/MeetCampus.Client.csproj" />
+  <Project Path="MeetCampus.Contracts/MeetCampus.Contracts.csproj" />
+  <Project Path="MeetCampus.HttpClients/MeetCampus.HttpClients.csproj" />
   <Project Path="MeetCampus/MeetCampus.csproj" />
 </Solution>
