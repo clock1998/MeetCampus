@@ -1,6 +1,6 @@
 @using System.Globalization
 @using MeetCampus.Client.Features.Auth
-@using MeetCampus.Client.Features.Navigation.Resources
+@using MeetCampus.Client.Features.Shared.Navigation
 @using MeetCampus.HttpClients.Features.Auth
 @using Microsoft.Extensions.Localization
 @inject NavigationManager Navigation
@@ -59,9 +59,19 @@
         <!-- Authentication Button -->
         <AuthorizeView>
             <Authorized>
-                <button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full px-6" disabled="@isSigningOut">
-                    Sign out
-                </button>
+                <div class="dropdown dropdown-end">
+                    <button class="btn btn-ghost btn-circle" title="@L["Nav_Theme"]" tabindex="0">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                    </button>
+                    <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
+                        <ul class="bg-base-200 rounded-lg p-2">
+                            <li><a href="/profile/setup" class="rounded-lg">@L["Nav_Profile"]</a></li>
+                            <li><button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full" disabled="@isSigningOut">Sign out</button></li>
+                        </ul>
+                    </ul>
+                </div>
             </Authorized>
             <NotAuthorized>
                 <a href="/auth/login" class="btn btn-primary btn-sm rounded-full px-6">
@@ -109,7 +119,13 @@
                 <li>
                     <AuthorizeView>
                         <Authorized>
-                            <button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full" disabled="@isSigningOut">Sign out</button>
+                            <li>
+                                <summary class="rounded-lg"> @L["Nav_User"]</summary>
+                                <ul class="bg-base-200 rounded-lg p-2">
+                                    <li><a href="/profile/setup" class="rounded-lg">@L["Nav_Profile"]</a></li>
+                                    <li><button @onclick="SignOutAsync" class="btn btn-primary btn-sm rounded-full" disabled="@isSigningOut">Sign out</button></li>
+                                </ul>
+                            </li>
                         </Authorized>
                         <NotAuthorized>
                             <a href="/auth/login" class="btn btn-primary btn-sm rounded-full">@L["Nav_SignIn"]</a>

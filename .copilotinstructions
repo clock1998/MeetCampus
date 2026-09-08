@@ -2,493 +2,197 @@
 
 ## Project Overview
 
-This is a **Blazor WebAssembly** web application with a hosted ASP.NET Core backend using .NET 10, Entity Framework Core with PostgreSQL, and Tailwind CSS for styling. The project follows a **vertical slicing architecture** with modern C# patterns and best practices.
+Meet Campus is a .NET 10 hosted Blazor WebAssembly application for a social/campus community experience. It uses a vertical-slice architecture, ASP.NET Core Identity with cookie authentication, Entity Framework Core with PostgreSQL, Tailwind CSS, DaisyUI, and localized client UI.
 
-## Technology Stack
+## Solution Architecture
 
-- **Framework:** Blazor WebAssembly (Interactive Mode) + ASP.NET Core Backend
-- **.NET Version:** .NET 10
-- **Database:** PostgreSQL with Entity Framework Core
-- **Styling:** Tailwind CSS (mobile-first) + Daisy UI components
-- **Authentication:** ASP.NET Core Identity with Blazor auth patterns
-- **Real-Time Messaging:** SignalR (for chat)
-- **Language:** C# 14 (prefer C# for all client-side logic; avoid JavaScript)
+The solution is split into four projects with explicit boundaries:
 
-## Project Type
+- `MeetCampus` — ASP.NET Core server host. Owns the Blazor host shell, ASP.NET Core Identity, authentication cookies, EF Core, PostgreSQL access, migrations, database seeding, API controllers, server-side feature services, and Identity protocol endpoints.
+- `MeetCampus.Client` — Blazor WebAssembly client. Owns all visible application UI, routes, layouts, navigation, authentication pages, localized resources, client authentication state, and browser-facing feature behavior.
+- `MeetCampus.Contracts` — shared cross-boundary contracts. Contains request and response records used by the server APIs and typed HTTP clients. Do not place EF entities or server services here.
+- `MeetCampus.HttpClients` — typed HTTP clients shared by the client application. Contains client interfaces, implementations, and common HTTP infrastructure for calling server APIs.
 
-**Social/Dating App** with real-time friend discovery, connections, and messaging capabilities.
+Project dependency direction:
 
-
-## Architecture & Project Structure
-
-- Use vertical slicing: organize by feature (Auth, Users, Connections, Chat, Notifications, etc.), not by technical layer.
-- Each feature contains its own Pages, Services, DTOs, Components, and (if needed) Hubs.
-- Shared components and services go in a Shared folder.
-- Each class, interface, DTO, and component must be in its own file.
-
-## C# Coding Standards
-
-### Naming Conventions
-
-- **Classes & Interfaces:** PascalCase (`UserService`, `IUserRepository`)
-- **Methods & Properties:** PascalCase (`GetUserById()`, `IsActive`)
-- **Private fields:** `_camelCase` (e.g., `_logger`, `_userService`)
-- **Constants:** `UPPER_SNAKE_CASE` or PascalCase for well-known constants
-- **Blazor Components:** PascalCase ending in `.razor` (e.g., `UserCard.razor`, `LoadingSpinner.razor`)
-- **DTOs:** `[Entity]Dto` suffix (e.g., `UserDto`, `PostCreateDto`)
-- **Services:** `[Entity]Service` suffix (e.g., `UserService`, `PostService`)
-
-
-### File Organization
-- Use one file per class, interface, DTO, or component.
-
-
-### Modern C# 14 Patterns
-- Use file-scoped namespaces, records for DTOs, and nullable reference types.
-- Prefer `required` for mandatory properties and use async/await throughout.
-
-## Entity Framework Core & PostgreSQL
-
-
-### Core Social App Entities
-- User: profile, bio, photo, age, gender, interests, last seen, etc.
-- Connection: friend requests, matches, blocks, status, timestamps.
-- ChatMessage: sender, recipient, content, sent/read timestamps, isRead.
-
-
-**DbContext Setup:**
-- Entities go in `Data/Entities/` folder.
-- Use PostgreSQL provider and migrations for schema changes.
-
-### DTOs vs Entities
-
-- **Entities:** Only in `Data/Entities/`. Used by EF Core and database layer only.
-- **DTOs:** In `Features/[Feature]/DTOs/`. Used for API responses and service communication.
-- **Never expose entities directly** from APIs or services; always map to DTOs.
-
-
-**DTOs:**
-- Use DTOs for all API/service communication. Never expose entities directly.
-
-### Async All the Way
-
-- All database operations must be **async**
-- Use `async`/`await` end-to-end
-- Use `CancellationToken` parameter (default: `CancellationToken ct = default`)
-- Example:
-
-```csharp
-public async Task<UserDto?> GetUserByIdAsync(int id, CancellationToken ct = default)
-{
-    var user = await _context.Users
-        .AsNoTracking()
-        .FirstOrDefaultAsync(u => u.Id == id, ct);
-    
-    return user == null ? null : MapToDto(user);
-}
+```text
+MeetCampus.Client -> MeetCampus.HttpClients -> MeetCampus.Contracts
+MeetCampus.Client -> MeetCampus.Contracts
+MeetCampus -> MeetCampus.Client
+MeetCampus -> MeetCampus.Contracts
 ```
 
-## Blazor WebAssembly & Interactive Mode
-
-### Component Organization
-
-**Interactive WebAssembly Components:**
-- Location: `Features/[Feature]/Components/`
-- Render mode: Add `@rendermode InteractiveWebAssembly` to components that need interactivity
-- Use static rendering for layout/non-interactive components
-
-**Component Structure:**
-
-```razor
-@page "/users/{UserId:int}"
-@rendermode InteractiveWebAssembly
-@using MeetCampus.Features.Users.Services
-@using MeetCampus.Features.Users.DTOs
-@inject UserService UserService
-@inject NavigationManager Navigation
-
-<div class="container mx-auto p-4">
-    @if (user == null)
-    {
-        <LoadingSpinner />
-    }
-    else
-    {
-        <h1 class="text-2xl font-bold">@user.FirstName @user.LastName</h1>
-    }
-</div>
-
-@code {
-    [Parameter]
-    public int UserId { get; set; }
-
-    private UserDto? user;
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await UserService.GetUserByIdAsync(UserId);
-    }
-}
-```
-
-
-### Authentication in Blazor
-- Use CascadingAuthenticationState and AuthorizeView for authentication.
-
-```razor
-<AuthorizeView>
-    <Authorized>
-        <p>Welcome, @context.User.Identity?.Name</p>
-    </Authorized>
-    <NotAuthorized>
-        <p>You are not authorized</p>
-    </NotAuthorized>
-</AuthorizeView>
-```
-
-
-### Prefer C# Over JavaScript
-- Use C# for all client-side logic. Avoid JavaScript unless absolutely necessary.
-
-
-## SignalR for Real-Time Chat
-- Use SignalR for all real-time chat and notifications.
-- Place server-side hubs in each feature's Hubs folder.
-- Use a client-side wrapper service for SignalR in Blazor.
-- Use group management for targeted message delivery.
-
-
-## Styling with Tailwind CSS & Daisy UI
-
-### Design Language: Soft Campus
-The "Soft Campus" aesthetic prioritizes **approachable sophistication**—reducing anxiety through comfort, accessibility, and generosity of space. It replaces aggressive design with a calming, open experience.
-
-#### Typography: Simple & Human
-- **Primary Font:** Inter (clean, slightly rounded, exceptionally readable)
-- **Secondary Font (Headings):** Poppins or Quicksand (geometric, rounded bowls for softness)
-- **Rules:**
-  - Maintain strict font size hierarchy (DaisyUI defaults work well)
-  - Increase line-height for body text: use `leading-relaxed` or `leading-loose` for generous feel
-  - Use letter spacing sparingly; never over-tighten text
-  - Example: `<p class="leading-relaxed tracking-normal">Readable, generous body text</p>`
-
-#### Color Palette: Calm Contrast
-- **Base (Backdrop):** Soft cream/off-white instead of pure white (DaisyUI `bg-base-100`)
-- **Secondary Base:** Soft beige/taupe for containers (DaisyUI `bg-base-200`)
-- **Primary Brand Color:** Single, friendly accent—Sage Green (growth), Muted Coral (warmth), or Dusty Sky Blue (calm)
-  - Use sparingly for active states and primary CTAs only
-- **Text Color:** Dark brown-gray or charcoal instead of pure black (DaisyUI `text-base-content`)
-  - Reduces eye strain and feels gentler
-
-#### Whitespace & Layout: The "Bento Box" Feel
-- **Generous Spacing:** Use Tailwind spacing scale religiously (`p-4`, `p-6`, `p-8`). When in doubt, add padding.
-- **Card-Based Layout:** Group related information in distinctly rounded, soft-colored cards (`bg-base-200 rounded-3xl`)
-  - Example: Separate cards for "Matched in the Last Hour," "Events," "Messages"
-  - Makes interface scannable and digestible
-- **Shadows:** Subtle depth only; use `shadow-sm` sparingly on important containers only
-- **No Sharp Corners:** Every interactive element and container must be rounded
-
-#### Component Patterns: Soft Elements
-- **Curve Rule:** All interactive elements use `rounded-lg`, `rounded-xl`, or `rounded-full`
-- **Buttons:**
-  - Primary: Solid-color button (`btn btn-primary`)
-  - Secondary: Outlined button (`btn btn-outline btn-neutral`)
-  - Avoid aggressive gradients; maintain clarity and hierarchy
-- **Badges:** Use soft, low-contrast badges (`badge badge-neutral` or `badge badge-ghost`)
-  - Provides information without demanding attention
-  - For verification or category tags
-- **Cards (Core Component):**
-  - Profile cards: Large photo + name + one key detail (e.g., "Verified")
-  - Hide additional details (Major, About Me) until user taps
-  - Keep initial view clean and uncluttered
-  - Use `card bg-base-100 shadow-sm rounded-2xl p-6`
-- **Modals & Dropdowns:** Use DaisyUI components with rounded corners and soft backgrounds
-- **Forms:** Use DaisyUI form components (`input`, `textarea`, `select`) with consistent padding and rounded borders
-
-#### Implementation Checklist
-- ✅ Use Inter for body, Poppins/Quicksand for headings
-- ✅ Every component has rounded corners (no sharp edges)
-- ✅ Generous padding and whitespace throughout
-- ✅ Soft shadows (`shadow-sm`) only on key containers
-- ✅ Muted, friendly color palette (avoid aggressive colors)
-- ✅ Cards use Bento Box layout for information grouping
-- ✅ Buttons avoid gradients; use solid or outline styles
-- ✅ Text has relaxed line-height for readability
-- ✅ All interactive elements feel approachable, not competitive
-
-### Daisy UI Components
-- **Primary component library:** Use Daisy UI components whenever possible
-- Daisy UI provides pre-built, accessible components built on Tailwind CSS
-- Common components: buttons, cards, modals, dropdowns, alerts, badges, avatars, etc.
-- Documentation: https://daisyui.com/
-
-### Usage Examples
-- Buttons: `<button class="btn btn-primary">Click me</button>`
-- Cards: `<div class="card bg-base-100 shadow-xl rounded-2xl"></div>`
-- Alerts: `<div class="alert alert-info"><span>Info message</span></div>`
-- Modals: Use Daisy UI modal components with Blazor event handlers
-- Forms: Use Daisy UI form components (`input`, `textarea`, `select` with Daisy classes)
-
-### Tailwind CSS Customization
-- Use Tailwind for custom styling and spacing when Daisy UI doesn't cover it
-- Design mobile-first, then add responsive breakpoints
-- Use reusable components for common UI patterns
-- All custom styles should complement, not conflict with, Daisy UI theme and Soft Campus aesthetic
-
-## Dependency Injection
-
-
-### HTTP Client Pattern
-- Always use typed `HttpClient` with an interface abstraction (e.g., `IProfileSetupClient` + `ProfileSetupClient`).
-- Register typed clients via DI using `AddHttpClient<Interface, Implementation>()`.
-
-
-### Service Registration Pattern
-- Register all services and SignalR hubs using dependency injection in Program.cs.
-
-
-### Injecting into Components
-- Use constructor or property injection for services in Blazor components.
-
-
-### Service Design
-- Keep services focused on one responsibility. Use scoped lifetime by default.
-
-## Error Handling & Validation
-
-
-### Null Checks
-- Use ArgumentNullException and input validation for all parameters.
-
-
-### Exception Types
-- Use specific exceptions and provide meaningful error messages.
-
-
-### Async Exception Handling
-- Log and handle exceptions gracefully in async code.
-
-
-## Logging
-- Use ILogger<T> for logging. Use appropriate log levels and structured data.
-
-
-## API Layer (Backend)
-- Group endpoints by feature. Use DTOs for all input/output.
-
-
-## Testing Best Practices
-- Create a separate test project. Test public APIs and services. Use xUnit or similar.
-
-## Security Best Practices
-
-### Social App Specific
-
-- **User Privacy:** Never expose user data (email, phone) without explicit permission
-- **Block List:** Always check if users have blocked each other before showing profiles or allowing chat
-- **Message Encryption:** Consider end-to-end encryption for private messages in future versions
-- **Report/Abuse:** Implement reporting mechanism for inappropriate behavior
-- **Age Verification:** Validate user age claims (for dating app context)
-- **Photo Moderation:** Implement photo review before public visibility
-- **Rate Limiting:** Implement rate limiting on:
-  - Connection requests (e.g., max 50 per day)
-  - Message sending (e.g., max 100 per hour)
-  - Profile views logging
-
-### General Best Practices
-
-- **Never** expose database entities in API responses; use DTOs
-- Validate all user input server-side
-- Use `[Authorize]` attributes on protected endpoints
-- Hash passwords with Identity Core (built-in)
-- Use `CancellationToken` to prevent long-running operations
-- Store secrets in `appsettings.json` (local dev) or environment variables (production)
-- Enable HTTPS everywhere
-- Use CSRF protection (already enabled with `app.UseAntiforgery()`)
-
-
-## Real-Time Notifications
-- Use SignalR for new match alerts, message notifications, typing indicators, online/offline status, and connection requests.
-
-## Project Structure Example (Social/Dating App)
-
-```
-MeetCampus/
-├── Features/
-│   ├── Auth/
-│   │   ├── Components/
-│   │   │   └── LoginForm.razor
-│   │   ├── Pages/
-│   │   │   ├── Login.razor
-│   │   │   └── Register.razor
-│   │   ├── Services/
-│   │   │   └── AuthenticationService.cs
-│   │   └── DTOs/
-│   │       ├── LoginRequest.cs
-│   │       └── RegisterRequest.cs
-│   │
-│   ├── Users/
-│   │   ├── Components/
-│   │   │   ├── UserCard.razor
-│   │   │   └── ProfileEditor.razor
-│   │   ├── Pages/
-│   │   │   ├── UserDiscovery.razor
-│   │   │   └── UserProfile.razor
-│   │   ├── Services/
-│   │   │   └── UserService.cs
-│   │   └── DTOs/
-│   │       ├── UserProfileDto.cs
-│   │       ├── UserDiscoveryDto.cs
-│   │       └── UpdateProfileRequest.cs
-│   │
-│   ├── Connections/
-│   │   ├── Components/
-│   │   │   ├── ConnectionRequestCard.razor
-│   │   │   └── MatchList.razor
-│   │   ├── Pages/
-│   │   │   ├── Matches.razor
-│   │   │   └── Requests.razor
-│   │   ├── Services/
-│   │   │   └── ConnectionService.cs
-│   │   └── DTOs/
-│   │       ├── ConnectionRequestDto.cs
-│   │       ├── MatchDto.cs
-│   │       └── SendConnectionRequest.cs
-│   │
-│   ├── Chat/
-│   │   ├── Components/
-│   │   │   ├── ChatWindow.razor
-│   │   │   ├── MessageList.razor
-│   │   │   ├── MessageInput.razor
-│   │   │   ├── OnlineUsersList.razor
-│   │   │   └── ConversationList.razor
-│   │   ├── Pages/
-│   │   │   ├── ChatRoom.razor
-│   │   │   └── Messages.razor
-│   │   ├── Services/
-│   │   │   ├── ChatService.cs
-│   │   │   └── ChatHubClient.cs
-│   │   ├── Hubs/
-│   │   │   └── ChatHub.cs
-│   │   └── DTOs/
-│   │       ├── ChatMessageDto.cs
-│   │       ├── SendMessageRequest.cs
-│   │       ├── ConversationDto.cs
-│   │       └── UserPresenceDto.cs
-│   │
-│   └── Notifications/
-│       ├── Components/
-│       │   └── NotificationBell.razor
-│       ├── Services/
-│       │   └── NotificationService.cs
-│       └── DTOs/
-│           └── NotificationDto.cs
-│
-├── Shared/
-│   ├── Components/
-│   │   ├── Layout/
-│   │   │   ├── MainLayout.razor
-│   │   │   └── Sidebar.razor
-│   │   └── Common/
-│   │       ├── LoadingSpinner.razor
-│   │       ├── ErrorAlert.razor
-│   │       └── Button.razor
-│   ├── Services/
-│   │   └── [Shared services]
-│   └── DTOs/
-│       └── [Shared DTOs]
-│
-├── Data/
-│   ├── ApplicationDbContext.cs
-│   ├── Entities/
-│   │   ├── User.cs
-│   │   ├── Connection.cs
-│   │   └── ChatMessage.cs
-│   └── Migrations/
-│
-├── Pages/
-│   ├── App.razor
-│   ├── Home.razor
-│   ├── Layout/
-│   │   └── MainLayout.razor
-│   ├── Routes.razor
-│   └── NotFound.razor
-│
-├── Program.cs
-├── appsettings.json
-├── appsettings.Development.json
-└── Styles/
-    └── tailwind.css
-```
-
-## Development Workflow
-
-
-## Development Workflow
-- Create entities and DTOs for each feature.
-- Implement services and register with DI.
-- Add endpoints or hubs as needed.
-- Build UI components and pages.
-- Style with Tailwind (mobile-first).
-- Write tests for all public methods.
-
-
-## Quick Checklist for New Features
-- Entity and DTOs created for each feature
-- Service created with async/await and CancellationToken
-- Components are interactive with InteractiveWebAssembly if needed
-- Styling uses Daisy UI components where applicable, Tailwind for custom needs (mobile-first)
-- DI configured in Program.cs
-- API endpoints or hubs mapped (if applicable)
-- Error handling with specific exceptions
-- Unit tests written
-- Null checks and input validation
-- Logging for important operations
-
-## Real-Time Features (Chat, Notifications)
-- SignalR hub and client wrapper created
-- Connection/disconnection and group management handled
-- User authentication verified in hub
-- Component subscribes/unsubscribes to events
-- Proper disposal and reconnection logic
-- Typing indicators and presence updates working
-
-## Social App Security
-- User privacy checks
-- Block list verified before showing profiles
-- Connection requests validated
-- Chat messages only between connected users
-- Age/gender filtering applied
-- Rate limiting for sensitive actions
-- Reported content flagged for moderation
-
----
-
-**Last Updated:** Based on .NET 10 and modern Blazor patterns.
-
+Keep server implementation details out of `MeetCampus.Client`, `MeetCampus.Contracts`, and `MeetCampus.HttpClients`. Keep browser UI out of the server feature services and controllers.
+
+## Feature-First Organization
+
+Organize code by feature rather than by global technical layers.
+
+- Client feature UI belongs under `MeetCampus.Client/Features/[Feature]/`.
+  - `Pages/` contains routable `.razor` pages.
+  - `Components/` contains reusable feature components when needed.
+  - `Resources/` contains the feature resource marker and `.resx` files.
+- Server feature implementation belongs under `MeetCampus/Features/[Feature]/`.
+  - `Controllers/` contains API controllers.
+  - `Services/` contains server-side application and domain orchestration.
+  - `Infrastructure/` contains server-specific protocol and framework integration.
+  - `Models/` contains server-only models that are not API contracts.
+- Shared API contracts belong under `MeetCampus.Contracts/Features/[Feature]/Contracts/`.
+- Typed clients belong under `MeetCampus.HttpClients/Features/[Feature]/`.
+- Shared client layout and navigation belong under `MeetCampus.Client/Layout/` and `MeetCampus.Client/Features/Shared/`.
+- Each class, interface, record, DTO/contract, and Razor component must have its own file.
+
+Do not recreate the old server-owned Identity UI. Authentication pages are client-owned; the server retains Identity services, cookie handling, APIs, and protocol infrastructure required by external login, passkeys, and account operations.
+
+## C# Standards
+
+- Target `net10.0`; do not change the target framework, SDK, or language version unless explicitly requested.
+- Use nullable reference types and implicit usings consistently with the project files.
+- Use file-scoped namespaces and modern C# syntax supported by the target framework.
+- Prefer records for immutable API contracts and DTO-like data.
+- Use `required` for mandatory object properties when appropriate.
+- Use PascalCase for public types, methods, and properties; use `_camelCase` for private fields.
+- Use `Async` suffix for asynchronous methods.
+- Use the least visible accessibility that satisfies the design; do not default to `public`.
+- Do not add abstractions unless they isolate an external dependency, represent a meaningful boundary, or improve testability.
+- Reuse existing services and contracts instead of wrapping them unnecessarily.
+- Keep user-facing strings in localized resource files, not inline in application logic.
+- Do not edit generated files, migrations, snapshots, or files marked auto-generated unless the task specifically requires it.
+- Comments should explain why, not restate what the code does.
+
+## Async, Validation, and Error Handling
+
+- Use async/await end-to-end for I/O and database operations.
+- Accept and propagate `CancellationToken ct = default` for service and data-access operations where appropriate.
+- Pass cancellation tokens to EF Core and HTTP calls; do not use sync-over-async.
+- Use `ArgumentNullException.ThrowIfNull` for reference arguments and validate strings with `string.IsNullOrWhiteSpace` where appropriate.
+- Throw precise exceptions and preserve useful context. Do not catch or swallow `Exception` broadly.
+- Do not create fire-and-forget work from request or component code.
+- Validate all input on the server even when the client validates it first.
+- Prefer `AsNoTracking()` for read-only EF Core queries.
+- Use structured logging through `ILogger<T>` for important server operations; never log secrets, passwords, tokens, or sensitive personal data.
+
+## Server, Data, and API Boundaries
+
+- `MeetCampus/Data/` contains `ApplicationDbContext`, Identity/application data types, profile entities, and migrations.
+- EF entities are persistence models only. Never expose them directly from controllers, services, or contracts.
+- Map entities to contracts before returning API responses.
+- Keep database access in server services or the data layer; client projects must not reference EF Core or `ApplicationDbContext`.
+- Use PostgreSQL through the configured Npgsql provider and create migrations for schema changes.
+- Apply authorization at the API boundary with `[Authorize]` or equivalent policy checks for protected operations.
+- Group controllers and endpoints by feature under `MeetCampus/Features/[Feature]/Controllers/`.
+- Use contracts from `MeetCampus.Contracts` for all API input and output. Do not duplicate request/response shapes in the client or server.
+- Register server services, controllers, authentication, authorization, and localization in `MeetCampus/Program.cs`.
+- Preserve `MeetCampus/Components/App.razor`, `MeetCampus/Components/Pages/Error.razor`, and the `MapRazorComponents<App>()` host configuration unless the hosting architecture is intentionally changed. The server still hosts the Blazor shell even though application UI belongs to the client project.
+
+## Authentication and Authorization
+
+Authentication uses ASP.NET Core Identity with application cookies, not JWT or bearer-token authentication.
+
+- The server owns `ApplicationUser`, Identity managers, cookie configuration, account services, authentication APIs, antiforgery protection, and Identity protocol endpoints.
+- The client owns login, registration, password recovery, email confirmation, account-management pages, and navigation UI.
+- Use `CascadingAuthenticationState`, `AuthorizeView`, `AuthorizeRouteView`, and the existing client authentication state provider.
+- Protect client routes with route authorization and redirect anonymous users through the existing `RedirectToLogin` flow.
+- Use `IAuthClient` and `AuthClient` for client authentication operations; do not call Identity managers from client components.
+- Use `IProfileSetupClient` and other typed clients for feature API calls; do not construct ad hoc HTTP requests in components.
+- Preserve the authentication-state serialization/deserialization setup between the server host and WebAssembly client.
+- Keep cookie-based authentication and antiforgery requirements consistent when adding or changing endpoints.
+- Check authorization and ownership server-side for every protected resource. Client route protection is not a security boundary.
+- Do not expose passwords, reset tokens, recovery codes, or other secrets in logs or API responses beyond the intended operation.
+
+## Blazor WebAssembly Client
+
+- Put interactive pages and components in `MeetCampus.Client` under the relevant feature folder.
+- Use the existing hosted WebAssembly render-mode setup. Do not add `@rendermode InteractiveWebAssembly` blindly; follow the render mode already used by the surrounding route and host.
+- Use `Routes.razor` as the client routing entry point and preserve its authorization behavior.
+- Use `MainLayout.razor`, shared navigation, and reusable components instead of duplicating layout markup.
+- Inject typed clients and focused services through DI. Components should coordinate UI state, not contain server or persistence logic.
+- Dispose subscriptions, timers, and SignalR connections correctly when components own them.
+- Prefer C# and Blazor APIs. Use JavaScript only when browser functionality cannot reasonably be implemented in .NET; isolate unavoidable interop behind a focused service.
+- Use `NavigationManager` for application navigation and preserve return URLs safely when redirecting.
+- Avoid blocking calls, synchronous HTTP calls, and unbounded work in lifecycle methods.
+
+## Typed HTTP Clients
+
+- Define a client interface only when it represents a real external/API boundary or is needed for testing; pair it with one implementation.
+- Place feature clients in `MeetCampus.HttpClients/Features/[Feature]/`.
+- Register clients in `MeetCampus.Client/Program.cs` with `AddHttpClient<Interface, Implementation>()` and the hosted application base address.
+- Put common request, response, error, and status handling in the existing HTTP infrastructure rather than duplicating it in each feature client.
+- Deserialize into contracts from `MeetCampus.Contracts`; never deserialize API responses into server entities.
+- Pass cancellation tokens through HTTP operations and handle expected API failures without hiding unexpected failures.
 
 ## Localization
 
-- Each new feature area gets its own resource marker class and `.resx` file pair — never add keys to `SharedResource` for new components.
-- File naming: `[Feature]Resource.cs` + `[Feature]Resource.resx` + `[Feature]Resource.fr.resx` (and any other supported cultures).
-- Place all resource files in `MeetCampus.Client/Resources/`.
-- Inject the specific localizer: `@inject IStringLocalizer<[Feature]Resource> L`
-- `SharedResource` is reserved for truly global, cross-feature keys (currently only `Testing_*`).
-- No additional DI registration needed — `AddLocalization()` resolves all `IStringLocalizer<T>` automatically.
+- Add a resource marker and resource files for each feature that has user-facing text: `[Feature]Resource.cs`, `[Feature]Resource.resx`, and supported culture variants such as `[Feature]Resource.fr.resx`.
+- Place client resources under `MeetCampus.Client/Features/[Feature]/Resources/`.
+- Inject the feature-specific `IStringLocalizer<[Feature]Resource>` in Razor components.
+- Use shared resources only for truly global strings. Do not put feature-specific keys in a shared resource.
+- Keep validation, status, error, and navigation text localizable.
 
-## Important NuGet Packages
-- Microsoft.AspNetCore.SignalR.Client
-- Microsoft.AspNetCore.SignalR
-- Npgsql.EntityFrameworkCore.PostgreSQL
-- daisyui (npm package)
-- AutoMapper (optional)
-- FluentValidation (optional)
-- Serilog (optional)
+## Styling
 
+- Use Tailwind CSS and DaisyUI with the existing Soft Campus design language.
+- Prefer DaisyUI components for standard controls and Tailwind utilities for layout and custom styling.
+- Use mobile-first responsive design and generous spacing.
+- Preserve accessible labels, focus states, semantic HTML, keyboard navigation, and sufficient contrast.
+- Keep custom styles compatible with the existing theme; avoid introducing unrelated UI frameworks or global styles.
+
+## Future Real-Time Features
+
+When implementing chat or notifications, use SignalR with server hubs under the relevant feature and a client-side wrapper under the matching client feature. Authenticate hubs, validate membership and authorization server-side, manage group membership explicitly, and dispose/reconnect client connections correctly. Do not add SignalR infrastructure to unrelated features.
+
+## Security
+
+- Require HTTPS in development and production configurations.
+- Validate and authorize every server operation; never trust client route guards or client-provided identity data.
+- Protect user privacy and return only the minimum profile data needed by the requesting operation.
+- Check blocking, connection, and ownership rules before exposing profiles, sending messages, or changing relationships.
+- Use ASP.NET Core Identity password hashing and token providers; never implement custom password storage.
+- Use antiforgery protection for cookie-authenticated state-changing requests as required by the endpoint style.
+- Store local secrets in user secrets or environment configuration, never in source control.
+- Add rate limiting and abuse controls to sensitive operations such as login, password reset, connection requests, messaging, and profile access.
+- Do not introduce end-to-end encryption, moderation, age verification, or other product security features without defining the required data and operational design first.
+
+## Testing and Validation
+
+- Use the test framework already present in the solution; if no test project exists, add a separate `[ProjectName].Tests` project rather than placing tests in production projects.
+- Test public services, API behavior, authentication flows, validation, and important component behavior through public APIs.
+- Follow Arrange-Act-Assert, one behavior per test, deterministic tests, and the repository's existing naming conventions.
+- Avoid mocking code owned by the solution; mock external dependencies only when necessary.
+- After changes, build the affected project and then the solution. Run relevant tests when available.
+- For database changes, verify migrations and seeding behavior without committing secrets or local database state.
+
+## Development Workflow
+
+1. Identify the owning feature and project boundary before editing.
+2. Define or update a shared contract when an API shape changes.
+3. Implement server authorization, validation, service logic, and API behavior.
+4. Implement or update the typed HTTP client.
+5. Implement client pages/components and localized resources.
+6. Register required services and clients in the appropriate `Program.cs`.
+7. Apply Tailwind/DaisyUI styling and accessibility checks.
+8. Build the affected project and solution; run relevant tests.
+9. Review the diff for accidental entity exposure, duplicated contracts, secrets, missing authorization, and obsolete server UI references.
+
+## Important Project Files
+
+- `MeetCampus/Program.cs` — server DI, middleware, Identity, database, host shell, and endpoint mapping.
+- `MeetCampus/Components/App.razor` — server-hosted Blazor application shell.
+- `MeetCampus.Client/Program.cs` — WebAssembly DI, authentication-state deserialization, localization, and typed client registration.
+- `MeetCampus.Client/Routes.razor` — client routing and authorization route handling.
+- `MeetCampus.Contracts/Features/` — shared API contracts.
+- `MeetCampus.HttpClients/Features/` — typed feature HTTP clients.
+- `MeetCampus/Data/` — EF Core context, Identity/application data, and migrations.
+- `MeetCampus/Properties/launchSettings.json` — server launch profiles and browser startup behavior.
 
 ## Troubleshooting
-- Check SignalR hub URL and CORS settings
-- Ensure authentication tokens are valid
-- Apply EF Core migrations for schema changes
-- Use InteractiveWebAssembly for interactive components
-- Ensure backend is running and HTTPS is configured
+
+- For authentication redirect problems, inspect `Routes.razor`, `RedirectToLogin.razor`, the client authentication state provider, server cookie configuration, and the selected server launch profile.
+- For API failures, inspect the browser request, controller route, authorization policy, contract shape, typed client, and server logs in that order.
+- For database failures, check the configured connection string, pending migrations, PostgreSQL availability, and startup seeding.
+- For routing or render-mode problems, inspect the server `Components/App.razor`, `MapRazorComponents<App>()`, client `Routes.razor`, and additional client assemblies.
+- For localization problems, verify the feature resource marker, `.resx` naming, culture initialization in `MeetCampus.Client/Program.cs`, and the injected localizer type.
+
+---
+
+**Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI, server-owned Identity/API infrastructure, shared contracts, and typed HTTP clients.
