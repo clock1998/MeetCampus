@@ -1,3 +1,4 @@
+using MeetCampus.Data.Profiles;
 using MeetCampus.Data.User;
 
 namespace MeetCampus.Data;
@@ -8,6 +9,8 @@ public sealed class UserProfile
 
     public string ApplicationUserId { get; set; } = string.Empty;
     public ApplicationUser ApplicationUser { get; set; } = default!;
+
+    public List<UserProfileImage>? ProfileImages  { get; set; } = null;
 
     public Guid? GenderId { get; set; }
     public Gender? Gender { get; set; }

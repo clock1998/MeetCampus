@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MeetCampus.Data.Profiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Data
 {
     internal static class ApplicationDbContextHelpers
     {
-        internal static void ConfigureUserProfile(ModelBuilder builder)
+        internal static void ConfigureEntities(ModelBuilder builder)
         {
             builder.Entity<UserProfile>(entity =>
             {
@@ -105,6 +106,16 @@ namespace MeetCampus.Data
                 entity.Property(item => item.Name).HasMaxLength(128);
                 entity.Property(item => item.DisplayKey).HasMaxLength(128);
                 entity.HasIndex(item => item.Code).IsUnique();
+            });
+
+            builder.Entity<UserProfileImage>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.ImageKey).HasMaxLength(256);
+                entity.HasOne(image => image.UserProfile)
+                    .WithMany(profile => profile.ProfileImages)
+                    .HasForeignKey(image => image.UserProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

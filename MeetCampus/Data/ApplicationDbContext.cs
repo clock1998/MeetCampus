@@ -1,5 +1,5 @@
+using MeetCampus.Data.Profiles;
 using MeetCampus.Data.User;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,12 +15,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         public DbSet<UserEthnicity> UserEthnicities => Set<UserEthnicity>();
         public DbSet<Gender> Genders => Set<Gender>();
         public DbSet<Sexuality> Sexualities => Set<Sexuality>();
+        public DbSet<UserProfileImage> UserProfileImages => Set<UserProfileImage>();
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            SeedHelper.SeedRoles(builder);
-            ApplicationDbContextHelpers.ConfigureUserProfile(builder);
-            SeedHelper.SeedProfileLookups(builder);
-        }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        SeedHelper.SeedRoles(builder);
+        ApplicationDbContextHelpers.ConfigureEntities(builder);
+        SeedHelper.SeedProfileLookups(builder);
+    }
 }
