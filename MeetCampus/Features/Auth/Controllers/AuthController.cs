@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using MeetCampus.Contracts.Features.Auth.Contracts;
-using MeetCampus.Data;
+using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using MeetCampus.Features.Auth.Services;
 using Microsoft.AspNetCore.Antiforgery;

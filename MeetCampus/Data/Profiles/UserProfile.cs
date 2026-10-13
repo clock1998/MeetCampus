@@ -1,3 +1,5 @@
+using MeetCampus.Data.User;
+
 namespace MeetCampus.Data;
 
 public sealed class UserProfile

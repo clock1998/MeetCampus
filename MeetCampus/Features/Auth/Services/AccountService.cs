@@ -1,11 +1,11 @@
 using System.Text;
 using System.Security.Claims;
 using MeetCampus.Contracts.Features.Auth.Contracts;
-using MeetCampus.Data;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using MeetCampus.Data.User;
 
 namespace MeetCampus.Features.Auth.Services;
 

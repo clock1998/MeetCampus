@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Encodings.Web;
-using MeetCampus.Data;
+using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;

@@ -1,5 +1,5 @@
 using MeetCampus.Contracts.Features.Profile.Contracts;
-using MeetCampus.Data;
+using MeetCampus.Data.User;
 using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

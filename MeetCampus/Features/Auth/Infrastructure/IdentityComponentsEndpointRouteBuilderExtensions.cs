@@ -1,4 +1,4 @@
-using MeetCampus.Data;
+using MeetCampus.Data.User;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;

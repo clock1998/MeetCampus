@@ -1,4 +1,4 @@
-using MeetCampus.Data;
+using MeetCampus.Data.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 

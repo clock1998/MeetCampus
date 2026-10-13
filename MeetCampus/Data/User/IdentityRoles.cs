@@ -1,4 +1,4 @@
-namespace MeetCampus.Data;
+namespace MeetCampus.Data.User;
 
 internal static class IdentityRoles
 {
