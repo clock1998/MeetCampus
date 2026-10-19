@@ -34,9 +34,7 @@
         <!-- Theme Selector Dropdown -->
         <div class="dropdown dropdown-end">
             <button class="btn btn-ghost btn-circle" title="@L["Nav_Theme"]" tabindex="0">
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                </svg>
+                <LucideIcon Name="moon" CssClass="h-5 w-5" />
             </button>
             <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
                 <li><button @onclick="@(() => SetTheme("light"))" class="rounded-lg">@L["Nav_ThemeLight"]</button></li>
@@ -48,7 +46,7 @@
         <!-- Language Selector Dropdown -->
         <div class="dropdown dropdown-end">
             <button class="btn btn-ghost btn-circle" title="@L["Nav_Language"]" tabindex="0" aria-label="@L["Nav_Language"]">
-                <svg class="text-base-content/70 size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"></path></svg>
+                <LucideIcon Name="globe" CssClass="text-base-content/70 size-5" />
             </button>
             <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
                 <li><button @onclick="@(() => SetLanguage("en"))" class="rounded-lg">🇺🇸 English</button></li>
@@ -60,10 +58,8 @@
         <AuthorizeView>
             <Authorized>
                 <div class="dropdown dropdown-end">
-                    <button class="btn btn-ghost btn-circle" title="@L["Nav_Theme"]" tabindex="0">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                        </svg>
+                    <button class="btn btn-ghost btn-circle" title="@L["Nav_Account"]" aria-label="@L["Nav_Account"]" tabindex="0">
+                        <LucideIcon Name="user-round" CssClass="h-5 w-5" />
                     </button>
                     <ul class="dropdown-content menu bg-base-100 border-base-300 z-1 w-52 rounded-2xl border p-2 shadow" tabindex="0">
                         <ul class="bg-base-200 rounded-lg p-2">
@@ -84,10 +80,8 @@
     <!-- Mobile Menu Button -->
     <div class="flex-none lg:hidden">
         <div class="dropdown dropdown-end">
-            <button class="btn btn-ghost btn-circle" aria-label="Menu">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+            <button class="btn btn-ghost btn-circle" aria-label="@L["Nav_Menu"]">
+                <LucideIcon Name="menu" CssClass="h-6 w-6" />
             </button>
             <ul class="dropdown-content menu bg-base-100 border-base-300 w-52 rounded-2xl border p-2 shadow">
                 <li><a href="/mission" class="rounded-lg">@L["Nav_Mission"]</a></li>

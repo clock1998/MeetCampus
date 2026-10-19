@@ -153,4 +153,10 @@
   <data name="Nav_Profile" xml:space="preserve">
     <value>Profile</value>
   </data>
+  <data name="Nav_Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Nav_Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
 </root>

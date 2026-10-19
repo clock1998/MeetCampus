@@ -1,0 +1,20 @@
+<span class="inline-block @CssClass"
+      style="background-color: currentColor; mask-image: url('@IconPath'); -webkit-mask-image: url('@IconPath'); mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center; mask-size: contain; -webkit-mask-size: contain;"
+      aria-hidden="true"></span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public string CssClass { get; set; } = "h-5 w-5";
+
+    private string IconPath => Name switch
+    {
+        "globe" => "/icons/globe.svg",
+        "menu" => "/icons/menu.svg",
+        "moon" => "/icons/moon.svg",
+        "user-round" => "/icons/user-round.svg",
+        _ => throw new ArgumentOutOfRangeException(nameof(Name), Name, "Unknown Lucide icon."),
+    };
+}
