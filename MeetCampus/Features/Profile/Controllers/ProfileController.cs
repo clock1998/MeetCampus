@@ -1,6 +1,7 @@
 using MeetCampus.Contracts.Features.Profile.Contracts;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Profile.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,12 @@ namespace MeetCampus.Features.Profile.Controllers;
 [Authorize]
 [Route("api/profile")]
 public sealed class ProfileController(
-    ProfileSetupService profileSetupService,
+    UserProfileService userProfileService,
+    ProfileImageService profileImageService,
     UserManager<ApplicationUser> userManager) : ControllerBase
 {
     [HttpGet("setup")]
-    public async Task<IActionResult> GetSetupAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProfileSetupAsync(CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User);
         if (string.IsNullOrWhiteSpace(userId))
@@ -23,12 +25,12 @@ public sealed class ProfileController(
             return Unauthorized();
         }
 
-        var response = await profileSetupService.GetSetupAsync(userId, cancellationToken);
+        var response = await userProfileService.GetProfileSetupAsync(userId, cancellationToken);
         return Ok(response);
     }
 
     [HttpPut("setup")]
-    public async Task<IActionResult> UpdateSetupAsync(
+    public async Task<IActionResult> UpdateProfileAsync(
         [FromBody] UpdateUserProfileRequest request,
         CancellationToken cancellationToken)
     {
@@ -40,12 +42,71 @@ public sealed class ProfileController(
 
         try
         {
-            await profileSetupService.UpdateSetupAsync(userId, request, cancellationToken);
+            await userProfileService.UpdateProfileAsync(userId, request, cancellationToken);
             return NoContent();
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpPost("setup/images")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(ProfileImageService.MaximumUploadRequestSizeBytes)]
+    public async Task<IActionResult> UploadProfileImagesAsync(
+        [FromForm] List<IFormFile>? files,
+        CancellationToken cancellationToken)
+    {
+        var userId = userManager.GetUserId(User);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        if (files is null || files.Count == 0)
+        {
+            return BadRequest("At least one image file is required.");
+        }
+
+        try
+        {
+            await profileImageService.UploadProfileImagesAsync(userId, files, cancellationToken);
+            return NoContent();
+        }
+        catch (InvalidDataException exception)
+        {
+            return BadRequest(exception.Message);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
+    }
+
+    [HttpPut("setup/images/{imageId:guid}/avatar")]
+    public async Task<IActionResult> SetAvatarAsync(Guid imageId, CancellationToken cancellationToken)
+    {
+        var userId = userManager.GetUserId(User);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var wasUpdated = await profileImageService.SetAvatarAsync(userId, imageId, cancellationToken);
+        return wasUpdated ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("setup/images/{imageId:guid}")]
+    public async Task<IActionResult> DeleteProfileImageAsync(Guid imageId, CancellationToken cancellationToken)
+    {
+        var userId = userManager.GetUserId(User);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        var wasDeleted = await profileImageService.DeleteProfileImageAsync(userId, imageId, cancellationToken);
+        return wasDeleted ? NoContent() : NotFound();
     }
 }

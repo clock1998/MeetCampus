@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Features.Profile.Services;
 
-public sealed class ProfileSetupService(ApplicationDbContext dbContext)
+public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileImageService profileImageService)
 {
-    public async Task<UserProfileSetupResponse> GetSetupAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserProfileSetupResponse> GetProfileSetupAsync(string userId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentException("User ID must not be empty.", nameof(userId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
 
         var profile = await dbContext.UserProfiles
             .AsNoTracking()
@@ -16,6 +16,7 @@ public sealed class ProfileSetupService(ApplicationDbContext dbContext)
 
         return new UserProfileSetupResponse
         {
+            ProfileImages = await profileImageService.GetProfileImagesAsync(userId, cancellationToken),
             Profile = new UserProfileSetupForm
             {
                 GenderId = profile?.GenderId,
@@ -67,9 +68,9 @@ public sealed class ProfileSetupService(ApplicationDbContext dbContext)
     /// <summary>
     /// Throws <see cref="InvalidOperationException"/> when a referenced lookup ID does not exist.
     /// </summary>
-    public async Task UpdateSetupAsync(string userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default)
+    public async Task UpdateProfileAsync(string userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentException("User ID must not be empty.", nameof(userId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentNullException.ThrowIfNull(request);
 
         if (request.GenderId.HasValue && !await dbContext.Genders.AnyAsync(g => g.Id == request.GenderId.Value, cancellationToken))

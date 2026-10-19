@@ -52,7 +52,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddLocalization();
-builder.Services.AddScoped<ProfileSetupService>();
+builder.Services.AddScoped<UserProfileService>();
+builder.Services.AddScoped<ProfileImageService>();
+builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3"));
+builder.Services.AddSingleton<S3ProfileImageStorage>();
 var app = builder.Build();
 
 // Apply pending migrations and seed Identity data.

@@ -78,8 +78,27 @@
   <data name="ProfileSetup_Title" xml:space="preserve"><value>Configurez votre profil</value></data>
   <data name="ProfileSetup_Description" xml:space="preserve"><value>Vous seul pouvez modifier ces informations de profil.</value></data>
   <data name="ProfileSetup_Loading" xml:space="preserve"><value>Chargement de votre profil...</value></data>
+  <data name="ProfileSetup_ProfileImage" xml:space="preserve"><value>Photo de profil</value></data>
+  <data name="ProfileSetup_ProfileImageAlt" xml:space="preserve"><value>Votre photo de profil</value></data>
+  <data name="ProfileSetup_ProfileImageHint" xml:space="preserve"><value>Sélectionnez jusqu'à 6 images JPEG, PNG ou WebP (5 Mio maximum chacune). Le téléversement commence dès leur sélection.</value></data>
+  <data name="ProfileSetup_ProfileImageCount" xml:space="preserve"><value>{0} image(s) sur {1}</value></data>
+  <data name="ProfileSetup_CurrentAvatar" xml:space="preserve"><value>Avatar actuel</value></data>
+  <data name="ProfileSetup_SetAsAvatar" xml:space="preserve"><value>Définir comme avatar</value></data>
+  <data name="ProfileSetup_DeleteImage" xml:space="preserve"><value>Supprimer l'image</value></data>
+  <data name="ProfileSetup_DeleteImageConfirmation" xml:space="preserve"><value>Voulez-vous vraiment supprimer cette image de profil ?</value></data>
+  <data name="ProfileSetup_ImageDeleted" xml:space="preserve"><value>L'image de profil a été supprimée.</value></data>
+  <data name="ProfileSetup_DeleteImageError" xml:space="preserve"><value>Impossible de supprimer l'image de profil. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_AvatarUpdated" xml:space="preserve"><value>Votre avatar a été mis à jour.</value></data>
+  <data name="ProfileSetup_AvatarUpdateError" xml:space="preserve"><value>Impossible de mettre à jour votre avatar. Veuillez réessayer.</value></data>
+  <data name="ProfileSetup_ProfileImagesUploaded" xml:space="preserve"><value>Vos images de profil ont été téléversées.</value></data>
+  <data name="ProfileSetup_UploadingImages" xml:space="preserve"><value>Téléversement des images de profil...</value></data>
+  <data name="ProfileSetup_ProfileImageLimitError" xml:space="preserve"><value>Vous pouvez avoir jusqu'à 6 images de profil.</value></data>
+  <data name="ProfileSetup_ProfileImageSizeError" xml:space="preserve"><value>Chaque image ne doit pas dépasser 5 Mio.</value></data>
+  <data name="ProfileSetup_ProfileImageTypeError" xml:space="preserve"><value>Choisissez une image JPEG, PNG ou WebP.</value></data>
+  <data name="ProfileSetup_ProfileImageUploadError" xml:space="preserve"><value>Votre profil a été enregistré, mais les images n'ont pas pu être téléversées. Veuillez réessayer.</value></data>
   <data name="ProfileSetup_SelectPlaceholder" xml:space="preserve"><value>Sélectionnez une option</value></data>
   <data name="ProfileSetup_SaveButton" xml:space="preserve"><value>Enregistrer le profil</value></data>
+  <data name="ProfileSetup_SavingButton" xml:space="preserve"><value>Enregistrement...</value></data>
   <data name="ProfileSetup_LoadError" xml:space="preserve"><value>Impossible de charger votre profil. Veuillez réessayer.</value></data>
   <data name="ProfileSetup_SaveSuccess" xml:space="preserve"><value>Votre profil a été enregistré.</value></data>
   <data name="ProfileSetup_SaveError" xml:space="preserve"><value>Impossible d'enregistrer votre profil. Veuillez réessayer.</value></data>

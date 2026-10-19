@@ -4,6 +4,8 @@ public sealed record UserProfileSetupResponse
 {
     public UserProfileSetupForm Profile { get; set; } = new();
 
+    public IReadOnlyList<ProfileImageResponse> ProfileImages { get; set; } = [];
+
     public IReadOnlyList<ProfileLookupOption> Genders { get; set; } = [];
 
     public IReadOnlyList<ProfileLookupOption> Sexualities { get; set; } = [];
