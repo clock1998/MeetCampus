@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using MeetCampus.Client.Features.Auth.HttpClients;
+using MeetCampus.Client.Infrastructure;
 using MeetCampus.Contracts.Features.Auth.Contracts;
-using MeetCampus.HttpClients.Features.Auth;
-using MeetCampus.HttpClients.Infrastructure.Http;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace MeetCampus.Client.Features.Auth;

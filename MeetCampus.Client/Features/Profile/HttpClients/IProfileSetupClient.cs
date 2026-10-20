@@ -1,6 +1,6 @@
 using MeetCampus.Contracts.Features.Profile.Contracts;
 
-namespace MeetCampus.HttpClients.Features.Profile;
+namespace MeetCampus.Client.Features.Profile.HttpClients;
 
 public interface IProfileSetupClient
 {

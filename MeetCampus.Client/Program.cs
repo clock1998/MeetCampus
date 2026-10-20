@@ -1,7 +1,7 @@
 using System.Globalization;
 using MeetCampus.Client.Features.Auth;
-using MeetCampus.HttpClients.Features.Auth;
-using MeetCampus.HttpClients.Features.Profile;
+using MeetCampus.Client.Features.Auth.HttpClients;
+using MeetCampus.Client.Features.Profile.HttpClients;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 

@@ -1,7 +1,7 @@
+using MeetCampus.Client.Infrastructure;
 using MeetCampus.Contracts.Features.Auth.Contracts;
-using MeetCampus.HttpClients.Infrastructure.Http;
 
-namespace MeetCampus.HttpClients.Features.Auth;
+namespace MeetCampus.Client.Features.Auth.HttpClients;
 
 public sealed class AuthClient(HttpClient httpClient) : BaseApiClient(httpClient), IAuthClient
 {

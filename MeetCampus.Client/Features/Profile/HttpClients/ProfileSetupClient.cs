@@ -1,8 +1,8 @@
 using MeetCampus.Contracts.Features.Profile.Contracts;
-using MeetCampus.HttpClients.Infrastructure.Http;
+using MeetCampus.Client.Infrastructure;
 using System.Net.Http.Headers;
 
-namespace MeetCampus.HttpClients.Features.Profile;
+namespace MeetCampus.Client.Features.Profile.HttpClients;
 
 public class ProfileSetupClient(HttpClient httpClient) : BaseApiClient(httpClient), IProfileSetupClient
 {

@@ -1,6 +1,6 @@
 using MeetCampus.Contracts.Features.Auth.Contracts;
 
-namespace MeetCampus.HttpClients.Features.Auth;
+namespace MeetCampus.Client.Features.Auth.HttpClients;
 
 public interface IAuthClient
 {
