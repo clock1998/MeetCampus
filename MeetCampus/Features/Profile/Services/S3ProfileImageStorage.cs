@@ -24,6 +24,7 @@ public sealed class S3ProfileImageStorage(IOptions<S3Options> options) : IDispos
             Key = key,
             InputStream = content,
             ContentType = contentType,
+            UseChunkEncoding = false, //Avoid payload signing issues with some S3-compatible providers
         }, cancellationToken);
     }
 
@@ -62,22 +63,24 @@ public sealed class S3ProfileImageStorage(IOptions<S3Options> options) : IDispos
                 if (_client is not null)
                     return _client;
 
-                var endpoint = GetRequiredSetting(_options.Endpoint, nameof(_options.Endpoint));
+                var optionEndpoint = GetRequiredSetting(_options.Endpoint, nameof(_options.Endpoint));
                 var accessId = GetRequiredSetting(_options.AccessId, nameof(_options.AccessId));
                 var accessSecret = GetRequiredSetting(_options.AccessSecret, nameof(_options.AccessSecret));
 
-                if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var serviceUri)
+                if (!Uri.TryCreate(optionEndpoint, UriKind.Absolute, out var serviceUri)
                     || serviceUri.Scheme is not ("http" or "https"))
                 {
                     throw new InvalidOperationException("The configured S3 endpoint must be an absolute HTTP or HTTPS URL.");
                 }
-
+                var endpoint = new Uri(optionEndpoint);
                 _client = new AmazonS3Client(
                     new BasicAWSCredentials(accessId, accessSecret),
                     new AmazonS3Config
                     {
-                        ServiceURL = endpoint,
+                        ServiceURL = $"{endpoint.Scheme}://{endpoint.Authority}",
                         ForcePathStyle = true,
+                        Timeout = TimeSpan.FromSeconds(30),
+                        AuthenticationRegion = "garage"
                     });
 
                 return _client;

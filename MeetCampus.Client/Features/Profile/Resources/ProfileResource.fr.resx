@@ -108,4 +108,10 @@
   <data name="ProfileSetup_Required_Language" xml:space="preserve"><value>Veuillez sélectionner une langue.</value></data>
   <data name="ProfileSetup_Required_Intention" xml:space="preserve"><value>Veuillez sélectionner une intention.</value></data>
   <data name="ProfileSetup_Required_Ethnicity" xml:space="preserve"><value>Veuillez sélectionner une origine ethnique.</value></data>
+  <data name="ProfileImages_PageTitle" xml:space="preserve"><value>Photos de profil</value></data>
+  <data name="ProfileImages_Title" xml:space="preserve"><value>Ajoutez vos photos de profil</value></data>
+  <data name="ProfileImages_Description" xml:space="preserve"><value>Téléversez des photos, choisissez votre avatar et gérez votre galerie de profil.</value></data>
+  <data name="ProfileImages_BackToProfile" xml:space="preserve"><value>Retour au profil</value></data>
+  <data name="ProfileImages_Finish" xml:space="preserve"><value>Terminer</value></data>
+  <data name="ProfileSetup_ManageImages" xml:space="preserve"><value>Gérer les photos de profil</value></data>
 </root>

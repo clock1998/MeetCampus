@@ -73,13 +73,14 @@ public sealed class ProfileImageService(
                 await imageStorage.UploadAsync(key, optimizedImage, "image/webp", cancellationToken);
                 uploadedKeys.Add(key);
 
-                profile.ProfileImages.Add(new UserProfileImage
+                var profileImage = new UserProfileImage
                 {
                     Id = Guid.NewGuid(),
                     UserProfileId = profile.Id,
                     ImageKey = key,
                     IsAvatar = !hasAvatar,
-                });
+                };
+                dbContext.UserProfileImages.Add(profileImage);
                 hasAvatar = true;
             }
 

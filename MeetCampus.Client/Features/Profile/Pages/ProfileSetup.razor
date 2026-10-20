@@ -9,7 +9,7 @@
 @using System.Linq.Expressions
 @inject IProfileSetupClient ProfileClient
 @inject IStringLocalizer<ProfileResource> L
-@inject IJSRuntime JS
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <PageTitle>@L["ProfileSetup_PageTitle"]</PageTitle>
@@ -40,60 +40,6 @@
             {
                 <EditForm EditContext="editContext" OnValidSubmit="SaveAsync" class="space-y-5">
                     <DataAnnotationsValidator />
-                    <fieldset class="fieldset">
-                        <legend class="fieldset-legend">@L["ProfileSetup_ProfileImage"]</legend>
-                        <p class="text-base-content/70 text-sm">
-                            @L["ProfileSetup_ProfileImageCount", profileImages.Count, MaximumProfileImages]
-                        </p>
-                        @if (profileImages.Count > 0)
-                        {
-                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                                @foreach (var image in profileImages)
-                                {
-                                    <div class="border-base-300 bg-base-100 relative rounded-2xl border p-3">
-                                        <button class="btn btn-error btn-circle btn-sm absolute top-2 right-2 z-10 shadow"
-                                                type="button"
-                                                aria-label="@L["ProfileSetup_DeleteImage"]"
-                                                title="@L["ProfileSetup_DeleteImage"]"
-                                                disabled="@(isSaving || isUploadingImages || settingAvatarId.HasValue || deletingImageId.HasValue)"
-                                                @onclick="() => DeleteProfileImageAsync(image.Id)">
-                                            @if (deletingImageId == image.Id)
-                                            {
-                                                <span class="loading loading-spinner loading-xs" aria-hidden="true"></span>
-                                            }
-                                            else
-                                            {
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 11v6m4-6v6" />
-                                                </svg>
-                                            }
-                                        </button>
-                                        <img src="@image.Url" alt="@L["ProfileSetup_ProfileImageAlt"]" class="h-32 w-full rounded-xl object-cover" />
-                                        @if (image.IsAvatar)
-                                        {
-                                            <p class="text-primary mt-2 text-sm font-semibold">@L["ProfileSetup_CurrentAvatar"]</p>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-sm btn-outline mt-2 w-full" type="button"
-                                                    disabled="@(isSaving || isUploadingImages || settingAvatarId.HasValue || deletingImageId.HasValue)"
-                                                    @onclick="() => SetAvatarAsync(image.Id)">
-                                                @(settingAvatarId == image.Id ? L["ProfileSetup_SavingButton"] : L["ProfileSetup_SetAsAvatar"])
-                                            </button>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        }
-                        <InputFile OnChange="HandleImagesSelected" multiple accept="image/jpeg,image/png,image/webp"
-                                   disabled="@(isSaving || settingAvatarId.HasValue || profileImages.Count + selectedImages.Count >= MaximumProfileImages)"
-                                   class="file-input file-input-bordered w-full" />
-                        @if (isUploadingImages)
-                        {
-                            <p class="text-base-content/70 text-sm" role="status">@L["ProfileSetup_UploadingImages"]</p>
-                        }
-                        <p class="text-base-content/70 text-sm">@L["ProfileSetup_ProfileImageHint"]</p>
-                    </fieldset>
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Gender"]</legend>
                         <InputSelect @bind-Value="profile.GenderId" class="select select-bordered w-full">
@@ -176,10 +122,16 @@
                         <ValidationMessage For="() => profile.EthnicityId" class="text-error text-sm mt-1" />
                     </fieldset>
 
-                    <button class="btn btn-primary rounded-full" type="submit" disabled="@(isSaving || isUploadingImages || settingAvatarId.HasValue || deletingImageId.HasValue)">
+                    <button class="btn btn-primary rounded-full" type="submit" disabled="@isSaving">
                         @(isSaving ? L["ProfileSetup_SavingButton"] : L["ProfileSetup_SaveButton"])
                     </button>
                 </EditForm>
+                @if (hasCompletedProfile)
+                {
+                    <button class="btn btn-outline mt-4 rounded-full" type="button" @onclick="OpenProfileImages">
+                        @L["ProfileSetup_ManageImages"]
+                    </button>
+                }
             }
         </section>
     </div>
@@ -195,18 +147,13 @@
     private IReadOnlyList<ProfileLookupOption> languages = [];
     private IReadOnlyList<ProfileLookupOption> intentions = [];
     private IReadOnlyList<ProfileLookupOption> ethnicities = [];
-    private IReadOnlyList<ProfileImageResponse> profileImages = [];
-    private List<IBrowserFile> selectedImages = [];
     private string? errorMessage;
     private string? successMessage;
     private bool isLoading = true;
     private bool isSaving;
-    private bool isUploadingImages;
-    private Guid? settingAvatarId;
-    private Guid? deletingImageId;
+    private bool hasCompletedProfile;
 
-    private const long MaximumProfileImageSizeBytes = 5 * 1024 * 1024;
-    private const int MaximumProfileImages = 6;
+    private void OpenProfileImages() => Navigation.NavigateTo("/profile/images");
 
     protected override void OnInitialized()
     {
@@ -240,7 +187,11 @@
         {
             var response = await ProfileClient.GetProfileSetupAsync();
             profile = response.Profile;
-            profileImages = response.ProfileImages;
+            hasCompletedProfile = profile.StudyDomainId.HasValue
+                && profile.SchoolId.HasValue
+                && profile.LanguageId.HasValue
+                && profile.IntentionId.HasValue
+                && profile.EthnicityId.HasValue;
             InitEditContext();
             genders = response.Genders;
             sexualities = response.Sexualities;
@@ -289,201 +240,16 @@
                 return;
             }
 
-            if (selectedImages.Count > 0 && !await UploadSelectedImagesAsync(saveProfileBeforeUpload: false))
+            if (!hasCompletedProfile)
+            {
+                Navigation.NavigateTo("/profile/images");
                 return;
-
+            }
             successMessage = L["ProfileSetup_SaveSuccess"];
         }
         finally
         {
             isSaving = false;
-        }
-    }
-
-    private async Task HandleImagesSelected(InputFileChangeEventArgs args)
-    {
-        errorMessage = null;
-        successMessage = null;
-        IReadOnlyList<IBrowserFile> images;
-        try
-        {
-            images = args.GetMultipleFiles(MaximumProfileImages);
-        }
-        catch (InvalidOperationException)
-        {
-            selectedImages.Clear();
-            errorMessage = L["ProfileSetup_ProfileImageLimitError"];
-            return;
-        }
-
-        if (profileImages.Count + images.Count > MaximumProfileImages)
-        {
-            selectedImages.Clear();
-            errorMessage = L["ProfileSetup_ProfileImageLimitError"];
-            return;
-        }
-
-        foreach (var image in images)
-        {
-            if (image.Size is <= 0 or > MaximumProfileImageSizeBytes)
-            {
-                selectedImages.Clear();
-                errorMessage = L["ProfileSetup_ProfileImageSizeError"];
-                return;
-            }
-
-            var contentType = image.ContentType.ToLowerInvariant();
-            if (contentType is not ("image/jpeg" or "image/png" or "image/webp"))
-            {
-                selectedImages.Clear();
-                errorMessage = L["ProfileSetup_ProfileImageTypeError"];
-                return;
-            }
-        }
-
-        selectedImages = images.ToList();
-        await UploadSelectedImagesAsync(saveProfileBeforeUpload: true);
-    }
-
-    private async Task<bool> UploadSelectedImagesAsync(bool saveProfileBeforeUpload)
-    {
-        if (selectedImages.Count == 0)
-            return true;
-
-        if (saveProfileBeforeUpload && !editContext.Validate())
-        {
-            errorMessage = L["ProfileSetup_RequiredSelections"];
-            return false;
-        }
-
-        isUploadingImages = true;
-        var openedStreams = new List<Stream>(selectedImages.Count);
-        try
-        {
-            if (saveProfileBeforeUpload)
-            {
-                try
-                {
-                    await ProfileClient.UpdateProfileAsync(CreateProfileRequest());
-                }
-                catch (ApiClientException)
-                {
-                    errorMessage = L["ProfileSetup_SaveError"];
-                    return false;
-                }
-            }
-
-            var uploads = new List<ProfileImageUploadRequest>(selectedImages.Count);
-            foreach (var image in selectedImages)
-            {
-                var imageStream = image.OpenReadStream(MaximumProfileImageSizeBytes);
-                openedStreams.Add(imageStream);
-                uploads.Add(new ProfileImageUploadRequest(imageStream, image.Name, image.ContentType));
-            }
-
-            try
-            {
-                await ProfileClient.UploadProfileImagesAsync(uploads);
-            }
-            catch (ApiClientException)
-            {
-                errorMessage = L["ProfileSetup_ProfileImageUploadError"];
-                return false;
-            }
-        }
-        finally
-        {
-            foreach (var imageStream in openedStreams)
-                await imageStream.DisposeAsync();
-            isUploadingImages = false;
-        }
-
-        selectedImages.Clear();
-        try
-        {
-            profileImages = (await ProfileClient.GetProfileSetupAsync()).ProfileImages;
-        }
-        catch (ApiClientException)
-        {
-            errorMessage = L["ProfileSetup_LoadError"];
-            return false;
-        }
-
-        successMessage = L["ProfileSetup_ProfileImagesUploaded"];
-        return true;
-    }
-
-    private UpdateUserProfileRequest CreateProfileRequest()
-    {
-        return new UpdateUserProfileRequest
-        {
-            GenderId = profile.GenderId,
-            SexualityId = profile.SexualityId,
-            StudyDomainId = profile.StudyDomainId!.Value,
-            SchoolId = profile.SchoolId!.Value,
-            LanguageId = profile.LanguageId!.Value,
-            IntentionId = profile.IntentionId!.Value,
-            EthnicityId = profile.EthnicityId!.Value,
-        };
-    }
-
-    private async Task SetAvatarAsync(Guid imageId)
-    {
-        errorMessage = null;
-        successMessage = null;
-        settingAvatarId = imageId;
-
-        try
-        {
-            await ProfileClient.SetAvatarAsync(imageId);
-            profileImages = profileImages
-                .Select(image => image with { IsAvatar = image.Id == imageId })
-                .ToList();
-            successMessage = L["ProfileSetup_AvatarUpdated"];
-        }
-        catch (ApiClientException)
-        {
-            errorMessage = L["ProfileSetup_AvatarUpdateError"];
-        }
-        finally
-        {
-            settingAvatarId = null;
-        }
-    }
-
-    private async Task DeleteProfileImageAsync(Guid imageId)
-    {
-        if (!await JS.InvokeAsync<bool>("confirm", L["ProfileSetup_DeleteImageConfirmation"].Value))
-            return;
-
-        errorMessage = null;
-        successMessage = null;
-        deletingImageId = imageId;
-
-        try
-        {
-            await ProfileClient.DeleteProfileImageAsync(imageId);
-
-            var deletedImage = profileImages.FirstOrDefault(image => image.Id == imageId);
-            var remainingImages = profileImages.Where(image => image.Id != imageId).ToList();
-            if (deletedImage?.IsAvatar == true && remainingImages.Count > 0)
-            {
-                var nextAvatarId = remainingImages.OrderBy(image => image.Id).First().Id;
-                remainingImages = remainingImages
-                    .Select(image => image with { IsAvatar = image.Id == nextAvatarId })
-                    .ToList();
-            }
-
-            profileImages = remainingImages;
-            successMessage = L["ProfileSetup_ImageDeleted"];
-        }
-        catch (ApiClientException)
-        {
-            errorMessage = L["ProfileSetup_DeleteImageError"];
-        }
-        finally
-        {
-            deletingImageId = null;
         }
     }
 
