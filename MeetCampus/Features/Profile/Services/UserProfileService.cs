@@ -1,4 +1,4 @@
-using MeetCampus.Contracts.Features.Profile.Contracts;
+using MeetCampus.Contracts.Features.Profile;
 using MeetCampus.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,11 +1,11 @@
 using System.Text;
 using System.Security.Claims;
-using MeetCampus.Contracts.Features.Auth.Contracts;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using MeetCampus.Data.User;
+using MeetCampus.Contracts.Features.Auth;
 
 namespace MeetCampus.Features.Auth.Services;
 
@@ -252,7 +252,7 @@ public sealed class AccountService(
             return new AccountOperationResponse(false, ["User account was not found."]);
         }
 
-        if (await userManager.HasPasswordAsync(user) && !await userManager.CheckPasswordAsync(user, password))
+        if (await userManager.HasPasswordAsync(user) && !string.IsNullOrEmpty(password) && !await userManager.CheckPasswordAsync(user, password))
         {
             return new AccountOperationResponse(false, ["Incorrect password."]);
         }

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using MeetCampus.Contracts.Features.Auth.Contracts;
+using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using MeetCampus.Features.Auth.Services;

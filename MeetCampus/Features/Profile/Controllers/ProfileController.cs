@@ -1,10 +1,10 @@
-using MeetCampus.Contracts.Features.Profile.Contracts;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MeetCampus.Contracts.Features.Profile;
 
 namespace MeetCampus.Features.Profile.Controllers;
 

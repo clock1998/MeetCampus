@@ -1,4 +1,4 @@
-using MeetCampus.Contracts.Features.Auth.Contracts;
+using MeetCampus.Contracts.Features.Auth;
 
 namespace MeetCampus.Client.Features.Auth.HttpClients;
 

@@ -1,5 +1,5 @@
 using Amazon.S3;
-using MeetCampus.Contracts.Features.Profile.Contracts;
+using MeetCampus.Contracts.Features.Profile;
 using MeetCampus.Data;
 using MeetCampus.Data.Profiles;
 using Microsoft.AspNetCore.Http;
