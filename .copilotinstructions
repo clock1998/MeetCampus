@@ -6,23 +6,21 @@ Meet Campus is a .NET 10 hosted Blazor WebAssembly application for a social/camp
 
 ## Solution Architecture
 
-The solution is split into four projects with explicit boundaries:
+The solution is split into three projects with explicit boundaries:
 
 - `MeetCampus` — ASP.NET Core server host. Owns the Blazor host shell, ASP.NET Core Identity, authentication cookies, EF Core, PostgreSQL access, migrations, database seeding, API controllers, server-side feature services, and Identity protocol endpoints.
-- `MeetCampus.Client` — Blazor WebAssembly client. Owns all visible application UI, routes, layouts, navigation, authentication pages, localized resources, client authentication state, and browser-facing feature behavior.
-- `MeetCampus.Contracts` — shared cross-boundary contracts. Contains request and response records used by the server APIs and typed HTTP clients. Do not place EF entities or server services here.
-- `MeetCampus.HttpClients` — typed HTTP clients shared by the client application. Contains client interfaces, implementations, and common HTTP infrastructure for calling server APIs.
+- `MeetCampus.Client` — Blazor WebAssembly client. Owns all visible application UI, routes, layouts, navigation, authentication pages, localized resources, client authentication state, browser-facing feature behavior, and typed API clients in `Features/[Feature]/HttpClients/` with shared client HTTP infrastructure in `Infrastructure/`.
+- `MeetCampus.Contracts` — shared cross-boundary contracts. Contains request and response records used by server APIs and the client. Contracts are organized under `Features/[Feature]/` namespaces and folders. Do not place EF entities or server services here.
 
 Project dependency direction:
 
 ```text
-MeetCampus.Client -> MeetCampus.HttpClients -> MeetCampus.Contracts
 MeetCampus.Client -> MeetCampus.Contracts
 MeetCampus -> MeetCampus.Client
 MeetCampus -> MeetCampus.Contracts
 ```
 
-Keep server implementation details out of `MeetCampus.Client`, `MeetCampus.Contracts`, and `MeetCampus.HttpClients`. Keep browser UI out of the server feature services and controllers.
+The server references the client project to host the WebAssembly UI, and references contracts for API boundaries. The client references contracts and owns its typed HTTP clients; there is no separate `MeetCampus.HttpClients` project in the solution. Keep server implementation details out of `MeetCampus.Client` and `MeetCampus.Contracts`. Keep browser UI out of the server feature services and controllers.
 
 ## Feature-First Organization
 
@@ -37,8 +35,9 @@ Organize code by feature rather than by global technical layers.
   - `Services/` contains server-side application and domain orchestration.
   - `Infrastructure/` contains server-specific protocol and framework integration.
   - `Models/` contains server-only models that are not API contracts.
-- Shared API contracts belong under `MeetCampus.Contracts/Features/[Feature]/Contracts/`.
-- Typed clients belong under `MeetCampus.HttpClients/Features/[Feature]/`.
+- Shared API contracts belong under `MeetCampus.Contracts/Features/[Feature]/` and use the matching `MeetCampus.Contracts.Features.[Feature]` namespace.
+- Typed client interfaces and implementations belong under `MeetCampus.Client/Features/[Feature]/HttpClients/` and use the matching `MeetCampus.Client.Features.[Feature].HttpClients` namespace.
+- Shared client HTTP infrastructure belongs under `MeetCampus.Client/Infrastructure/` and uses `MeetCampus.Client.Infrastructure`.
 - Shared client layout and navigation belong under `MeetCampus.Client/Layout/` and `MeetCampus.Client/Features/Shared/`.
 - Each class, interface, record, DTO/contract, and Razor component must have its own file.
 
@@ -85,6 +84,14 @@ Do not recreate the old server-owned Identity UI. Authentication pages are clien
 - Register server services, controllers, authentication, authorization, and localization in `MeetCampus/Program.cs`.
 - Preserve `MeetCampus/Components/App.razor`, `MeetCampus/Components/Pages/Error.razor`, and the `MapRazorComponents<App>()` host configuration unless the hosting architecture is intentionally changed. The server still hosts the Blazor shell even though application UI belongs to the client project.
 
+## Object Storage
+
+- Use Garage as the S3-compatible object store for profile image uploads and reads; keep object-storage operations in server-side feature services, never in the WebAssembly client.
+- Use the existing `S3ProfileImageStorage` service and configured `S3Options` rather than creating ad hoc S3 clients in controllers or components.
+- Configure the AWS .NET S3 client for Garage's endpoint and path-style requests (`ForcePathStyle = true`) with the Garage signing region (`AuthenticationRegion = "garage"`); keep endpoint and credentials in configuration/secrets, not source control.
+- For `PutObjectRequest`, disable chunk encoding when required for Garage signature compatibility. Request-level SDK settings belong on the request, not `AmazonS3Config`; verify options against the installed AWSSDK.S3 version before using them.
+- Preserve server-side image validation/optimization and ownership checks before storing or returning profile images. Do not expose storage credentials or log signed URLs.
+
 ## Authentication and Authorization
 
 Authentication uses ASP.NET Core Identity with application cookies, not JWT or bearer-token authentication.
@@ -114,10 +121,10 @@ Authentication uses ASP.NET Core Identity with application cookies, not JWT or b
 
 ## Typed HTTP Clients
 
-- Define a client interface only when it represents a real external/API boundary or is needed for testing; pair it with one implementation.
-- Place feature clients in `MeetCampus.HttpClients/Features/[Feature]/`.
+- Define a client interface only when it represents a real API boundary or is needed for testing; pair it with one implementation.
+- Place feature client interfaces and implementations in `MeetCampus.Client/Features/[Feature]/HttpClients/`.
 - Register clients in `MeetCampus.Client/Program.cs` with `AddHttpClient<Interface, Implementation>()` and the hosted application base address.
-- Put common request, response, error, and status handling in the existing HTTP infrastructure rather than duplicating it in each feature client.
+- Put common request, response, error, and status handling in `MeetCampus.Client/Infrastructure/` rather than duplicating it in each feature client.
 - Deserialize into contracts from `MeetCampus.Contracts`; never deserialize API responses into server entities.
 - Pass cancellation tokens through HTTP operations and handle expected API failures without hiding unexpected failures.
 
@@ -181,7 +188,8 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 - `MeetCampus.Client/Program.cs` — WebAssembly DI, authentication-state deserialization, localization, and typed client registration.
 - `MeetCampus.Client/Routes.razor` — client routing and authorization route handling.
 - `MeetCampus.Contracts/Features/` — shared API contracts.
-- `MeetCampus.HttpClients/Features/` — typed feature HTTP clients.
+- `MeetCampus.Client/Features/[Feature]/HttpClients/` — typed feature HTTP clients.
+- `MeetCampus.Client/Infrastructure/` — shared client API infrastructure and exceptions.
 - `MeetCampus/Data/` — EF Core context, Identity/application data, and migrations.
 - `MeetCampus/Properties/launchSettings.json` — server launch profiles and browser startup behavior.
 
@@ -195,4 +203,4 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 
 ---
 
-**Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI, server-owned Identity/API infrastructure, shared contracts, and typed HTTP clients.
+**Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI and typed HTTP clients, server-owned Identity/API infrastructure, and shared feature contracts.
