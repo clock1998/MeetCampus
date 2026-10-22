@@ -16,7 +16,7 @@ Validate a finite, explainable, consent-based matching loop for university stude
 
 1. A student verifies a university email address.
 2. The student completes a required profile, uploads a profile image, and answers the baseline questionnaire.
-3. The system delivers a limited weekly batch of compatible people.
+3. The system delivers a limited daily batch of compatible people.
 4. Each person can express interest or pass.
 5. A mutual interest opens a conversation.
 6. Every profile and conversation supports blocking and reporting.
@@ -44,7 +44,7 @@ Defer the following until the core loop is validated:
 ## 2. MVP Product Invariants
 
 1. **Compatibility over popularity:** Do not use likes received, profile views, message volume, response rate, attractiveness ratings, or time spent as ranking signals.
-2. **Finite discovery:** Deliver a small weekly recommendation batch. Do not implement an infinite feed.
+2. **Finite discovery:** Deliver a small daily recommendation batch. Do not implement an infinite feed.
 3. **Explainability:** Show grounded, shareable reasons for every recommendation.
 4. **Mutual consent:** Unrestricted messaging begins only after both eligible users express interest.
 5. **Safety:** Blocking and reporting must be available before public pilot release.
@@ -73,6 +73,7 @@ Defer the following until the core loop is validated:
 - Normalize email addresses and enforce uniqueness.
 - Do not expose university email addresses through public APIs.
 - Rate-limit verification and recovery attempts and avoid account enumeration.
+- Use dummy/no-op email delivery for the MVP; production email delivery is deferred.
 
 ### 4.2 Discoverability prerequisites
 
@@ -82,28 +83,25 @@ A student may become discoverable only when all of the following are true:
 - Account is active and not suspended, deactivated, or paused.
 - The student explicitly opts into discoverability.
 - All required profile fields are complete.
-- At least one approved profile image exists.
+- At least one profile image has been uploaded.
 - All active baseline questionnaire questions are answered.
 
 The system must immediately remove a user from recommendations and contact eligibility when any prerequisite stops being true.
 
 ### 4.3 Profile fields
 
-Every field below is required unless explicitly marked optional:
+Every MVP field below is required unless explicitly marked optional. Age or age range is deferred; do not make it an MVP profile field or discoverability prerequisite.
 
 - Display name.
-- Age or age range, subject to the pilot age policy.
 - Connection intents.
 - Interests and activities.
 - Social and communication preferences represented through approved user summaries.
-- At least one profile image, subject to moderation controls.
+- At least one profile image.
 - Program/faculty (optional).
 - Short biography (optional).
 - Ideal activities or first-meetup preferences (optional).
 - Conversation starter (optional).
 - Coarse availability, never a live schedule (optional).
-
-Do not require political views, disability disclosure, or other sensitive traits.
 
 ---
 
@@ -116,6 +114,7 @@ Do not require political views, disability disclosure, or other sensitive traits
 - Store stable question IDs and validated structured answers.
 - Missing answers are not disagreements.
 - Do not infer sensitive traits from profiles, photos, writing, hobbies, or answer patterns.
+- Sensitive traits are not categorically excluded from required profile or questionnaire fields; any included field must be explicitly defined and versioned in the approved configuration, with its privacy class and scoring/display rules specified.
 - Optional deeper questions may be offered after onboarding but are not required for discoverability.
 
 ### 5.2 Connection intents
@@ -164,7 +163,7 @@ Do not expose private answers, exact matching-only answers, inferred sensitive t
 
 ---
 
-## 6. Weekly Recommendations
+## 6. Daily Recommendations
 
 ### 6.1 Batch behavior
 
@@ -303,13 +302,14 @@ Allow an optional text description. Defer evidence attachments.
 Before the pilot, verify:
 
 - [ ] Unverified, inactive, paused, suspended, or opted-out users cannot become discoverable.
-- [ ] Discoverability requires all required profile fields, at least one approved profile image, and all baseline questionnaire answers.
+- [ ] Discoverability requires all required profile fields, at least one uploaded profile image, and all baseline questionnaire answers.
 - [ ] Blocked or otherwise ineligible candidates never appear in recommendations or contact flows.
 - [ ] Recommendations use a compatibility score of at least 30 and show a qualitative band plus evidence coverage.
 - [ ] Explanations use actual shareable input data and never leak private answers.
 - [ ] Missing answers are not treated as disagreement.
 - [ ] Popularity, profile views, message volume, response rate, and engagement time do not influence ranking.
 - [ ] System batches respect the configured limits and are reproducible from recorded versions and seed.
+- [ ] Daily batches provide at most three new recommendations per user per day and do not exceed nine unseen recommendations.
 - [ ] Dating eligibility requires both users to select dating.
 - [ ] Mutual interest is required before unrestricted messaging.
 - [ ] Pending, accepted, expired, cancelled, and blocked contact transitions are validated server-side.
@@ -338,6 +338,12 @@ Before the pilot, verify:
 11. Add integration tests for privacy, authorization, state transitions, and concurrent quota enforcement.
 12. Run a limited university pilot before expanding scope.
 
+### Deferred future work (not part of MVP acceptance)
+
+- Define an age or age-range field, the pilot age policy, and its validation/enforcement before adding age data collection.
+- Define and implement a profile-image review/approval workflow before requiring approved-image status for discoverability.
+- Replace dummy/no-op email delivery with an operational production email service.
+
 ---
 
 ## 12. Configuration
@@ -346,19 +352,19 @@ All values must be validated configuration, not scattered constants.
 
 ```yaml
 matching:
-  system_batch_size: 5
-  max_unseen_recommendations: 10
-  refresh_period: weekly
+  new_recommendations_per_user_per_day: 3
+  max_unseen_recommendations: 9
+  refresh_period: daily
   passed_profile_suppression_days: 90
   minimum_compatibility_score: 30
   use_popularity_signals: false
   display_exact_score: false
   weights:
-	interests: 0.25
-	values: 0.30
-	social_communication: 0.20
-	lifestyle_availability: 0.15
-	connection_intent_expectations: 0.10
+    interests: 0.25
+    values: 0.30
+    social_communication: 0.20
+    lifestyle_availability: 0.15
+    connection_intent_expectations: 0.10
 
 contact:
   max_pending_outbound: 3
@@ -373,9 +379,9 @@ privacy:
   private_answers_in_explanations: false
   discoverability_requires_user_opt_in: true
   profile_image_required_for_discoverability: true
+  profile_image_approval_required_for_discoverability: false
 
 safety:
   blocking_is_immediate: true
   reporting_required_for_mvp: true
   moderation_actions_audited: true
-```
