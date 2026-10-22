@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace MeetCampus.Client.Infrastructure;
+namespace MeetCampus.Client.Shared;
 
 public abstract class BaseApiClient
 {

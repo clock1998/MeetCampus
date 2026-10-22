@@ -27,12 +27,15 @@ safe real-world activities, and provide robust misconduct reporting.
 
 ### 1.1 Supported connection types
 
-The product should be configurable to support one or more of: -
-Friendship - Dating / romantic connections - Study partners - Activity
-partners - Other university community connections
+The product should be configurable to support one or more of: 
+Friendship - Dating / romantic connections - Study partners - Activity partners
 
-Users may select multiple connection intents. Matching and contact
-eligibility must respect intent compatibility.
+All four connection intents are enabled at launch. Users may select
+multiple connection intents. Matching and contact eligibility must respect
+the administrator-configured intent compatibility matrix. Dating is the
+only symmetric intent: both users must select dating for dating eligibility.
+All other intent rules are directional and must be evaluated from the
+viewer's selected intent to the candidate's accepted intent.
 
 ### 1.2 Product principles
 
@@ -96,9 +99,9 @@ refresh cadence, and suppression period must be configuration values,
 not hard-coded constants.
 
 Each recommendation should display: - Profile information the candidate
-has chosen to share. - Compatible connection intents. - A compatibility
-score or qualitative score band, if enabled. - Evidence coverage /
-confidence indicator. - Two or three grounded commonalities. - A
+has chosen to share. - Compatible connection intents. - A qualitative
+compatibility band, not an exact numeric score. - Evidence coverage
+indicator. - Two or three grounded commonalities. - A
 constructive difference or conversation starter where appropriate. -
 Actions such as `Interested`, `Pass`, and optionally `Save for later`.
 
@@ -147,9 +150,26 @@ recipients' request counts or popularity counters. - Do not reveal
 whether a request was ignored, declined, or unavailable due to capacity;
 present a neutral outcome to the sender.
 
-A recipient's acceptance opens a conversation. Unaccepted requests must
-not permit unrestricted messaging. Either participant can end a
+`Interested` is a mutual-interest signal. A user may express interest in
+an eligible profile without opening unrestricted messaging. When both
+users have active matching interest signals, the system creates an
+introduction request and opens a conversation. A recipient may restrict
+incoming interests and introduction requests by connection intent.
+
+Introduction request states are `pending`, `accepted`, `declined`,
+`expired`, `cancelled`, and `blocked`. A request is created as `pending`;
+only `accepted` requests open unrestricted messaging. The sender may
+cancel a pending request. A recipient may accept or decline a pending
+request. The system expires pending requests after the configured period.
+A block transitions any active request to `blocked` and terminates related
+contact eligibility immediately. Either participant can end a
 conversation, block the other user, or report misconduct.
+
+When a recipient reaches the configured rolling incoming-request limit,
+the system must temporarily remove that recipient from discoverability.
+The user becomes discoverable again automatically when their rolling
+request count falls below the configured limit, provided all other
+eligibility requirements remain satisfied.
 
 All limits must be configurable and tested with a university pilot.
 
@@ -171,7 +191,7 @@ All limits must be configurable and tested with a university pilot.
 ### 4.2 Requirements
 
 -   Maintain an administrator-managed allowlist of university email
-    domains.
+    domains in the application database.
 -   Validate email domains server-side.
 -   Normalize email addresses consistently and enforce uniqueness.
 -   Store authentication data separately from public profile data.
@@ -207,23 +227,24 @@ obligations and necessary moderation evidence.
 
 ### 5.1 Profile fields
 
-Required or optional fields should be configurable.
+Every listed field is required unless explicitly marked optional. The
+administrator may configure field definitions and validation rules, but
+must not weaken the required discoverability prerequisites defined in
+this specification.
 
 -   Preferred/display name
 -   Age or age range, subject to policy and privacy review
--   University verification badge (do not show email address)
--   Program/faculty (optional)
+-   Program/faculty (Optional)
 -   Connection intents
 -   Interests and activities
--   Optional short biography
+-   Short biography (Optional)
 -   Social and communication preferences, in user-selected summaries
--   Ideal activities or first-meetup preferences
--   Optional conversation starter
--   Optional photos subject to privacy and moderation controls
--   Optional coarse availability; never show a live schedule
+-   Ideal activities or first-meetup preferences (Optional)
+-   Conversation starter (Optional)
+-   Profile images subject to privacy and moderation controls
+-   Coarse availability; never show a live schedule (Optional)
 
-Do not require disclosure of gender, sexual orientation, religion,
-political views, disability, or other sensitive traits. Where a
+Do not require disclosure of political views, disability, or other sensitive traits. Where a
 connection type requires a user to express a preference, collect only
 what is necessary, explain its use, and let the user control visibility.
 
@@ -248,9 +269,17 @@ exact answer to a private question.
 
 ### 6.1 Onboarding
 
-Start with approximately 15--25 onboarding questions and offer optional
-deeper questions later. Do not require a long questionnaire before
-showing value.
+Start with approximately 15--25 required baseline onboarding questions
+and offer optional deeper questions later. The questionnaire, including
+question versions, baseline/deeper classification, validation rules,
+scoring configuration, and explanation templates, is configurable by an
+administrator. Do not require a long questionnaire before showing value.
+
+To become discoverable, a user must complete all baseline questions, all
+required profile fields, and at least one approved profile image. A user
+may receive system recommendations after completing at least half of the
+currently active optional deeper questions. A user with low evidence
+coverage must not appear in custom discovery.
 
 Question categories: - Interests and activities - Values and
 priorities - Social and communication preferences - Lifestyle and
@@ -312,7 +341,7 @@ constraint, or user's decision not to be discoverable.
 
 ### 7.2 Initial category weights
 
-Use configurable weights that sum to 1.0:
+Use administrator-configurable weights that sum to 1.0:
 
   Category                                 Initial weight
   -------------------------------------- ----------------
@@ -374,7 +403,10 @@ supports the comparison.
 Do not automatically penalize a person for an incomplete profile. Show a
 neutral explanation such as "Strong alignment in the areas you've both
 answered." Do not imply that a low coverage value means a person is a
-poor match.
+poor match. Define a configurable minimum evidence-coverage threshold
+for custom discovery; candidates below that threshold are excluded from
+custom discovery but may still receive system recommendations when they
+meet the deeper-question completion rule.
 
 ### 7.5 Symmetry and directional constraints
 
@@ -431,8 +463,9 @@ batch_utility(B, viewer) =
     - diversity_penalty(B) * diversity_weight
 ```
 
-Select up to the configured batch size, subject to eligibility and
-exposure rules. An MVP greedy algorithm is sufficient: repeatedly choose
+Select up to the configured batch size from candidates with a
+compatibility score of at least 30, subject to eligibility and exposure
+rules. An MVP greedy algorithm is sufficient: repeatedly choose
 the eligible candidate with the highest score after subtracting a modest
 redundancy penalty.
 
@@ -546,152 +579,10 @@ what information will be sent to moderators.
 Obtain qualified privacy/legal review for the university and
 jurisdiction before launch.
 
-------------------------------------------------------------------------
 
-## 11. Technical Architecture
+## 11. Data Model, Integrity, and Privacy
 
-### 11.1 Architecture approach
-
-Use a modular monolith for the initial release. Keep modules separated
-by responsibility but deploy a small number of services.
-
-Suggested logical modules: 1. `auth`: registration, verification,
-recovery, account lifecycle. 2. `profiles`: public profile fields,
-visibility, profile preferences. 3. `questionnaires`: question versions,
-answers, importance, privacy classification. 4. `matching`: eligibility,
-pair scoring, explanations, ranking, batch selection. 5. `discovery`:
-filters, pagination, result ordering, exposure controls. 6.
-`connections`: introduction requests, mutual consent, conversation
-permissions. 7. `messaging`: conversation membership, message delivery,
-rate limits. 8. `safety`: blocks, reports, moderation decisions,
-enforcement. 9. `notifications`: rate-limited delivery and
-deduplication. 10. `admin`: university settings, limits, moderation,
-aggregate metrics.
-
-### 11.2 Suggested stack
-
-These are recommendations, not mandatory dependencies: - Frontend:
-Next.js + TypeScript, or an equivalent modern web framework. - Backend:
-NestJS/Fastify with TypeScript, or FastAPI with Python. - Database:
-PostgreSQL. - Background jobs: PostgreSQL-backed queue initially, or
-Redis-backed queue if justified. - Authentication: managed OIDC provider
-or established authentication library. - Media: private object storage
-with controlled image delivery. - Deployment: one application service,
-database, and background worker. - Monitoring: structured logs, error
-tracking, uptime monitoring, and security audit logs.
-
-PostgreSQL is sufficient for an initial single-university population.
-Start with indexed relational queries and batch scoring. Do not add a
-vector database, microservices, or ML infrastructure until scale or a
-concrete use case justifies it.
-
-------------------------------------------------------------------------
-
-## 12. Database Schema
-
-The following is the logical schema. Adapt naming and normalization to
-the selected framework, but preserve the privacy and integrity
-requirements.
-
-  -------------------------------------------------------------------------
-  Table                     Important fields        Purpose
-  ------------------------- ----------------------- -----------------------
-  `universities`            `id`, `name`,           University
-                            `allowed_domains`,      configuration
-                            `policy_config`         
-
-  `users`                   `id`,                   Authentication and
-                            `email_normalized`,     eligibility
-                            `email_verified_at`,    
-                            `university_id`,        
-                            `account_status`,       
-                            `created_at`            
-
-  `profiles`                `user_id`,              Public profile
-                            `display_name`, `bio`,  
-                            `profile_visibility`,   
-                            `discoverable_at`,      
-                            `updated_at`            
-
-  `questions`               `id`, `version`,        Versioned questionnaire
-                            `category`,             
-                            `answer_type`,          
-                            `scoring_config`,       
-                            `privacy_class`         
-
-  `user_answers`            `user_id`,              Matching and profile
-                            `question_id`,          answers
-                            `answer_value`,         
-                            `importance`,           
-                            `updated_at`            
-
-  `user_intents`            `user_id`,              Connection intentions
-                            `intent_type`,          
-                            `seeking_status`        
-
-  `user_preferences`        `user_id`,              Preferences and
-                            `preference_type`,      deal-breakers
-                            `preference_value`,     
-                            `is_hard_constraint`    
-
-  `match_batches`           `id`, `user_id`,        Batch lifecycle and
-                            `period_start`,         reproducibility
-                            `status`,               
-                            `algorithm_version`,    
-                            `selection_seed`        
-
-  `match_batch_items`       `batch_id`,             Recommendations
-                            `candidate_user_id`,    
-                            `score`,                
-                            `evidence_coverage`,    
-                            `explanation_data`,     
-                            `decision_status`       
-
-  `user_exposures`          `viewer_id`,            Exposure and
-                            `candidate_id`,         repeat-display controls
-                            `surface`,              
-                            `last_shown_at`,        
-                            `decision`              
-
-  `introduction_requests`   `id`, `sender_id`,      Consent and quotas
-                            `recipient_id`,         
-                            `status`, `created_at`, 
-                            `expires_at`            
-
-  `conversations`           `id`, `created_at`,     Conversation lifecycle
-                            `status`                
-
-  `conversation_members`    `conversation_id`,      Conversation
-                            `user_id`, `joined_at`  authorization
-
-  `messages`                `id`,                   Message history
-                            `conversation_id`,      
-                            `sender_id`, `body`,    
-                            `created_at`,           
-                            `deleted_at`            
-
-  `blocks`                  `blocker_id`,           Block relationships
-                            `blocked_id`,           
-                            `created_at`            
-
-  `reports`                 `id`, `reporter_id`,    Misconduct reports
-                            `reported_user_id`,     
-                            `reason`, `status`,     
-                            `created_at`            
-
-  `moderation_actions`      `id`, `report_id`,      Enforcement history
-                            `moderator_id`,         
-                            `action_type`,          
-                            `reason`, `created_at`  
-
-  `audit_events`            `id`, `actor_id`,       Security/admin auditing
-                            `event_type`,           
-                            `target_type`,          
-                            `target_id`,            
-                            `created_at`            
-  -------------------------------------------------------------------------
-
-### 12.1 Integrity, indexing, and privacy
+### 11.1 Integrity, indexing, and privacy
 
 -   Enforce unique normalized email addresses within the correct account
     scope.
@@ -700,6 +591,9 @@ requirements.
 -   Enforce unique block pairs with clear directional semantics.
 -   Prevent duplicate active introduction requests for a
     sender-recipient pair.
+-   Enforce active introduction-request states and recipient rolling
+    quotas transactionally; update temporary discoverability when the
+    recipient capacity is reached or becomes available again.
 -   Enforce unique recommendation entries per batch and candidate.
 -   Index university, account status, discoverability, supported
     filters, and conversation message order.
@@ -717,132 +611,7 @@ requirements.
 
 ------------------------------------------------------------------------
 
-## 13. API Specification
-
-Use versioned REST endpoints for the MVP. These routes define intended
-behavior and are not a complete OpenAPI document.
-
-  Method    Endpoint                                   Purpose
-  --------- ------------------------------------------ -------------------------------------
-  `POST`    `/v1/auth/register`                        Begin registration
-  `POST`    `/v1/auth/verify-email`                    Verify email token
-  `GET`     `/v1/me`                                   Get current account/profile
-  `PATCH`   `/v1/me/profile`                           Update profile
-  `GET`     `/v1/questionnaires/current`               Get active questionnaire
-  `PUT`     `/v1/me/answers`                           Save questionnaire answers
-  `GET`     `/v1/matches/current`                      Get current recommendation batch
-  `POST`    `/v1/matches/{id}/decision`                Interested, pass, or save
-  `GET`     `/v1/discovery`                            Filter/rank candidates
-  `POST`    `/v1/introduction-requests`                Send introduction request
-  `POST`    `/v1/introduction-requests/{id}/accept`    Accept request
-  `POST`    `/v1/introduction-requests/{id}/decline`   Decline request
-  `GET`     `/v1/conversations`                        Get authorized conversations
-  `POST`    `/v1/conversations/{id}/messages`          Send a message
-  `POST`    `/v1/users/{id}/block`                     Block user
-  `POST`    `/v1/reports`                              Submit report
-  `GET`     `/v1/me/privacy`                           Get privacy/data-management options
-  `POST`    `/v1/me/deactivation`                      Begin deactivation
-
-### 13.1 Example discovery request
-
-``` http
-GET /v1/discovery?intent=friendship&sort=compatibility&limit=10
-Authorization: Bearer <access_token>
-```
-
-### 13.2 Example response shape
-
-``` json
-{
-  "items": [
-    {
-      "user_id": "opaque-user-id",
-      "profile": {
-        "display_name": "Alex",
-        "interests": ["hiking", "science", "board games"]
-      },
-      "compatibility": {
-        "score": 84,
-        "evidence_coverage": 0.78,
-        "reasons": [
-          {
-            "category": "interests",
-            "label": "Shared interest in hiking"
-          },
-          {
-            "category": "social_style",
-            "label": "Similar preference for small gatherings"
-          }
-        ]
-      },
-      "actions": {
-        "can_request_introduction": true
-      }
-    }
-  ],
-  "next_cursor": "opaque-pagination-cursor"
-}
-```
-
-All example values are illustrative. Never return raw private
-questionnaire answers, university emails, internal moderation flags, or
-another user's hidden interest in the viewer.
-
-### 13.3 API security
-
--   Enforce authorization on every endpoint.
--   Recheck eligibility, discoverability, blocks, and consent
-    immediately before delivery.
--   Use idempotency keys for retriable state-changing operations.
--   Apply per-user and per-IP rate limits, especially to authentication
-    and messaging.
--   Use opaque public IDs and prevent profile enumeration.
--   Ensure pagination cannot bypass eligibility checks or quotas.
--   Keep sensitive answer data and message bodies out of general
-    application logs.
--   Validate all input on the server.
--   Use secure cookie/session/token handling and standard CSRF
-    protections where applicable.
-
-------------------------------------------------------------------------
-
-## 14. State Machines and Transactional Rules
-
-### 14.1 Introduction request states
-
-States: - `pending` - `accepted` - `declined` - `expired` -
-`cancelled` - `terminated` (for applicable safety/account events)
-
-Rules: - Acceptance creates or enables a conversation. - Decline and
-expiry close the request. - A pending request cannot be duplicated for
-the same sender/recipient pair. - Blocks or suspensions prevent further
-interaction regardless of request state. - Do not permit unrestricted
-messages before acceptance. - Store timestamps for all state
-transitions.
-
-### 14.2 Concurrency
-
-Quota checks must be atomic. Do not perform a read-count followed by an
-independent insert without transaction protection. Concurrent requests
-could otherwise exceed limits.
-
-Use database transactions, constraints, or an atomic quota ledger for
-introduction and message limits. Revalidate conversation membership,
-account status, and block status when writing each message.
-
-### 14.3 Auditability
-
-For every generated batch, retain sufficient non-sensitive metadata to
-reproduce or explain selection: - Algorithm version - Question/scoring
-versions - Relevant configuration version - Selection seed - Candidate
-score and evidence coverage - Explanation template IDs -
-Eligibility/exclusion reason codes where safe to retain
-
-Do not store unnecessary copies of sensitive answers in audit logs.
-
-------------------------------------------------------------------------
-
-## 15. Fairness and Algorithm Governance
+## 12. Fairness and Algorithm Governance
 
 No matching system can guarantee zero bias just by omitting demographic
 fields. Proxy effects, missing data, uneven participation, and repeated
@@ -870,9 +639,9 @@ for avoidable, systematic exclusion.
 
 ------------------------------------------------------------------------
 
-## 16. Analytics and Success Metrics
+## 13. Analytics and Success Metrics
 
-### 16.1 North-star metric
+### 13.1 North-star metric
 
 **Weekly meaningful connection rate:** the proportion of active users
 who establish at least one mutually welcomed connection in a week and
@@ -881,7 +650,7 @@ voluntarily report that it was worthwhile.
 Report this alongside active-user counts and survey response rates to
 avoid misleading results from a small, highly engaged respondent group.
 
-### 16.2 Supporting metrics
+### 13.2 Supporting metrics
 
 -   Questionnaire completion rate
 -   Time to first relevant recommendation
@@ -901,7 +670,7 @@ only obvious similarities may increase acceptance while reducing
 meaningful discovery. A low meeting rate also does not automatically
 indicate poor matching.
 
-### 16.3 Analytics privacy
+### 13.3 Analytics privacy
 
 -   Prefer aggregate metrics.
 -   Do not build advertising profiles or sell matching data.
@@ -911,7 +680,7 @@ indicate poor matching.
 
 ------------------------------------------------------------------------
 
-## 17. MVP Delivery Plan
+## 14. MVP Delivery Plan
 
 ### Phase 1 --- Foundation
 
@@ -954,7 +723,7 @@ discovery from the beginning even if custom discovery launches later.
 
 ------------------------------------------------------------------------
 
-## 18. Acceptance Criteria
+## 15. Acceptance Criteria
 
 Before launch, verify all of the following:
 
@@ -967,9 +736,17 @@ Before launch, verify all of the following:
 -   [ ] Popularity and message volume do not affect compatibility
     scores.
 -   [ ] System recommendations respect configured batch limits.
+-   [ ] System recommendation candidates meet the 30-point minimum
+    compatibility floor.
 -   [ ] Custom search respects filters, pagination, eligibility, and
     exposure controls.
+-   [ ] Users with evidence coverage below the configured threshold do
+    not appear in custom discovery.
 -   [ ] Introduction quotas remain correct under concurrent requests.
+-   [ ] Recipient request capacity temporarily removes the recipient
+    from discoverability and restores it when capacity becomes available.
+-   [ ] Interest only opens an introduction request and conversation
+    after both eligible users express matching interest.
 -   [ ] Unaccepted requests do not allow unrestricted messaging.
 -   [ ] Blocking immediately prevents further contact and profile
     exposure.
@@ -988,7 +765,7 @@ Before launch, verify all of the following:
 
 ------------------------------------------------------------------------
 
-## 19. Recommended Initial Configuration
+## 16. Recommended Initial Configuration
 
 These values are hypotheses and must be configurable:
 
@@ -1005,19 +782,28 @@ matching:
     lifestyle_availability: 0.15
     connection_intent_expectations: 0.10
   require_mutually_compatible_intent: true
+  minimum_compatibility_score: 30
   use_popularity_signals: false
   missing_answers_are_disagreement: false
+  display_exact_score: false
+
+questionnaire:
+  require_all_baseline_questions_for_discoverability: true
+  minimum_optional_deeper_completion_for_recommendations: 0.50
 
 discovery:
   default_sort: compatibility
   use_pagination: true
   enforce_eligibility_on_every_page: true
   enforce_blocks_on_every_page: true
+  minimum_evidence_coverage: configurable
 
 introduction_requests:
   max_pending_sent: 3
   max_received_per_rolling_7_days: 5
   expiry_days: 7
+  remove_recipient_from_discoverability_at_capacity: true
+  interest_requires_mutual_signal: true
   require_acceptance_before_unrestricted_messaging: true
 
 privacy:
@@ -1025,6 +811,7 @@ privacy:
   private_answers_in_public_profile: false
   sensitive_answers_in_explanations: false
   discoverability_requires_user_opt_in: true
+  profile_image_required_for_discoverability: true
 
 safety:
   blocking_is_immediate: true
@@ -1038,7 +825,7 @@ schema validation.
 
 ------------------------------------------------------------------------
 
-## 20. Instructions for GitHub Copilot / AI Coding Assistants
+## 17. Instructions for GitHub Copilot / AI Coding Assistants
 
 Use this document as the product and architecture source of truth.
 
@@ -1086,19 +873,17 @@ rather than silently inventing product behavior.
 
 ------------------------------------------------------------------------
 
-## 21. Open Decisions Before Production
+## 18. Open Decisions Before Production
 
 Confirm these decisions before treating the specification as final: -
-Which connection types are enabled at launch? - Is custom discovery
-available at launch or after the first pilot? - Which profile fields are
-visible by default? - What age and eligibility policy applies? - Does a
-system match require mutual interest before messaging, while custom
-discovery uses introduction requests? - Are group activities a core
-launch feature or a later enhancement? - What is the moderation staffing
-and escalation model? - What are the exact retention and deletion
-policies? - Which privacy and legal requirements apply to the university
-and deployment jurisdiction? - Which frontend, backend, hosting, and
-identity-provider choices fit the project team?
+Is custom discovery available at launch or after the first pilot? - Which
+profile fields are visible by default? - What age and eligibility policy
+applies? - Are group activities a core launch feature or a later
+enhancement? - What is the moderation staffing and escalation model? -
+What are the exact retention and deletion policies? - Which privacy and
+legal requirements apply to the university and deployment jurisdiction? -
+Which frontend, backend, hosting, and identity-provider choices fit the
+project team?
 
 ------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-namespace MeetCampus.Client.Features.Shared.Navigation;
+namespace MeetCampus.Client.Shared.Navigation;
 
 /// <summary>
 /// Marker class for navigation-related localized strings.

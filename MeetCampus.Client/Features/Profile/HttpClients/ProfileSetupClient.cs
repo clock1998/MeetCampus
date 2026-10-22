@@ -1,6 +1,6 @@
-using MeetCampus.Client.Infrastructure;
 using System.Net.Http.Headers;
 using MeetCampus.Contracts.Features.Profile;
+using MeetCampus.Client.Shared;
 
 namespace MeetCampus.Client.Features.Profile.HttpClients;
 

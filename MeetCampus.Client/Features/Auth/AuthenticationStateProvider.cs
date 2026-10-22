@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using MeetCampus.Client.Features.Auth.HttpClients;
-using MeetCampus.Client.Infrastructure;
+using MeetCampus.Client.Shared;
 using MeetCampus.Contracts.Features.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
 
