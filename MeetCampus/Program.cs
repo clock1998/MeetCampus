@@ -38,15 +38,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddIdentityCore<ApplicationUser>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = true;
-        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
-    })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+builder.Services.AddMeetCampusIdentityCore()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
@@ -58,23 +50,10 @@ builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3"));
 builder.Services.AddSingleton<S3ProfileImageStorage>();
 var app = builder.Build();
 
-// Apply pending migrations and seed Identity data.
-using (var scope = app.Services.CreateScope())
-{
-    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    await dbContext.Database.MigrateAsync();
-    await Seed.SeedIdentityDataAsync(configuration, roleManager, userManager);
-}
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
-    app.UseMigrationsEndPoint();
 }
 else
 {

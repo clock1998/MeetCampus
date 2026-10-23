@@ -1,3 +1,4 @@
+# Copilot Instructions
 # Meet Campus - Copilot Instructions
 
 ## Project Overview
@@ -168,6 +169,7 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 - Avoid mocking code owned by the solution; mock external dependencies only when necessary.
 - After changes, build the affected project and then the solution. Run relevant tests when available.
 - For database changes, verify migrations and seeding behavior without committing secrets or local database state.
+- For MeetCampus integration tests, use Testcontainers rather than a remote test database or temporary remote schema.
 
 ## Development Workflow
 
@@ -204,3 +206,6 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 ---
 
 **Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI and typed HTTP clients, server-owned Identity/API infrastructure, and shared feature contracts.
+
+## Project Guidelines
+- For MeetCampus database and integration-test work, use the functioning remote PostgreSQL service rather than requiring local database setup; keep automated tests isolated from the app's default/shared database.

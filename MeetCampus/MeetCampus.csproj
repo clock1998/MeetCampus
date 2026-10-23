@@ -15,7 +15,6 @@
     <PackageReference Include="AWSSDK.S3" Version="4.0.104.5" />
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.13" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.13">
       <PrivateAssets>all</PrivateAssets>

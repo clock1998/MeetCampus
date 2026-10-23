@@ -5,7 +5,10 @@
     <File Path="package.json" />
     <File Path="tailwind.extension.json" />
   </Folder>
+  <Project Path="MeetCampus.AdminBootstrap/MeetCampus.AdminBootstrap.csproj" />
   <Project Path="MeetCampus.Client/MeetCampus.Client.csproj" />
   <Project Path="MeetCampus.Contracts/MeetCampus.Contracts.csproj" />
+  <Project Path="MeetCampus.IntegrationTests/MeetCampus.IntegrationTests.csproj" />
+  <Project Path="MeetCampus.Tests/MeetCampus.Tests.csproj" />
   <Project Path="MeetCampus/MeetCampus.csproj" />
 </Solution>
