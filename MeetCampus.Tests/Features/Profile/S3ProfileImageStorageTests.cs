@@ -1,4 +1,3 @@
-using Amazon.S3;
 using MeetCampus.Features.Profile.Services;
 using Microsoft.Extensions.Options;
 using Xunit;

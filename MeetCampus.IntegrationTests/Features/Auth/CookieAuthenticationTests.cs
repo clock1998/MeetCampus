@@ -18,7 +18,6 @@ public sealed class CookieAuthenticationTests
 
         using var response = await client.GetAsync("/api/profile/setup", TestContext.Current.CancellationToken);
 
-        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.StartsWith("/Account/Login", response.Headers.Location?.OriginalString, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 }
