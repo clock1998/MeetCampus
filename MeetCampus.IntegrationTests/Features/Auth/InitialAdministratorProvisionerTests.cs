@@ -31,7 +31,7 @@ public sealed class InitialAdministratorProvisionerTests(PostgreSqlContainerFixt
         var administrator = await userManager.FindByEmailAsync(email);
         Assert.NotNull(administrator);
         Assert.True(administrator.EmailConfirmed);
-        Assert.Contains("Admin", await userManager.GetRolesAsync(administrator));
+        Assert.Contains("Administrator", await userManager.GetRolesAsync(administrator));
 
         await provisioner.ProvisionAsync(email, "Different!Password-2");
 
@@ -55,7 +55,7 @@ public sealed class InitialAdministratorProvisionerTests(PostgreSqlContainerFixt
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => provisioner.ProvisionAsync(email, "Strong!Password-2"));
 
-        Assert.DoesNotContain("Admin", await userManager.GetRolesAsync(existingUser));
+        Assert.DoesNotContain("Administrator", await userManager.GetRolesAsync(existingUser));
     }
 
     private ServiceProvider CreateServices()

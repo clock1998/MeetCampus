@@ -1,12 +1,11 @@
-using Testcontainers.PostgreSql;
+﻿using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace MeetCampus.IntegrationTests.Infrastructure;
 
 public sealed class PostgreSqlContainerFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16-alpine")
         .WithDatabase("meetcampus_integration")
         .WithUsername("postgres")
         .WithPassword("postgres")
@@ -14,7 +13,7 @@ public sealed class PostgreSqlContainerFixture : IAsyncLifetime
 
     public string ConnectionString => _container.GetConnectionString();
 
-    public async Task InitializeAsync() => await _container.StartAsync();
+    public async ValueTask InitializeAsync() => await _container.StartAsync();
 
-    public async Task DisposeAsync() => await _container.DisposeAsync();
+    public async ValueTask DisposeAsync() => await _container.DisposeAsync();
 }

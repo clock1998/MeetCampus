@@ -17,7 +17,7 @@ namespace MeetCampus.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -184,23 +184,8 @@ namespace MeetCampus.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Name = "Concordia University"
-                        },
-                        new
-                        {
                             Id = new Guid("20000000-0000-0000-0000-000000000002"),
                             Name = "McGill University"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Name = "Université du Québec à Montréal (UQAM)"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000004"),
-                            Name = "Université de Montréal (UdeM)"
                         });
                 });
 
@@ -765,16 +750,16 @@ namespace MeetCampus.Migrations
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000003"),
-                            Code = "relationship",
-                            DisplayKey = "Profile_Intention_Relationship",
-                            Name = "Relationship"
+                            Code = "study-partner",
+                            DisplayKey = "Profile_Intention_StudyPartner",
+                            Name = "Study partner"
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000004"),
-                            Code = "networking",
-                            DisplayKey = "Profile_Intention_Networking",
-                            Name = "Networking"
+                            Code = "activity-partner",
+                            DisplayKey = "Profile_Intention_ActivityPartner",
+                            Name = "Activity partner"
                         });
                 });
 
@@ -861,22 +846,22 @@ namespace MeetCampus.Migrations
                         {
                             Id = "10000000-0000-0000-0000-000000000001",
                             ConcurrencyStamp = "6ed3e4b6-231f-41dd-9403-1595f6b8e73d",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
                             Id = "10000000-0000-0000-0000-000000000002",
                             ConcurrencyStamp = "8f3ec64a-af77-4f56-82f4-c9cea9eebd89",
-                            Name = "PowerUser",
-                            NormalizedName = "POWERUSER"
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
                         },
                         new
                         {
                             Id = "10000000-0000-0000-0000-000000000003",
                             ConcurrencyStamp = "b7d5672e-24dc-4c11-a948-6c89de8c3a40",
-                            Name = "User",
-                            NormalizedName = "USER"
+                            Name = "Student",
+                            NormalizedName = "STUDENT"
                         });
                 });
 

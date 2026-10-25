@@ -57,10 +57,7 @@ namespace MeetCampus.Data
                 new StudyDomain { Id = Guid.Parse("10000000-0000-0000-0000-000000000046"), Name = "Other" });
 
             builder.Entity<School>().HasData(
-                new School { Id = Guid.Parse("20000000-0000-0000-0000-000000000001"), Name = "Concordia University" },
-                new School { Id = Guid.Parse("20000000-0000-0000-0000-000000000002"), Name = "McGill University" },
-                new School { Id = Guid.Parse("20000000-0000-0000-0000-000000000003"), Name = "Université du Québec à Montréal (UQAM)" },
-                new School { Id = Guid.Parse("20000000-0000-0000-0000-000000000004"), Name = "Université de Montréal (UdeM)" });
+                new School { Id = Guid.Parse("20000000-0000-0000-0000-000000000002"), Name = "McGill University" });
 
             builder.Entity<Language>().HasData(
                 new Language { Id = Guid.Parse("70000000-0000-0000-0000-000000000001"), Name = "English" },
@@ -91,16 +88,16 @@ namespace MeetCampus.Data
                 new UserIntention
                 {
                     Id = Guid.Parse("30000000-0000-0000-0000-000000000003"),
-                    Code = "relationship",
-                    Name = "Relationship",
-                    DisplayKey = "Profile_Intention_Relationship"
+                    Code = "study-partner",
+                    Name = "Study partner",
+                    DisplayKey = "Profile_Intention_StudyPartner"
                 },
                 new UserIntention
                 {
                     Id = Guid.Parse("30000000-0000-0000-0000-000000000004"),
-                    Code = "networking",
-                    Name = "Networking",
-                    DisplayKey = "Profile_Intention_Networking"
+                    Code = "activity-partner",
+                    Name = "Activity partner",
+                    DisplayKey = "Profile_Intention_ActivityPartner"
                 });
 
             builder.Entity<UserEthnicity>().HasData(
@@ -211,23 +208,23 @@ namespace MeetCampus.Data
             {
                 new IdentityRole
                 {
-                    Id = IdentityRoles.AdminRoleId,
-                    Name = IdentityRoles.Admin,
-                    NormalizedName = IdentityRoles.Admin.ToUpperInvariant(),
+                    Id = IdentityRoles.AdministratorRoleId,
+                    Name = IdentityRoles.Administrator,
+                    NormalizedName = IdentityRoles.Administrator.ToUpperInvariant(),
                     ConcurrencyStamp = "6ed3e4b6-231f-41dd-9403-1595f6b8e73d"
                 },
                 new IdentityRole
                 {
-                    Id = IdentityRoles.PowerUserRoleId,
-                    Name = IdentityRoles.PowerUser,
-                    NormalizedName = IdentityRoles.PowerUser.ToUpperInvariant(),
+                    Id = IdentityRoles.ModeratorRoleId,
+                    Name = IdentityRoles.Moderator,
+                    NormalizedName = IdentityRoles.Moderator.ToUpperInvariant(),
                     ConcurrencyStamp = "8f3ec64a-af77-4f56-82f4-c9cea9eebd89"
                 },
                 new IdentityRole
                 {
-                    Id = IdentityRoles.UserRoleId,
-                    Name = IdentityRoles.User,
-                    NormalizedName = IdentityRoles.User.ToUpperInvariant(),
+                    Id = IdentityRoles.StudentRoleId,
+                    Name = IdentityRoles.Student,
+                    NormalizedName = IdentityRoles.Student.ToUpperInvariant(),
                     ConcurrencyStamp = "b7d5672e-24dc-4c11-a948-6c89de8c3a40"
                 }
             };

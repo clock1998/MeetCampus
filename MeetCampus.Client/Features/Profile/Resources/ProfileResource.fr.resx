@@ -41,8 +41,8 @@
   <!-- Intention options -->
   <data name="Profile_Intention_Friendship" xml:space="preserve"><value>Amitié</value></data>
   <data name="Profile_Intention_Dating" xml:space="preserve"><value>Rencontres</value></data>
-  <data name="Profile_Intention_Relationship" xml:space="preserve"><value>Relation sérieuse</value></data>
-  <data name="Profile_Intention_Networking" xml:space="preserve"><value>Réseautage</value></data>
+  <data name="Profile_Intention_StudyPartner" xml:space="preserve"><value>Partenaire d’étude</value></data>
+  <data name="Profile_Intention_ActivityPartner" xml:space="preserve"><value>Partenaire d’activité</value></data>
 
   <!-- Ethnicity options -->
   <data name="Profile_Ethnicity_PreferNotToSay" xml:space="preserve"><value>Préfère ne pas le dire</value></data>

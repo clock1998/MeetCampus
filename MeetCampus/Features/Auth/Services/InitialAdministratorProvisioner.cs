@@ -18,15 +18,15 @@ public sealed class InitialAdministratorProvisioner(
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
-        if (!await roleManager.RoleExistsAsync(IdentityRoles.Admin))
-            throw new InvalidOperationException("The Admin role is missing. Apply database migrations before bootstrapping an administrator.");
+        if (!await roleManager.RoleExistsAsync(IdentityRoles.Administrator))
+            throw new InvalidOperationException("The Administrator role is missing. Apply database migrations before bootstrapping an administrator.");
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         var existingUser = await userManager.FindByEmailAsync(email);
         if (existingUser is not null)
         {
-            if (!await userManager.IsInRoleAsync(existingUser, IdentityRoles.Admin))
+            if (!await userManager.IsInRoleAsync(existingUser, IdentityRoles.Administrator))
                 throw new InvalidOperationException("An account already exists for the configured administrator email and is not an administrator. Refusing to elevate it.");
 
             await transaction.CommitAsync(cancellationToken);
@@ -50,11 +50,11 @@ public sealed class InitialAdministratorProvisioner(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var addRoleResult = await userManager.AddToRoleAsync(administrator, IdentityRoles.Admin);
+        var addRoleResult = await userManager.AddToRoleAsync(administrator, IdentityRoles.Administrator);
         if (!addRoleResult.Succeeded)
         {
             throw new InvalidOperationException(
-                $"Failed to assign the Admin role: {string.Join(", ", addRoleResult.Errors.Select(error => error.Description))}");
+                $"Failed to assign the Administrator role: {string.Join(", ", addRoleResult.Errors.Select(error => error.Description))}");
         }
 
         await transaction.CommitAsync(cancellationToken);

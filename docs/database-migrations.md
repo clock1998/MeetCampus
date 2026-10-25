@@ -49,7 +49,7 @@ Run the published command:
 dotnet artifacts/admin-bootstrap/MeetCampus.AdminBootstrap.dll
 ```
 
-The command verifies there are no pending migrations and requires the `Admin` role created by migrations. It creates a new confirmed administrator using `UserManager` and assigns the migration-managed role using `RoleManager`. A rerun for an existing administrator is a no-op; if the configured email belongs to a non-administrator, the command fails without elevating that account or changing its password. Normal web startup does not create or promote administrators.
+The command verifies there are no pending migrations and requires the `Administrator` role created by migrations. It creates a new confirmed administrator using `UserManager` and assigns the migration-managed role using `RoleManager`. A rerun for an existing administrator is a no-op; if the configured email belongs to a non-administrator, the command fails without elevating that account or changing its password. Normal web startup does not create or promote administrators.
 
 ## Automated migration tests
 

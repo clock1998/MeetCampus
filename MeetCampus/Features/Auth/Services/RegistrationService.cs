@@ -33,7 +33,7 @@ public sealed class RegistrationService(
             return RegistrationResult.Failed(createResult.Errors);
         }
 
-        var roleResult = await userManager.AddToRoleAsync(user, IdentityRoles.User);
+        var roleResult = await userManager.AddToRoleAsync(user, IdentityRoles.Student);
         if (!roleResult.Succeeded)
         {
             return RegistrationResult.Failed(roleResult.Errors);
