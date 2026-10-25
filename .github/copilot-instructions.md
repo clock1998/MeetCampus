@@ -203,6 +203,10 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 - For routing or render-mode problems, inspect the server `Components/App.razor`, `MapRazorComponents<App>()`, client `Routes.razor`, and additional client assemblies.
 - For localization problems, verify the feature resource marker, `.resx` naming, culture initialization in `MeetCampus.Client/Program.cs`, and the injected localizer type.
 
+## Package Vulnerability Management
+
+- For explicitly acknowledged and accepted package vulnerability risk, suppress the corresponding NuGet advisory warning at the specific package reference rather than globally; keep other advisory warnings visible.
+
 ---
 
 **Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI and typed HTTP clients, server-owned Identity/API infrastructure, and shared feature contracts.
