@@ -7,8 +7,13 @@ using MeetCampus.Features.Auth.Services;
 using MeetCampus.Features.Profile.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -51,6 +56,7 @@ builder.Services.AddSingleton<S3ProfileImageStorage>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
