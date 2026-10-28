@@ -7,7 +7,7 @@ namespace MeetCampus.Features.Auth.Services;
 
 public sealed class InitialAdministratorProvisioner(
     ApplicationDbContext dbContext,
-    RoleManager<IdentityRole> roleManager,
+    RoleManager<IdentityRole<Guid>> roleManager,
     UserManager<ApplicationUser> userManager)
 {
     /// <summary>

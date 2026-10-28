@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MeetCampus.AdminBootstrap": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
