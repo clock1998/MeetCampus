@@ -173,6 +173,8 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 
 ## Development Workflow
 
+Before implementing a new feature, create a focused implementation plan and present it for user review. Do not implement multiple distinct features in one change. Wait for approval of the plan before making feature code changes.
+
 1. Identify the owning feature and project boundary before editing.
 2. Define or update a shared contract when an API shape changes.
 3. Implement server authorization, validation, service logic, and API behavior.
@@ -182,6 +184,11 @@ When implementing chat or notifications, use SignalR with server hubs under the 
 7. Apply Tailwind/DaisyUI styling and accessibility checks.
 8. Build the affected project and solution; run relevant tests.
 9. Review the diff for accidental entity exposure, duplicated contracts, secrets, missing authorization, and obsolete server UI references.
+
+## Database Migrations
+
+- Do not create, modify, or remove EF Core migration files unless the user explicitly requests migration work. The user manages migrations.
+- When a feature requires a schema change, describe the required model/schema impact in the plan and implementation summary; do not generate a migration.
 
 ## Important Project Files
 

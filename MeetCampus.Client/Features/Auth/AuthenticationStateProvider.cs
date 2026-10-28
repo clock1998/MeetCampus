@@ -45,9 +45,9 @@ internal sealed class ClientAuthenticationStateProvider(
         }
 
         var claims = new List<Claim>();
-        if (!string.IsNullOrWhiteSpace(user.UserId))
+        if (user.UserId.HasValue)
         {
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.UserId));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.UserId.Value.ToString()));
         }
 
         if (!string.IsNullOrWhiteSpace(user.Email))

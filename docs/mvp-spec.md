@@ -110,11 +110,12 @@ Every MVP field below is required unless explicitly marked optional. Age or age 
 ### 5.1 Questionnaire
 
 - Start with approximately 15–25 baseline questions across interests, values, social preferences, lifestyle, availability, and connection expectations.
-- An administrator configures question definitions, versions, validation, privacy class, scoring configuration, and approved explanation templates.
+- An administrator configures question definitions, validation, privacy class, scoring configuration, and approved explanation templates.
+- Each question has an `UpdatedAt` timestamp. When a question changes, answers submitted before that timestamp can be marked as needing an update; prior answers are not silently rewritten.
 - Store stable question IDs and validated structured answers.
 - Missing answers are not disagreements.
 - Do not infer sensitive traits from profiles, photos, writing, hobbies, or answer patterns.
-- Sensitive traits are not categorically excluded from required profile or questionnaire fields; any included field must be explicitly defined and versioned in the approved configuration, with its privacy class and scoring/display rules specified.
+- Sensitive traits are not categorically excluded from required profile or questionnaire fields; any included field must be explicitly defined in the approved configuration, with its privacy class and scoring/display rules specified.
 - Optional deeper questions may be offered after onboarding but are not required for discoverability.
 
 ### 5.2 Connection intents
@@ -185,7 +186,7 @@ Record the following for every batch and recommendation:
 
 - Batch identifier and timestamp.
 - Viewer and candidate identifiers.
-- Algorithm and questionnaire/scoring versions.
+- Algorithm and scoring configuration versions.
 - Compatibility score and evidence coverage.
 - Category-score inputs or a reproducible versioned reference.
 - Explanation-template inputs.

@@ -19,13 +19,11 @@ public sealed class ProfileController(
     [HttpGet("setup")]
     public async Task<IActionResult> GetProfileSetupAsync(CancellationToken cancellationToken)
     {
-        var userId = userManager.GetUserId(User);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
             return Unauthorized();
-        }
 
-        var response = await userProfileService.GetProfileSetupAsync(userId, cancellationToken);
+        var response = await userProfileService.GetProfileSetupAsync(user.Id, cancellationToken);
         return Ok(response);
     }
 
@@ -34,15 +32,13 @@ public sealed class ProfileController(
         [FromBody] UpdateUserProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var userId = userManager.GetUserId(User);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
             return Unauthorized();
-        }
 
         try
         {
-            await userProfileService.UpdateProfileAsync(userId, request, cancellationToken);
+            await userProfileService.UpdateProfileAsync(user.Id, request, cancellationToken);
             return NoContent();
         }
         catch (InvalidOperationException ex)
@@ -58,11 +54,9 @@ public sealed class ProfileController(
         [FromForm] List<IFormFile>? files,
         CancellationToken cancellationToken)
     {
-        var userId = userManager.GetUserId(User);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
             return Unauthorized();
-        }
 
         if (files is null || files.Count == 0)
         {
@@ -71,7 +65,7 @@ public sealed class ProfileController(
 
         try
         {
-            await profileImageService.UploadProfileImagesAsync(userId, files, cancellationToken);
+            await profileImageService.UploadProfileImagesAsync(user.Id, files, cancellationToken);
             return NoContent();
         }
         catch (InvalidDataException exception)
@@ -87,26 +81,22 @@ public sealed class ProfileController(
     [HttpPut("setup/images/{imageId:guid}/avatar")]
     public async Task<IActionResult> SetAvatarAsync(Guid imageId, CancellationToken cancellationToken)
     {
-        var userId = userManager.GetUserId(User);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
             return Unauthorized();
-        }
 
-        var wasUpdated = await profileImageService.SetAvatarAsync(userId, imageId, cancellationToken);
+        var wasUpdated = await profileImageService.SetAvatarAsync(user.Id, imageId, cancellationToken);
         return wasUpdated ? NoContent() : NotFound();
     }
 
     [HttpDelete("setup/images/{imageId:guid}")]
     public async Task<IActionResult> DeleteProfileImageAsync(Guid imageId, CancellationToken cancellationToken)
     {
-        var userId = userManager.GetUserId(User);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
             return Unauthorized();
-        }
 
-        var wasDeleted = await profileImageService.DeleteProfileImageAsync(userId, imageId, cancellationToken);
+        var wasDeleted = await profileImageService.DeleteProfileImageAsync(user.Id, imageId, cancellationToken);
         return wasDeleted ? NoContent() : NotFound();
     }
 }

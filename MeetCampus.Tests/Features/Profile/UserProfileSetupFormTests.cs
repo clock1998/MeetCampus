@@ -23,7 +23,7 @@ public sealed class UserProfileSetupFormTests
             new[]
             {
                 nameof(UserProfileSetupForm.EthnicityId),
-                nameof(UserProfileSetupForm.IntentionId),
+                nameof(UserProfileSetupForm.IntentionIds),
                 nameof(UserProfileSetupForm.LanguageId),
                 nameof(UserProfileSetupForm.SchoolId),
                 nameof(UserProfileSetupForm.StudyDomainId),
@@ -39,7 +39,7 @@ public sealed class UserProfileSetupFormTests
             StudyDomainId = Guid.NewGuid(),
             SchoolId = Guid.NewGuid(),
             LanguageId = Guid.NewGuid(),
-            IntentionId = Guid.NewGuid(),
+            IntentionIds = [Guid.NewGuid()],
             EthnicityId = Guid.NewGuid(),
         };
 

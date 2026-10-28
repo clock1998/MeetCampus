@@ -10,7 +10,7 @@
     private bool confirmed;
 
     [SupplyParameterFromQuery]
-    private string? UserId { get; set; }
+    private Guid? UserId { get; set; }
 
     [SupplyParameterFromQuery]
     private string? Email { get; set; }
@@ -25,13 +25,13 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Code))
+        if (!UserId.HasValue || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Code))
         {
             message = "Invalid email change confirmation link.";
             return;
         }
 
-        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId, Code, Email));
+        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId.Value, Code, Email));
         message = response.Succeeded ? "Thank you for confirming your email change." : "Error changing email.";
         confirmed = true;
     }

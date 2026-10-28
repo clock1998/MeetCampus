@@ -7,7 +7,7 @@ public sealed class UserProfile
 {
     public Guid Id { get; set; }
 
-    public string ApplicationUserId { get; set; } = string.Empty;
+    public Guid ApplicationUserId { get; set; }
     public ApplicationUser ApplicationUser { get; set; } = default!;
 
     public List<UserProfileImage>? ProfileImages  { get; set; } = null;
@@ -27,8 +27,7 @@ public sealed class UserProfile
     public Guid LanguageId { get; set; }
     public Language Language { get; set; } = default!;
 
-    public Guid IntentionId { get; set; }
-    public UserIntention Intention { get; set; } = default!;
+    public ICollection<UserProfileIntention> Intentions { get; set; } = [];
 
     public Guid EthnicityId { get; set; }
     public UserEthnicity Ethnicity { get; set; } = default!;

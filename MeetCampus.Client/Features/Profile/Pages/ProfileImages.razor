@@ -126,7 +126,7 @@
             if (response.Profile.StudyDomainId is null
                 || response.Profile.SchoolId is null
                 || response.Profile.LanguageId is null
-                || response.Profile.IntentionId is null
+                || response.Profile.IntentionIds.Count == 0
                 || response.Profile.EthnicityId is null)
             {
                 Navigation.NavigateTo("/profile/setup");

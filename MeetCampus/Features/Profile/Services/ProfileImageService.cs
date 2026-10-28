@@ -23,10 +23,8 @@ public sealed class ProfileImageService(
     private const int MaximumAvatarEdgePixels = 512;
     private const long MaximumSourcePixelCount = 20_000_000;
 
-    public async Task<IReadOnlyList<ProfileImageResponse>> GetProfileImagesAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<ProfileImageResponse>> GetProfileImagesAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-
         var images = await dbContext.UserProfileImages
             .AsNoTracking()
             .Where(image => image.UserProfile.ApplicationUserId == userId)
@@ -41,11 +39,10 @@ public sealed class ProfileImageService(
     }
 
     public async Task UploadProfileImagesAsync(
-        string userId,
+        Guid userId,
         IReadOnlyList<IFormFile> files,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentNullException.ThrowIfNull(files);
 
         if (files.Count is < 1 or > MaximumProfileImageCount)
@@ -97,10 +94,8 @@ public sealed class ProfileImageService(
         }
     }
 
-    public async Task<bool> SetAvatarAsync(string userId, Guid imageId, CancellationToken cancellationToken = default)
+    public async Task<bool> SetAvatarAsync(Guid userId, Guid imageId, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-
         var profile = await dbContext.UserProfiles
             .Include(userProfile => userProfile.ProfileImages)
             .SingleOrDefaultAsync(userProfile => userProfile.ApplicationUserId == userId, cancellationToken);
@@ -119,10 +114,8 @@ public sealed class ProfileImageService(
         return true;
     }
 
-    public async Task<bool> DeleteProfileImageAsync(string userId, Guid imageId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteProfileImageAsync(Guid userId, Guid imageId, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-
         var profile = await dbContext.UserProfiles
             .Include(userProfile => userProfile.ProfileImages)
             .SingleOrDefaultAsync(userProfile => userProfile.ApplicationUserId == userId, cancellationToken);

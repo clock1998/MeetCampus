@@ -1,7 +1,9 @@
+using MeetCampus.Data;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -12,7 +14,8 @@ public sealed class RegistrationService(
     IUserStore<ApplicationUser> userStore,
     SignInManager<ApplicationUser> signInManager,
     IEmailSender<ApplicationUser> emailSender,
-    ILogger<RegistrationService> logger)
+    ILogger<RegistrationService> logger,
+    ApplicationDbContext dbContext)
 {
     public async Task<RegistrationResult> RegisterAsync(
         RegisterUserRequest request,
@@ -20,6 +23,11 @@ public sealed class RegistrationService(
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(buildConfirmationUrl);
+
+        if (!await IsEmailDomainAllowedAsync(request.Email, CancellationToken.None))
+        {
+            return RegistrationResult.Failed(new[] { new IdentityErrorDescriber().InvalidEmail(request.Email) });
+        }
 
         var user = CreateUser();
 
@@ -38,6 +46,14 @@ public sealed class RegistrationService(
         {
             return RegistrationResult.Failed(roleResult.Errors);
         }
+
+        dbContext.AccountLifecycles.Add(new AccountLifecycle
+        {
+            ApplicationUserId = user.Id,
+            Status = AccountStatus.Active,
+            DiscoverabilityOptIn = false
+        });
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         logger.LogInformation("User created a new account with password.");
 
@@ -78,4 +94,25 @@ public sealed class RegistrationService(
 
         return (IUserEmailStore<ApplicationUser>)userStore;
     }
+
+    private async Task<bool> IsEmailDomainAllowedAsync(string email, CancellationToken cancellationToken)
+    {
+        var separatorIndex = email.LastIndexOf('@');
+        if (separatorIndex <= 0 || separatorIndex == email.Length - 1)
+        {
+            return false;
+        }
+
+        var originalDomain = email[(separatorIndex + 1)..].Trim().TrimEnd('.');
+        var domain = originalDomain.ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(domain) || !string.Equals(originalDomain, domain, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return await dbContext.AllowedEmailDomains
+            .AsNoTracking()
+            .AnyAsync(item => item.IsEnabled && item.Domain == domain, cancellationToken);
+    }
+
 }

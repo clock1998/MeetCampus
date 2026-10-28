@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Encodings.Web;
+using MeetCampus.Data;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using Microsoft.AspNetCore.Identity;
@@ -11,33 +12,42 @@ namespace MeetCampus.Features.Auth.Services;
 public sealed class EmailConfirmationService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    IEmailSender<ApplicationUser> emailSender)
+    IEmailSender<ApplicationUser> emailSender,
+    ApplicationDbContext dbContext)
 {
-    public async Task<EmailConfirmationResult> ConfirmEmailAsync(string userId, string encodedCode)
+    public async Task<EmailConfirmationResult> ConfirmEmailAsync(Guid userId, string encodedCode)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentException.ThrowIfNullOrWhiteSpace(encodedCode);
 
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
             return EmailConfirmationResult.NotFound();
         }
 
         var result = await userManager.ConfirmEmailAsync(user, DecodeToken(encodedCode));
+        if (result.Succeeded)
+        {
+            var lifecycle = await dbContext.AccountLifecycles.FindAsync(userId);
+            if (lifecycle is not null)
+            {
+                lifecycle.EmailVerifiedAt = DateTimeOffset.UtcNow;
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
         return result.Succeeded ? EmailConfirmationResult.Success() : EmailConfirmationResult.Failed();
     }
 
     public async Task<EmailConfirmationResult> ConfirmEmailChangeAsync(
-        string userId,
+        Guid userId,
         string email,
         string encodedCode)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(encodedCode);
 
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
             return EmailConfirmationResult.NotFound();
@@ -53,6 +63,13 @@ public sealed class EmailConfirmationService(
         if (!setUserNameResult.Succeeded)
         {
             return EmailConfirmationResult.Failed();
+        }
+
+        var lifecycle = await dbContext.AccountLifecycles.FindAsync(userId);
+        if (lifecycle is not null)
+        {
+            lifecycle.EmailVerifiedAt = null;
+            await dbContext.SaveChangesAsync();
         }
 
         await signInManager.RefreshSignInAsync(user);

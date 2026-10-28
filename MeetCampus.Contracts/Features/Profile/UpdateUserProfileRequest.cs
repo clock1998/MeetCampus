@@ -12,7 +12,7 @@ public sealed record UpdateUserProfileRequest
 
     public Guid LanguageId { get; set; }
 
-    public Guid IntentionId { get; set; }
+    public List<Guid> IntentionIds { get; set; } = [];
 
     public Guid EthnicityId { get; set; }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace MeetCampus.Features.Auth.Controllers;
@@ -53,6 +54,7 @@ public sealed class AuthController(
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting("verification")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<RegisterResponse>> RegisterAsync(
@@ -95,10 +97,13 @@ public sealed class AuthController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name;
         var roles = User.FindAll(ClaimTypes.Role).Select(claim => claim.Value).ToArray();
-        return Ok(new AuthUserResponse(true, userId, email, roles));
+        return Guid.TryParse(userId, out var parsedUserId)
+            ? Ok(new AuthUserResponse(true, parsedUserId, email, roles))
+            : Unauthorized();
     }
 
     [HttpPost("forgot-password")]
+    [EnableRateLimiting("verification")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<AuthOperationResponse>> ForgotPasswordAsync(
@@ -135,6 +140,7 @@ public sealed class AuthController(
     }
 
     [HttpPost("confirm-email")]
+    [EnableRateLimiting("verification")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<AuthOperationResponse>> ConfirmEmailAsync(
@@ -212,8 +218,25 @@ public sealed class AuthController(
         return Ok(await accountService.SetPasswordAsync(User, request.NewPassword));
     }
 
+    [HttpPost("account/email/verification")]
+    [Authorize]
+    [EnableRateLimiting("verification")]
+    [ValidateAntiForgeryToken]
+    public async Task<ActionResult<AccountOperationResponse>> SendEmailVerificationAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Ok(await accountService.SendEmailVerificationAsync(
+            User,
+            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
+            {
+                ["userId"] = userId,
+                ["code"] = code,
+            })));
+    }
+
     [HttpPost("account/email")]
     [Authorize]
+    [EnableRateLimiting("verification")]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<AccountOperationResponse>> ChangeEmailAsync(
         [FromBody] ChangeEmailRequest request,
@@ -227,21 +250,6 @@ public sealed class AuthController(
             {
                 ["userId"] = userId,
                 ["email"] = request.NewEmail,
-                ["code"] = code,
-            })));
-    }
-
-    [HttpPost("account/email/verification")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> SendEmailVerificationAsync(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.SendEmailVerificationAsync(
-            User,
-            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
-            {
-                ["userId"] = userId,
                 ["code"] = code,
             })));
     }

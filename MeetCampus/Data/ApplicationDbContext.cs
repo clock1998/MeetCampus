@@ -1,4 +1,9 @@
 using MeetCampus.Data.Profiles;
+using MeetCampus.Data.Audit;
+using MeetCampus.Data.Contact;
+using MeetCampus.Data.Matching;
+using MeetCampus.Data.Questionnaire;
+using MeetCampus.Data.Safety;
 using MeetCampus.Data.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -6,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
         public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<StudyDomain> StudyDomains => Set<StudyDomain>();
@@ -17,6 +23,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         public DbSet<Gender> Genders => Set<Gender>();
         public DbSet<Sexuality> Sexualities => Set<Sexuality>();
         public DbSet<UserProfileImage> UserProfileImages => Set<UserProfileImage>();
+        public DbSet<AccountLifecycle> AccountLifecycles => Set<AccountLifecycle>();
+        public DbSet<AllowedEmailDomain> AllowedEmailDomains => Set<AllowedEmailDomain>();
+        public DbSet<IntentCompatibilityRule> IntentCompatibilityRules => Set<IntentCompatibilityRule>();
+        public DbSet<Question> QuestionDefinitions => Set<Question>();
+        public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+        public DbSet<UserAnswer> QuestionnaireAnswerSets => Set<UserAnswer>();
+        public DbSet<UserProfileIntention> UserProfileIntentions => Set<UserProfileIntention>();
+        public DbSet<RecommendationBatch> RecommendationBatches => Set<RecommendationBatch>();
+        public DbSet<RecommendationItem> RecommendationItems => Set<RecommendationItem>();
+        public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
+        public DbSet<Conversation> Conversations => Set<Conversation>();
+        public DbSet<ConversationMessage> ConversationMessages => Set<ConversationMessage>();
+        public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+        public DbSet<UserReport> UserReports => Set<UserReport>();
+        public DbSet<ModerationAction> ModerationActions => Set<ModerationAction>();
+        public DbSet<AuditEvent> AuditEvents => Set<AuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -25,7 +47,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         ApplicationDbContextHelpers.ConfigureEntities(builder);
         SeedHelper.SeedProfileLookups(builder);
 
-        builder.Entity<IdentityUserPasskey<string>>(entity =>
+        builder.Entity<IdentityUserPasskey<Guid>>(entity =>
         {
             entity.ToTable("AspNetUserPasskeys");
             entity.HasKey(passkey => passkey.CredentialId);
@@ -43,16 +65,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Property(user => user.PhoneNumber)
             .HasMaxLength(256);
 
-        builder.Entity<IdentityUserLogin<string>>(entity =>
+        builder.Entity<IdentityUserLogin<Guid>>(entity =>
         {
             entity.Property(login => login.LoginProvider).HasMaxLength(128);
             entity.Property(login => login.ProviderKey).HasMaxLength(128);
         });
 
-        builder.Entity<IdentityUserToken<string>>(entity =>
+        builder.Entity<IdentityUserToken<Guid>>(entity =>
         {
             entity.Property(token => token.LoginProvider).HasMaxLength(128);
             entity.Property(token => token.Name).HasMaxLength(128);
         });
     }
+
 }

@@ -10,7 +10,7 @@
     private bool confirmed;
 
     [SupplyParameterFromQuery]
-    private string? UserId { get; set; }
+    private Guid? UserId { get; set; }
 
     [SupplyParameterFromQuery]
     private string? Code { get; set; }
@@ -22,13 +22,13 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Code))
+        if (!UserId.HasValue || string.IsNullOrWhiteSpace(Code))
         {
             message = "Invalid email confirmation link.";
             return;
         }
 
-        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId, Code, null));
+        var response = await AuthClient.ConfirmEmailAsync(new ConfirmEmailRequest(UserId.Value, Code, null));
         message = response.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
         confirmed = true;
     }

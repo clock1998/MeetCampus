@@ -1,15 +1,14 @@
 using MeetCampus.Contracts.Features.Profile;
 using MeetCampus.Data;
+using MeetCampus.Data.Profiles;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Features.Profile.Services;
 
 public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileImageService profileImageService)
 {
-    public async Task<UserProfileSetupResponse> GetProfileSetupAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserProfileSetupResponse> GetProfileSetupAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-
         var profile = await dbContext.UserProfiles
             .AsNoTracking()
             .SingleOrDefaultAsync(p => p.ApplicationUserId == userId, cancellationToken);
@@ -24,7 +23,13 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
                 StudyDomainId = profile?.StudyDomainId,
                 SchoolId = profile?.SchoolId,
                 LanguageId = profile?.LanguageId,
-                IntentionId = profile?.IntentionId,
+                IntentionIds = profile is null
+                    ? []
+                    : await dbContext.UserProfileIntentions
+                        .AsNoTracking()
+                        .Where(item => item.UserProfileId == profile.Id)
+                        .Select(item => item.UserIntentionId)
+                        .ToListAsync(cancellationToken),
                 EthnicityId = profile?.EthnicityId,
             },
             Genders = await dbContext.Genders
@@ -68,9 +73,8 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
     /// <summary>
     /// Throws <see cref="InvalidOperationException"/> when a referenced lookup ID does not exist.
     /// </summary>
-    public async Task UpdateProfileAsync(string userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default)
+    public async Task UpdateProfileAsync(Guid userId, UpdateUserProfileRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentNullException.ThrowIfNull(request);
 
         if (request.GenderId.HasValue && !await dbContext.Genders.AnyAsync(g => g.Id == request.GenderId.Value, cancellationToken))
@@ -88,7 +92,12 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
         if (!await dbContext.CampusLanguages.AnyAsync(l => l.Id == request.LanguageId, cancellationToken))
             throw new InvalidOperationException("Invalid language.");
 
-        if (!await dbContext.UserIntentions.AnyAsync(i => i.Id == request.IntentionId, cancellationToken))
+        if (request.IntentionIds.Count == 0 || request.IntentionIds.Distinct().Count() != request.IntentionIds.Count)
+            throw new InvalidOperationException("Select one or more unique intentions.");
+
+        var validIntentionCount = await dbContext.UserIntentions
+            .CountAsync(intention => request.IntentionIds.Contains(intention.Id), cancellationToken);
+        if (validIntentionCount != request.IntentionIds.Count)
             throw new InvalidOperationException("Invalid intention.");
 
         if (!await dbContext.UserEthnicities.AnyAsync(e => e.Id == request.EthnicityId, cancellationToken))
@@ -108,8 +117,20 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
         profile.StudyDomainId = request.StudyDomainId;
         profile.SchoolId = request.SchoolId;
         profile.LanguageId = request.LanguageId;
-        profile.IntentionId = request.IntentionId;
         profile.EthnicityId = request.EthnicityId;
+
+        var existingIntentions = await dbContext.UserProfileIntentions
+            .Where(item => item.UserProfileId == profile.Id)
+            .ToListAsync(cancellationToken);
+        dbContext.UserProfileIntentions.RemoveRange(existingIntentions);
+        foreach (var intentionId in request.IntentionIds)
+        {
+            dbContext.UserProfileIntentions.Add(new UserProfileIntention
+            {
+                UserProfileId = profile.Id,
+                UserIntentionId = intentionId
+            });
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

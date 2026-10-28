@@ -17,5 +17,7 @@ public sealed class ApplicationDbContextMigrationTests(PostgreSqlContainerFixtur
 
         await using var dbContext = new ApplicationDbContext(options);
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(dbContext.Database.HasPendingModelChanges());
     }
 }

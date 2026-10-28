@@ -97,14 +97,19 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Intention"]</legend>
-                        <InputSelect @bind-Value="profile.IntentionId" class="@SelectClass(() => profile.IntentionId)">
-                            <option value="">@L["ProfileSetup_SelectPlaceholder"]</option>
+                        <div class="space-y-2">
                             @foreach (var option in intentions)
                             {
-                                <option value="@option.Id">@GetDisplay(option)</option>
+                                <label class="label cursor-pointer justify-start gap-3">
+                                    <input type="checkbox" class="checkbox checkbox-primary" checked="@profile.IntentionIds.Contains(option.Id)" @onchange="args => SetIntention(option.Id, args.Value is true)" />
+                                    <span class="label-text">@GetDisplay(option)</span>
+                                </label>
                             }
-                        </InputSelect>
-                        <ValidationMessage For="() => profile.IntentionId" class="text-error text-sm mt-1" />
+                        </div>
+                        @if (profile.IntentionIds.Count == 0)
+                        {
+                            <div class="text-error text-sm mt-1">@L["ProfileSetup_Required_Intention"]</div>
+                        }
                     </fieldset>
 
                     <fieldset class="fieldset">
@@ -187,7 +192,7 @@
             hasCompletedProfile = profile.StudyDomainId.HasValue
                 && profile.SchoolId.HasValue
                 && profile.LanguageId.HasValue
-                && profile.IntentionId.HasValue
+                && profile.IntentionIds.Count > 0
                 && profile.EthnicityId.HasValue;
             InitEditContext();
             genders = response.Genders;
@@ -223,7 +228,7 @@
                 StudyDomainId = profile.StudyDomainId!.Value,
                 SchoolId = profile.SchoolId!.Value,
                 LanguageId = profile.LanguageId!.Value,
-                IntentionId = profile.IntentionId!.Value,
+                IntentionIds = profile.IntentionIds,
                 EthnicityId = profile.EthnicityId!.Value,
             };
 
@@ -248,6 +253,16 @@
         {
             isSaving = false;
         }
+    }
+
+    private void SetIntention(Guid intentionId, bool isSelected)
+    {
+        if (isSelected && !profile.IntentionIds.Contains(intentionId))
+            profile.IntentionIds.Add(intentionId);
+        else if (!isSelected)
+            profile.IntentionIds.Remove(intentionId);
+
+        editContext.NotifyFieldChanged(new FieldIdentifier(profile, nameof(profile.IntentionIds)));
     }
 
     private string SelectClass(Expression<Func<Guid?>> accessor)
