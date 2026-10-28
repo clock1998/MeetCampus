@@ -198,22 +198,16 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.ApplicationUserId).IsRequired();
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.ApplicationUser)
                     .WithMany()
                     .HasForeignKey(item => item.ApplicationUserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne<QuestionOption>()
+                entity.HasOne(item => item.QuestionOption)
                     .WithMany()
                     .HasForeignKey(item => item.QuestionOptionId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => new { item.ApplicationUserId, item.CreatedAt });
             });
-
-            builder.Entity<RecommendationBatch>()
-                .HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(item => item.ViewerUserId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<RecommendationBatch>(entity =>
             {
@@ -221,6 +215,10 @@ namespace MeetCampus.Data
                 entity.Property(item => item.ViewerUserId).IsRequired();
                 entity.Property(item => item.AlgorithmVersion).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.ScoringWeightsJson).HasColumnType("jsonb").IsRequired();
+                entity.HasOne(item => item.ViewerUser)
+                    .WithMany()
+                    .HasForeignKey(item => item.ViewerUserId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => new { item.ViewerUserId, item.BatchDate }).IsUnique();
                 entity.HasIndex(item => item.CreatedAt);
             });
@@ -261,11 +259,11 @@ namespace MeetCampus.Data
                 entity.HasIndex(item => new { item.SenderUserId, item.RecipientUserId })
                     .IsUnique()
                     .HasFilter("\"State\" IN ('Pending', 'Accepted')");
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.Sender)
                     .WithMany()
                     .HasForeignKey(item => item.SenderUserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.Recipient)
                     .WithMany()
                     .HasForeignKey(item => item.RecipientUserId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -285,11 +283,11 @@ namespace MeetCampus.Data
                 entity.Property(item => item.FirstUserId).IsRequired();
                 entity.Property(item => item.SecondUserId).IsRequired();
                 entity.HasIndex(item => new { item.FirstUserId, item.SecondUserId }).IsUnique();
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.FirstUser)
                     .WithMany()
                     .HasForeignKey(item => item.FirstUserId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.SecondUser)
                     .WithMany()
                     .HasForeignKey(item => item.SecondUserId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -305,7 +303,7 @@ namespace MeetCampus.Data
                     .HasForeignKey(item => item.ConversationId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => new { item.ConversationId, item.CreatedAt, item.Id });
-                entity.HasOne<ApplicationUser>()
+                entity.HasOne(item => item.SenderUser)
                     .WithMany()
                     .HasForeignKey(item => item.SenderUserId)
                     .OnDelete(DeleteBehavior.Restrict);
@@ -375,8 +373,8 @@ namespace MeetCampus.Data
                 entity.Property(item => item.EntityId).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.DetailsJson).HasColumnType("jsonb");
                 entity.HasIndex(item => new { item.EntityType, item.EntityId, item.OccurredAt });
-                entity.HasIndex(item => new { item.ActorUserId, item.OccurredAt });
-                entity.HasOne<ApplicationUser>()
+                entity.HasIndex(item => new { item.OccurredAt });
+                entity.HasOne(item => item.ApplicationUser)
                     .WithMany()
                     .HasForeignKey(item => item.ActorUserId)
                     .OnDelete(DeleteBehavior.Restrict);
