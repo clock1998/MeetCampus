@@ -19,6 +19,8 @@ public sealed class AuthController(
     RegistrationService registrationService,
     PasswordRecoveryService passwordRecoveryService,
     EmailConfirmationService emailConfirmationService,
+    AccountEligibilityService accountEligibilityService,
+    AccountLifecycleService accountLifecycleService,
     AccountService accountService,
     SignInManager<ApplicationUser> signInManager,
     IAntiforgery antiforgery) : ControllerBase
@@ -62,7 +64,7 @@ public sealed class AuthController(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var result = await registrationService.RegisterAsync(
+        await registrationService.RegisterAsync(
             new RegisterUserRequest(request.Email, request.Password),
             (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
             {
@@ -70,10 +72,31 @@ public sealed class AuthController(
                 ["code"] = code,
             }));
 
-        return Ok(new RegisterResponse(
-            result.Succeeded,
-            result.RequiresConfirmedAccount,
-            result.Errors?.Select(error => error.Description).ToArray()));
+        return Ok(new RegisterResponse(true, true, null));
+    }
+
+    [HttpGet("account/eligibility")]
+    [Authorize]
+    public async Task<ActionResult<AccountEligibilityResponse>> GetAccountEligibilityAsync(CancellationToken cancellationToken)
+    {
+        var user = await signInManager.UserManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var eligibility = await accountEligibilityService.GetEligibilityAsync(user.Id, cancellationToken);
+        return eligibility is null ? Unauthorized() : Ok(eligibility);
+    }
+
+    [HttpPost("account/lifecycle")]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<ActionResult<AccountOperationResponse>> UpdateAccountLifecycleAsync(
+        [FromBody] UpdateAccountLifecycleRequest request,
+        CancellationToken cancellationToken)
+    {
+        return Ok(await accountLifecycleService.UpdateAsync(User, request, cancellationToken));
     }
 
     [HttpPost("logout")]
@@ -82,6 +105,26 @@ public sealed class AuthController(
     public async Task<ActionResult<AuthOperationResponse>> LogoutAsync()
     {
         await signInManager.SignOutAsync();
+        return Ok(new AuthOperationResponse(true));
+    }
+
+    [HttpPost("resend-confirmation")]
+    [EnableRateLimiting("verification")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<ActionResult<AuthOperationResponse>> ResendConfirmationAsync(
+        [FromBody] ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await emailConfirmationService.ResendConfirmationAsync(
+            request.Email,
+            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
+            {
+                ["userId"] = userId,
+                ["code"] = code,
+            }));
+
         return Ok(new AuthOperationResponse(true));
     }
 
@@ -122,6 +165,7 @@ public sealed class AuthController(
     }
 
     [HttpPost("reset-password")]
+    [EnableRateLimiting("verification")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<ResetPasswordResponse>> ResetPasswordAsync(
@@ -135,8 +179,8 @@ public sealed class AuthController(
             request.NewPassword);
 
         return Ok(new ResetPasswordResponse(
-            result.Succeeded || result.UserNotFound,
-            result.Errors));
+            result.Succeeded,
+            result.Succeeded ? null : ["The reset link is invalid or expired. Request a new reset link and try again."]));
     }
 
     [HttpPost("confirm-email")]

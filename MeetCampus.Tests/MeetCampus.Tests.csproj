@@ -23,4 +23,8 @@
 	<ProjectReference Include="..\MeetCampus\MeetCampus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Auth\" />
+  </ItemGroup>
+
 </Project>

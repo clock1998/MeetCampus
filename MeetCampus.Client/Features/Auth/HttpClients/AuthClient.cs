@@ -29,6 +29,15 @@ public sealed class AuthClient(HttpClient httpClient) : BaseApiClient(httpClient
     public Task<AccountProfileResponse> GetAccountAsync(CancellationToken cancellationToken = default) =>
         GetAsync<AccountProfileResponse>($"{Endpoint}/account", cancellationToken);
 
+    public Task<AccountEligibilityResponse> GetAccountEligibilityAsync(CancellationToken cancellationToken = default) =>
+        GetAsync<AccountEligibilityResponse>($"{Endpoint}/account/eligibility", cancellationToken);
+
+    public Task<AccountOperationResponse> UpdateAccountLifecycleAsync(UpdateAccountLifecycleRequest request, CancellationToken cancellationToken = default) =>
+        PostWithAntiforgeryAsync<UpdateAccountLifecycleRequest, AccountOperationResponse>($"{Endpoint}/account/lifecycle", request, cancellationToken);
+
+    public Task<AuthOperationResponse> ResendConfirmationAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default) =>
+        PostWithAntiforgeryAsync<ForgotPasswordRequest, AuthOperationResponse>($"{Endpoint}/resend-confirmation", request, cancellationToken);
+
     public Task<AccountOperationResponse> UpdatePhoneAsync(UpdatePhoneNumberRequest request, CancellationToken cancellationToken = default) =>
         PostWithAntiforgeryAsync<UpdatePhoneNumberRequest, AccountOperationResponse>($"{Endpoint}/account/phone", request, cancellationToken);
 

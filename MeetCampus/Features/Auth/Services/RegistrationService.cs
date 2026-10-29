@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Net.Mail;
 
 namespace MeetCampus.Features.Auth.Services;
 
@@ -24,16 +25,30 @@ public sealed class RegistrationService(
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(buildConfirmationUrl);
 
-        if (!await IsEmailDomainAllowedAsync(request.Email, CancellationToken.None))
+        if (!MailAddress.TryCreate(request.Email, out MailAddress? mailAddress) || mailAddress is null)
         {
             return RegistrationResult.Failed(new[] { new IdentityErrorDescriber().InvalidEmail(request.Email) });
         }
 
+        var address = mailAddress.Address;
+        var separatorIndex = address.LastIndexOf('@');
+        var domain = mailAddress.Host.TrimEnd('.').ToLowerInvariant();
+        if (separatorIndex <= 0 || string.IsNullOrWhiteSpace(domain))
+        {
+            return RegistrationResult.Failed(new[] { new IdentityErrorDescriber().InvalidEmail(request.Email) });
+        }
+
+        var email = $"{address[..separatorIndex]}@{domain}";
+        if (!await IsEmailDomainAllowedAsync(domain, CancellationToken.None))
+        {
+            return RegistrationResult.Failed(new[] { new IdentityErrorDescriber().InvalidEmail(email) });
+        }
+
         var user = CreateUser();
 
-        await userStore.SetUserNameAsync(user, request.Email, CancellationToken.None);
+        await userStore.SetUserNameAsync(user, email, CancellationToken.None);
         var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, request.Email, CancellationToken.None);
+        await emailStore.SetEmailAsync(user, email, CancellationToken.None);
 
         var createResult = await userManager.CreateAsync(user, request.Password);
         if (!createResult.Succeeded)
@@ -62,7 +77,7 @@ public sealed class RegistrationService(
         var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = buildConfirmationUrl(userId, encodedCode);
 
-        await emailSender.SendConfirmationLinkAsync(user, request.Email, HtmlEncoder.Default.Encode(callbackUrl));
+        await emailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
         if (userManager.Options.SignIn.RequireConfirmedAccount)
         {
@@ -95,24 +110,9 @@ public sealed class RegistrationService(
         return (IUserEmailStore<ApplicationUser>)userStore;
     }
 
-    private async Task<bool> IsEmailDomainAllowedAsync(string email, CancellationToken cancellationToken)
-    {
-        var separatorIndex = email.LastIndexOf('@');
-        if (separatorIndex <= 0 || separatorIndex == email.Length - 1)
-        {
-            return false;
-        }
-
-        var originalDomain = email[(separatorIndex + 1)..].Trim().TrimEnd('.');
-        var domain = originalDomain.ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(domain) || !string.Equals(originalDomain, domain, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        return await dbContext.AllowedEmailDomains
+    private Task<bool> IsEmailDomainAllowedAsync(string domain, CancellationToken cancellationToken) =>
+        dbContext.AllowedEmailDomains
             .AsNoTracking()
             .AnyAsync(item => item.IsEnabled && item.Domain == domain, cancellationToken);
-    }
 
 }

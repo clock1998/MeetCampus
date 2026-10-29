@@ -52,6 +52,8 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<EmailConfirmationService>();
 builder.Services.AddScoped<PasswordRecoveryService>();
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<AccountEligibilityService>();
+builder.Services.AddScoped<AccountLifecycleService>();
 builder.Services.AddScoped<AdministrativeDataService>();
 
 builder.Services.AddAuthentication(options =>

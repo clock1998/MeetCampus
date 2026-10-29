@@ -24,6 +24,12 @@ public interface IAuthClient
 
     Task<AccountProfileResponse> GetAccountAsync(CancellationToken cancellationToken = default);
 
+    Task<AccountEligibilityResponse> GetAccountEligibilityAsync(CancellationToken cancellationToken = default);
+
+    Task<AccountOperationResponse> UpdateAccountLifecycleAsync(UpdateAccountLifecycleRequest request, CancellationToken cancellationToken = default);
+
+    Task<AuthOperationResponse> ResendConfirmationAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default);
+
     Task<AccountOperationResponse> UpdatePhoneAsync(UpdatePhoneNumberRequest request, CancellationToken cancellationToken = default);
 
     Task<AccountOperationResponse> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default);
