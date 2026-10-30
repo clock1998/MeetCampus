@@ -1,27 +1,101 @@
 # Phase 3: Profile, Questionnaire, and Images
 
 ## Goal
-Provide required onboarding data while protecting private answers and requiring an uploaded profile image for discoverability.
+Deliver the profile-onboarding features that let a verified member describe their profile, choose connection intents, satisfy the MVP image requirement, and complete the questionnaire. The server remains authoritative for validation, privacy, and whether the profile is complete enough for discoverability.
 
 ## Prerequisites
 - Phase 2 complete.
+- Phase 1 persistence, configuration, and restricted administration foundations complete.
 - Age policy and image-approval workflow remain deferred beyond MVP.
 
-## Increments
-1. Refactor profile contracts, entities, setup service, and Blazor onboarding UI to capture only approved required/optional fields from section 4.3.
-2. Support multiple connection intents and per-intent inbound contact restrictions; enforce server validation against enabled intent rules.
-3. Preserve existing server-side image validation/optimization/storage. An uploaded image satisfies the MVP image prerequisite; defer image review/approval states and workflow.
-4. Create questionnaire-version and question-definition administration, including category, validation, privacy class, scoring configuration, and approved explanation templates.
-5. Add baseline questionnaire answer API/client UI using stable question IDs and validated structured values.
-6. Compute profile/questionnaire completion through the central eligibility service; missing answers are incomplete for discoverability but never score as disagreement.
+## Features
+
+### Feature 1: Profile setup and connection preferences
+
+**Outcome:** A member can maintain the profile information required by onboarding and select one or more enabled connection intents with the corresponding inbound-contact preferences.
+
+**Implementation:**
+1. Define or confirm the profile setup request/response contracts in `MeetCampus.Contracts`; return only fields the member is allowed to see or edit.
+2. Implement server-side profile setup and update operations in the Profile feature. Validate required values and all lookup IDs against active server-managed data; never trust client-supplied labels or eligibility state.
+3. Implement intent selection and per-intent inbound-contact restrictions using enabled intent and policy data from the Phase 1 foundation. Reject disabled, unknown, duplicate, or incompatible values.
+4. Add the Profile feature typed client and localized, accessible onboarding UI for entering profile data and selecting intents/preferences.
+5. Connect successful updates to the existing eligibility service so completion and contact eligibility reflect the saved state immediately.
+
+**Acceptance criteria:**
+- A member can save and update valid profile data, multiple enabled intents, and the allowed preference for each selected intent.
+- Invalid or disabled lookup values and policy combinations are rejected server-side with safe, useful validation results.
+- API responses expose no university email, private questionnaire data, or server-only eligibility details.
+
+### Feature 2: Profile image onboarding
+
+**Outcome:** A member can upload and manage the profile image required for MVP discoverability.
+
+**Implementation:**
+1. Reuse the existing server-side image validation, optimization, and `S3ProfileImageStorage` flow; retain ownership checks and the configured Garage-compatible storage client.
+2. Expose image upload, replacement, and removal behavior through the Profile feature API and a typed client. Do not put storage credentials or storage operations in the WebAssembly client.
+3. Add localized, accessible image controls and clear upload/validation feedback to profile onboarding.
+4. Represent image presence in the central eligibility evaluation. A successfully stored image satisfies the MVP prerequisite; do not introduce approval states or review workflow.
+
+**Acceptance criteria:**
+- Invalid images are rejected before storage; stored images follow the existing validation/optimization and ownership rules.
+- A successful upload satisfies the image prerequisite; image approval is not required for MVP eligibility.
+- Replacing or removing an image updates eligibility consistently, and storage failures do not falsely mark an image as present.
+
+### Feature 3: Questionnaire administration
+
+**Outcome:** Authorized administrators can maintain the initial questionnaire using the Phase 1 restricted administration boundary.
+
+**Implementation:**
+1. Add or complete server-side administration operations for question definitions, categories, answer validation rules, scoring configuration, and approved explanation templates, using the existing Phase 1 persistence and authorization/auditing foundations.
+2. Validate question types, allowed answer shapes/options, category assignments, scoring configuration, and explanation-template references before saving or publishing changes.
+3. Preserve stable question IDs. Track question update timestamps as defined in Phase 1 so changes can identify responses that members should refresh; do not introduce questionnaire versioning in this phase.
+4. Keep administration UI/API access restricted to the approved administrative surface and record required audit events.
+
+**Acceptance criteria:**
+- Unauthorized users cannot read or change questionnaire administration data.
+- Invalid definitions, scoring settings, and explanation references cannot be published.
+- A changed question can be identified for response refresh using its update timestamp without invalidating the stable question ID.
+
+### Feature 4: Member questionnaire responses
+
+**Outcome:** A member can answer and update the active questionnaire with validated structured values.
+
+**Implementation:**
+1. Define shared request/status contracts using stable question IDs; accept only the answer shape allowed by each current question definition.
+2. Implement server-side submission and update operations that validate question existence, active status, answer type, allowed options, and any required-answer rules against current definitions.
+3. Store response revisions and submission timestamps using the Phase 1 data model, and identify responses that need refresh after a question definition changes.
+4. Add the Questionnaire typed client and localized, accessible answer/edit UI. Render the active definitions and return validation/status information without returning raw private or matching-only answer values.
+5. Ensure questionnaire completeness is calculated from valid current responses, not from client-submitted completion flags.
+
+**Acceptance criteria:**
+- Unknown, inactive, stale, or malformed question answers are rejected with actionable validation results.
+- Members can update their own responses but cannot read or change another member's private responses.
+- Missing or refresh-required answers make the questionnaire incomplete; they are not treated as disagreement by scoring.
+
+### Feature 5: Onboarding completion and discoverability integration
+
+**Outcome:** Profile setup, image presence, and valid questionnaire responses consistently feed the existing central eligibility decision.
+
+**Implementation:**
+1. Add or confirm the required profile and questionnaire completion checks in the central eligibility service; do not create a second client- or feature-specific eligibility authority.
+2. Ensure profile, image, intent, or answer changes cause subsequent eligibility checks to use the latest persisted state.
+3. Return only the privacy-safe onboarding/eligibility status needed by the client to guide the member to incomplete steps.
+4. Verify downstream recommendation/contact entry points continue to use the shared eligibility service from Phase 2.
+
+**Acceptance criteria:**
+- Missing required profile data, an uploaded image, or valid current questionnaire answers prevents discoverability.
+- Completing all required onboarding steps makes the member eligible only when all other Phase 2 eligibility requirements are satisfied.
+- Eligibility changes take effect after a relevant update without duplicating eligibility logic in the client.
 
 ## Privacy rules
-- Public profile and recommendation contracts contain only approved shareable fields.
-- University email, private answers, exact matching-only answers, and storage credentials never leave server-side boundaries.
-- Sensitive traits may be included as required fields when explicitly defined in approved profile/questionnaire configuration; classify and protect answers according to their configured privacy class.
+- Never expose university email, raw private or exact matching-only answer values, or storage credentials in public contracts, client responses, logs, or explanations.
+- Keep private and matching-only answer use within authorized server-side persistence and matching operations; enforce ownership for member answer operations.
+- Do not return private answer values when rendering questionnaire status or an explanation.
 
-## Tests and exit criteria
-- Profile and questionnaire server validation rejects invalid lookup IDs, intents, questions, and answer shapes.
-- An uploaded image is required for eligibility; image approval is not an MVP gate.
-- Questionnaire-version rules preserve historical answers.
-- Client onboarding text is localized and accessible.
+## Cross-feature validation and phase exit criteria
+- Profile and questionnaire API tests cover valid saves, invalid lookup IDs/intents/questions/answer shapes, ownership, and authorization.
+- Image tests cover validation, optimization/storage outcomes, replacement/removal, ownership, and eligibility changes without requiring approval states.
+- Questionnaire administration tests cover authorization, validation, stable IDs, update timestamps, and audit events.
+- Eligibility tests cover each missing prerequisite and restoration after completion; missing answers never become score disagreement.
+- Client onboarding text is localized and controls are accessible by keyboard and assistive technology.
+- Build the affected projects and solution, then run relevant automated tests. No database migration files are created or changed as part of this phase; migration work is managed separately.

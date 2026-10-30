@@ -1,7 +1,7 @@
 # Phase 4: Deterministic Compatibility Scoring
 
 ## Goal
-Implement a pure, versioned matching-rules engine that calculates compatibility and evidence coverage without ML or popularity signals.
+Implement a pure, matching-rules engine that calculates compatibility and evidence coverage without ML or popularity signals.
 
 ## Prerequisites
 - Phase 3 complete.
