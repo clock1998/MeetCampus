@@ -13,6 +13,12 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
             .AsNoTracking()
             .SingleOrDefaultAsync(p => p.ApplicationUserId == userId, cancellationToken);
 
+        var intentions = await dbContext.UserIntentions
+            .AsNoTracking()
+            .OrderBy(intention => intention.Name)
+            .Select(intention => new ProfileLookupOption(intention.Id, intention.DisplayKey, intention.Name))
+            .ToListAsync(cancellationToken);
+
         return new UserProfileSetupResponse
         {
             ProfileImages = await profileImageService.GetProfileImagesAsync(userId, cancellationToken),
@@ -57,11 +63,7 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
                 .OrderBy(l => l.Name)
                 .Select(l => new ProfileLookupOption(l.Id, null, l.Name))
                 .ToListAsync(cancellationToken),
-            Intentions = await dbContext.UserIntentions
-                .AsNoTracking()
-                .OrderBy(i => i.Name)
-                .Select(i => new ProfileLookupOption(i.Id, i.DisplayKey, i.Name))
-                .ToListAsync(cancellationToken),
+            Intentions = intentions,
             Ethnicities = await dbContext.UserEthnicities
                 .AsNoTracking()
                 .OrderBy(e => e.Name)
@@ -95,9 +97,11 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
         if (request.IntentionIds.Count == 0 || request.IntentionIds.Distinct().Count() != request.IntentionIds.Count)
             throw new InvalidOperationException("Select one or more unique intentions.");
 
-        var validIntentionCount = await dbContext.UserIntentions
-            .CountAsync(intention => request.IntentionIds.Contains(intention.Id), cancellationToken);
-        if (validIntentionCount != request.IntentionIds.Count)
+        var availableIntentionIds = await dbContext.UserIntentions
+            .Select(intention => intention.Id)
+            .ToListAsync(cancellationToken);
+        var availableIntentionIdSet = availableIntentionIds.ToHashSet();
+        if (request.IntentionIds.Any(intentionId => !availableIntentionIdSet.Contains(intentionId)))
             throw new InvalidOperationException("Invalid intention.");
 
         if (!await dbContext.UserEthnicities.AnyAsync(e => e.Id == request.EthnicityId, cancellationToken))

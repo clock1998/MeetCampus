@@ -123,9 +123,9 @@ Every MVP field below is required unless explicitly marked optional. Age or age 
 The pilot enables friendship, dating, study partners, and activity partners.
 
 - Users may choose multiple intents.
+- A user's selected intents describe both the connection types they seek and the types they are willing to receive interests or introduction requests about.
 - Dating is symmetric: both users must select dating for dating eligibility.
 - Other intent compatibility is directional and evaluated using the administrator-configured intent compatibility matrix.
-- Users may restrict which intents can send them interests or introduction requests.
 
 ### 5.3 Compatibility score
 

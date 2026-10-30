@@ -123,7 +123,7 @@ Authentication uses ASP.NET Core Identity with application cookies, not JWT or b
 ## Typed HTTP Clients
 
 - Define a client interface only when it represents a real API boundary or is needed for testing; pair it with one implementation.
-- Place feature client interfaces and implementations in `MeetCampus.Client/Features/[Feature]/HttpClients/`.
+- Place feature client interfaces and implementations in `MeetCampus.Client/Features/[Feature]/HttpClients/`."
 - Register clients in `MeetCampus.Client/Program.cs` with `AddHttpClient<Interface, Implementation>()` and the hosted application base address.
 - Put common request, response, error, and status handling in `MeetCampus.Client/Infrastructure/` rather than duplicating it in each feature client.
 - Deserialize into contracts from `MeetCampus.Contracts`; never deserialize API responses into server entities.
@@ -213,6 +213,10 @@ Before implementing a new feature, create a focused implementation plan and pres
 ## Package Vulnerability Management
 
 - For explicitly acknowledged and accepted package vulnerability risk, suppress the corresponding NuGet advisory warning at the specific package reference rather than globally; keep other advisory warnings visible.
+
+## Questionnaire Management
+
+- Questionnaire definitions and answers are not versioned; do not design or implement questionnaire versioning or historical-answer preservation.
 
 ---
 

@@ -12,17 +12,17 @@ Deliver the profile-onboarding features that let a verified member describe thei
 
 ### Feature 1: Profile setup and connection preferences
 
-**Outcome:** A member can maintain the profile information required by onboarding and select one or more enabled connection intents with the corresponding inbound-contact preferences.
+**Outcome:** A member can maintain the profile information required by onboarding and select one or more connection intents that represent both what they seek and what they are willing to receive interests or introduction requests about.
 
 **Implementation:**
 1. Define or confirm the profile setup request/response contracts in `MeetCampus.Contracts`; return only fields the member is allowed to see or edit.
 2. Implement server-side profile setup and update operations in the Profile feature. Validate required values and all lookup IDs against active server-managed data; never trust client-supplied labels or eligibility state.
-3. Implement intent selection and per-intent inbound-contact restrictions using enabled intent and policy data from the Phase 1 foundation. Reject disabled, unknown, duplicate, or incompatible values.
-4. Add the Profile feature typed client and localized, accessible onboarding UI for entering profile data and selecting intents/preferences.
+3. Validate selected intents against server-managed intent records. Reject unknown, duplicate, or incompatible values.
+4. Add the Profile feature typed client and localized, accessible onboarding UI for entering profile data and selecting intents.
 5. Connect successful updates to the existing eligibility service so completion and contact eligibility reflect the saved state immediately.
 
 **Acceptance criteria:**
-- A member can save and update valid profile data, multiple enabled intents, and the allowed preference for each selected intent.
+- A member can save and update valid profile data and multiple selected intents.
 - Invalid or disabled lookup values and policy combinations are rejected server-side with safe, useful validation results.
 - API responses expose no university email, private questionnaire data, or server-only eligibility details.
 
