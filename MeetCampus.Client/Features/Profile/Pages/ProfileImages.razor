@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
+@using MeetCampus.Client.Shared.Navigation
 @inject IProfileSetupClient ProfileClient
 @inject IStringLocalizer<ProfileResource> L
 @inject IJSRuntime JS
@@ -56,9 +57,7 @@
                                         }
                                         else
                                         {
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 11v6m4-6v6" />
-                                            </svg>
+                                            <LucideIcon Name="trash-2" CssClass="h-4 w-4" />
                                         }
                                     </button>
                                     <img src="@image.Url" alt="@L["ProfileSetup_ProfileImageAlt"]" class="h-32 w-full rounded-xl object-cover" />
