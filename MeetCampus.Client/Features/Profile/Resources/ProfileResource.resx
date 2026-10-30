@@ -111,6 +111,7 @@
   <data name="ProfileImages_PageTitle" xml:space="preserve"><value>Profile images</value></data>
   <data name="ProfileImages_Title" xml:space="preserve"><value>Add your profile images</value></data>
   <data name="ProfileImages_Description" xml:space="preserve"><value>Upload images, choose your avatar, and manage your profile gallery.</value></data>
+  <data name="ProfileImages_RequiredForDiscoverability" xml:space="preserve"><value>Upload at least one profile image to finish. A stored image is required to appear in discoverability.</value></data>
   <data name="ProfileImages_BackToProfile" xml:space="preserve"><value>Back to profile</value></data>
   <data name="ProfileImages_Finish" xml:space="preserve"><value>Finish</value></data>
   <data name="ProfileSetup_ManageImages" xml:space="preserve"><value>Manage profile images</value></data>

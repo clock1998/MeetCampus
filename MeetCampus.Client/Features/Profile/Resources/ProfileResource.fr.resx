@@ -111,6 +111,7 @@
   <data name="ProfileImages_PageTitle" xml:space="preserve"><value>Photos de profil</value></data>
   <data name="ProfileImages_Title" xml:space="preserve"><value>Ajoutez vos photos de profil</value></data>
   <data name="ProfileImages_Description" xml:space="preserve"><value>Téléversez des photos, choisissez votre avatar et gérez votre galerie de profil.</value></data>
+  <data name="ProfileImages_RequiredForDiscoverability" xml:space="preserve"><value>Téléversez au moins une photo de profil pour terminer. Une photo enregistrée est requise pour être visible dans les suggestions.</value></data>
   <data name="ProfileImages_BackToProfile" xml:space="preserve"><value>Retour au profil</value></data>
   <data name="ProfileImages_Finish" xml:space="preserve"><value>Terminer</value></data>
   <data name="ProfileSetup_ManageImages" xml:space="preserve"><value>Gérer les photos de profil</value></data>

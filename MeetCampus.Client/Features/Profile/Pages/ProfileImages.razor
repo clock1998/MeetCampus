@@ -80,19 +80,27 @@
                     }
                     <InputFile OnChange="HandleImagesSelected" multiple accept="image/jpeg,image/png,image/webp"
                                disabled="@(isUploadingImages || settingAvatarId.HasValue || deletingImageId.HasValue || profileImages.Count >= MaximumProfileImages)"
+                               aria-label="@L["ProfileSetup_ProfileImage"]"
+                               aria-describedby="profile-image-upload-hint"
                                class="file-input file-input-bordered w-full" />
                     @if (isUploadingImages)
                     {
                         <p class="text-base-content/70 text-sm" role="status">@L["ProfileSetup_UploadingImages"]</p>
                     }
-                    <p class="text-base-content/70 text-sm">@L["ProfileSetup_ProfileImageHint"]</p>
+                    <p id="profile-image-upload-hint" class="text-base-content/70 text-sm">@L["ProfileSetup_ProfileImageHint"]</p>
+                    @if (profileImages.Count == 0)
+                    {
+                        <p class="text-warning text-sm" role="status">@L["ProfileImages_RequiredForDiscoverability"]</p>
+                    }
                 </fieldset>
 
                 <div class="mt-6 flex flex-wrap gap-3">
                     <button class="btn btn-outline rounded-full" type="button" @onclick="NavigateToProfileSetup">
                         @L["ProfileImages_BackToProfile"]
                     </button>
-                    <button class="btn btn-primary rounded-full" type="button" @onclick="FinishSetup">
+                    <button class="btn btn-primary rounded-full" type="button"
+                            disabled="@(profileImages.Count == 0 || isUploadingImages || deletingImageId.HasValue)"
+                            @onclick="FinishSetup">
                         @L["ProfileImages_Finish"]
                     </button>
                 </div>
