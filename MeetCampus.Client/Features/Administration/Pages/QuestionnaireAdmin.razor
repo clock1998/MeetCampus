@@ -1,0 +1,365 @@
+@page "/admin/questionnaire"
+@attribute [Authorize(Roles = "Administrator")]
+@using MeetCampus.Client.Features.Administration.HttpClients
+@using MeetCampus.Client.Features.Administration.Resources
+@using MeetCampus.Contracts.Features.Administration
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@inject IQuestionnaireAdminClient AdminClient
+@inject IStringLocalizer<AdministrationResource> L
+
+<PageTitle>@L["QuestionnaireAdmin_PageTitle"]</PageTitle>
+
+<div class="bg-base-100 px-6 py-10">
+    <div class="mx-auto max-w-5xl space-y-6">
+        <header class="space-y-2">
+            <h1 class="text-3xl font-bold">@L["QuestionnaireAdmin_Title"]</h1>
+            <p class="text-base-content/70">@L["QuestionnaireAdmin_Description"]</p>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-error" role="alert">@errorMessage</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success" role="status">@successMessage</div>
+        }
+
+        @if (isLoading)
+        {
+            <p role="status">@L["QuestionnaireAdmin_Loading"]</p>
+        }
+        else if (catalog is not null)
+        {
+            <section class="card bg-base-200 border-base-300 border p-5 shadow-sm">
+                <EditForm Model="editQuestion" OnValidSubmit="SaveAsync" class="space-y-5">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <h2 class="text-xl font-semibold">@(editingId.HasValue ? L["QuestionnaireAdmin_EditTitle"] : L["QuestionnaireAdmin_NewTitle"])</h2>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_Code"]</span>
+                            <InputText @bind-Value="editQuestion.Code" class="input input-bordered w-full" disabled="@editingId.HasValue" />
+                            <ValidationMessage For="@(() => editQuestion.Code)" />
+                        </label>
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_Type"]</span>
+                            <InputSelect @bind-Value="editQuestion.Type" class="select select-bordered w-full" @bind-Value:after="OnTypeChanged">
+                                <option value="@QuestionType.SingleChoice">@L["QuestionnaireAdmin_TypeSingle"]</option>
+                                <option value="@QuestionType.MultipleChoice">@L["QuestionnaireAdmin_TypeMultiple"]</option>
+                                <option value="@QuestionType.Scale">@L["QuestionnaireAdmin_TypeScale"]</option>
+                            </InputSelect>
+                        </label>
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_Category"]</span>
+                            <InputSelect @bind-Value="editQuestion.CategoryCode" class="select select-bordered w-full">
+                                @foreach (var category in catalog.Categories)
+                                {
+                                    <option value="@category.Code">@L[category.DisplayKey]</option>
+                                }
+                            </InputSelect>
+                        </label>
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_ScoringWeight"]</span>
+                            <InputNumber @bind-Value="editQuestion.ScoringWeight" class="input input-bordered w-full" step="0.01" />
+                        </label>
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_SortOrder"]</span>
+                            <InputNumber @bind-Value="editQuestion.SortOrder" class="input input-bordered w-full" />
+                        </label>
+                        @if (editQuestion.Type == QuestionType.MultipleChoice)
+                        {
+                            <label class="fieldset">
+                                <span class="fieldset-legend">@L["QuestionnaireAdmin_MaxSelections"]</span>
+                                <InputNumber @bind-Value="editQuestion.MaxSelections" class="input input-bordered w-full" />
+                            </label>
+                        }
+                        @if (editQuestion.Type == QuestionType.Scale)
+                        {
+                            <label class="fieldset">
+                                <span class="fieldset-legend">@L["QuestionnaireAdmin_ScaleMin"]</span>
+                                <InputNumber @bind-Value="editQuestion.ScaleMin" class="input input-bordered w-full" />
+                            </label>
+                            <label class="fieldset">
+                                <span class="fieldset-legend">@L["QuestionnaireAdmin_ScaleMax"]</span>
+                                <InputNumber @bind-Value="editQuestion.ScaleMax" class="input input-bordered w-full" />
+                            </label>
+                        }
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_PromptEn"]</span>
+                            <InputTextArea @bind-Value="editQuestion.PromptEn" class="textarea textarea-bordered min-h-24 w-full" />
+                            <ValidationMessage For="@(() => editQuestion.PromptEn)" />
+                        </label>
+                        <label class="fieldset">
+                            <span class="fieldset-legend">@L["QuestionnaireAdmin_PromptFr"]</span>
+                            <InputTextArea @bind-Value="editQuestion.PromptFr" class="textarea textarea-bordered min-h-24 w-full" />
+                            <ValidationMessage For="@(() => editQuestion.PromptFr)" />
+                        </label>
+                    </div>
+                    <label class="label cursor-pointer justify-start gap-3">
+                        <InputCheckbox @bind-Value="editQuestion.IsRequired" class="checkbox" />
+                        <span>@L["QuestionnaireAdmin_Required"]</span>
+                    </label>
+                    @if (editQuestion.Type != QuestionType.Scale)
+                    {
+                        <fieldset class="space-y-3">
+                            <legend class="text-lg font-semibold">@L["QuestionnaireAdmin_Options"]</legend>
+                            @for (var index = 0; index < editQuestion.Options.Count; index++)
+                            {
+                                var option = editQuestion.Options[index];
+                                <div @key="option" class="grid items-end gap-3 rounded-xl border border-base-300 p-4 md:grid-cols-[1fr_1fr_1fr_auto]">
+                                    <label class="fieldset">
+                                        <span class="fieldset-legend">@L["QuestionnaireAdmin_OptionCode"]</span>
+                                        <InputText @bind-Value="option.Code" class="input input-bordered w-full" />
+                                    </label>
+                                    <label class="fieldset">
+                                        <span class="fieldset-legend">@L["QuestionnaireAdmin_LabelEn"]</span>
+                                        <InputText @bind-Value="option.LabelEn" class="input input-bordered w-full" />
+                                    </label>
+                                    <label class="fieldset">
+                                        <span class="fieldset-legend">@L["QuestionnaireAdmin_LabelFr"]</span>
+                                        <InputText @bind-Value="option.LabelFr" class="input input-bordered w-full" />
+                                    </label>
+                                    <button type="button" class="btn btn-error btn-outline" @onclick="() => RemoveOption(option)" aria-label="@L["QuestionnaireAdmin_RemoveOption"]">
+                                        <LucideIcon Name="trash-2" CssClass="size-4" />
+                                    </button>
+                                </div>
+                            }
+                            <button type="button" class="btn btn-outline" @onclick="AddOption">@L["QuestionnaireAdmin_AddOption"]</button>
+                        </fieldset>
+                    }
+                    <div class="flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-primary" disabled="@isSaving">@L["QuestionnaireAdmin_Save"]</button>
+                        <button type="button" class="btn btn-ghost" @onclick="ResetForm">@L["QuestionnaireAdmin_Cancel"]</button>
+                    </div>
+                </EditForm>
+            </section>
+
+            <section class="space-y-3">
+                <h2 class="text-xl font-semibold">@L["QuestionnaireAdmin_QuestionsTitle"]</h2>
+                @if (questions.Count == 0)
+                {
+                    <p class="text-base-content/70">@L["QuestionnaireAdmin_Empty"]</p>
+                }
+                @foreach (var question in questions)
+                {
+                    <article @key="question.Id" class="card bg-base-200 border-base-300 border p-4 shadow-sm">
+                        <div class="flex flex-wrap items-start justify-between gap-4">
+                            <div class="space-y-1">
+                                <h3 class="font-semibold">@question.PromptEn</h3>
+                                <p class="text-sm text-base-content/70">@question.PromptFr</p>
+                                <p class="text-xs text-base-content/60">@question.Code · @L[$"QuestionnaireAdmin_Type{question.Type}"] · @L[catalog.Categories.Single(category => category.Code == question.CategoryCode).DisplayKey]</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline" @onclick="() => BeginEdit(question)">@L["QuestionnaireAdmin_Edit"]</button>
+                                <button type="button" class="btn btn-sm btn-error btn-outline" @onclick="() => DeleteAsync(question)" disabled="@isSaving">@L["QuestionnaireAdmin_Delete"]</button>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </section>
+        }
+    </div>
+</div>
+
+@code {
+    private List<QuestionResponse> questions = [];
+    private QuestionCatalogResponse? catalog;
+    private QuestionEditModel editQuestion = new();
+    private Guid? editingId;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            catalog = await AdminClient.GetCatalogAsync();
+            questions = (await AdminClient.GetQuestionsAsync()).ToList();
+            ResetForm();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = exception.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OnTypeChanged()
+    {
+        var type = editQuestion.Type;
+        if (Enum.IsDefined(type))
+        {
+            if (type == QuestionType.Scale)
+                editQuestion.Options.Clear();
+            else
+            {
+                editQuestion.ScaleMin = null;
+                editQuestion.ScaleMax = null;
+                if (editQuestion.Options.Count == 0)
+                    AddOption();
+            }
+        }
+    }
+
+    private void AddOption() => editQuestion.Options.Add(new QuestionOptionEditModel { SortOrder = editQuestion.Options.Count });
+
+    private void RemoveOption(QuestionOptionEditModel option) => editQuestion.Options.Remove(option);
+
+    private void BeginEdit(QuestionResponse question)
+    {
+        editingId = question.Id;
+        editQuestion = new QuestionEditModel
+        {
+            Code = question.Code,
+            Type = question.Type,
+            PromptEn = question.PromptEn,
+            PromptFr = question.PromptFr,
+            IsRequired = question.IsRequired,
+            CategoryCode = question.CategoryCode,
+            ScoringWeight = question.ScoringWeight,
+            SortOrder = question.SortOrder,
+            MaxSelections = question.MaxSelections,
+            ScaleMin = question.ScaleMin,
+            ScaleMax = question.ScaleMax,
+            Options = question.Options.Select(option => new QuestionOptionEditModel
+            {
+                Code = option.Code,
+                LabelEn = option.LabelEn,
+                LabelFr = option.LabelFr,
+                SortOrder = option.SortOrder,
+                ScoringValue = option.ScoringValue
+            }).ToList()
+        };
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (catalog is null)
+            return;
+
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+        try
+        {
+            for (var index = 0; index < editQuestion.Options.Count; index++)
+                editQuestion.Options[index].SortOrder = index;
+
+            var request = new QuestionRequest
+            {
+                Code = editQuestion.Code,
+                Type = editQuestion.Type,
+                PromptEn = editQuestion.PromptEn,
+                PromptFr = editQuestion.PromptFr,
+                IsRequired = editQuestion.IsRequired,
+                CategoryCode = editQuestion.CategoryCode,
+                ScoringWeight = editQuestion.ScoringWeight,
+                SortOrder = editQuestion.SortOrder,
+                MaxSelections = editQuestion.MaxSelections,
+                ScaleMin = editQuestion.ScaleMin,
+                ScaleMax = editQuestion.ScaleMax,
+                Options = editQuestion.Options.Select(option => new QuestionOptionAdminRequest
+                {
+                    Code = option.Code,
+                    LabelEn = option.LabelEn,
+                    LabelFr = option.LabelFr,
+                    SortOrder = option.SortOrder,
+                    ScoringValue = option.ScoringValue
+                }).ToList()
+            };
+            if (editingId is Guid id)
+                await AdminClient.UpdateQuestionAsync(id, request);
+            else
+                await AdminClient.CreateQuestionAsync(request);
+
+            questions = (await AdminClient.GetQuestionsAsync()).ToList();
+            successMessage = L["QuestionnaireAdmin_SaveSuccess"];
+            ResetForm();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = exception.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteAsync(QuestionResponse question)
+    {
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+        try
+        {
+            await AdminClient.DeleteQuestionAsync(question.Id);
+            questions.Remove(question);
+            if (editingId == question.Id)
+                ResetForm();
+            successMessage = L["QuestionnaireAdmin_DeleteSuccess"];
+        }
+        catch (Exception exception)
+        {
+            errorMessage = exception.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        editingId = null;
+        editQuestion = new QuestionEditModel
+        {
+            CategoryCode = catalog?.Categories.FirstOrDefault()?.Code ?? string.Empty,
+            Options = [new QuestionOptionEditModel()]
+        };
+    }
+
+    private sealed class QuestionEditModel
+    {
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(128, MinimumLength = 1)]
+        public string Code { get; set; } = string.Empty;
+        public QuestionType Type { get; set; } = QuestionType.SingleChoice;
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
+        public string PromptEn { get; set; } = string.Empty;
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
+        public string PromptFr { get; set; } = string.Empty;
+        public bool IsRequired { get; set; }
+        [System.ComponentModel.DataAnnotations.Required]
+        public string CategoryCode { get; set; } = string.Empty;
+        [System.ComponentModel.DataAnnotations.Range(typeof(decimal), "0", "1")]
+        public decimal ScoringWeight { get; set; }
+        public int SortOrder { get; set; }
+        public int? MaxSelections { get; set; }
+        public int? ScaleMin { get; set; }
+        public int? ScaleMax { get; set; }
+        public List<QuestionOptionEditModel> Options { get; set; } = [];
+    }
+
+    private sealed class QuestionOptionEditModel
+    {
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(128, MinimumLength = 1)]
+        public string Code { get; set; } = string.Empty;
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(512, MinimumLength = 1)]
+        public string LabelEn { get; set; } = string.Empty;
+        [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(512, MinimumLength = 1)]
+        public string LabelFr { get; set; } = string.Empty;
+        public int SortOrder { get; set; }
+        public string? ScoringValue { get; set; }
+    }
+}

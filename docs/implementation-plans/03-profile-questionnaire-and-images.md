@@ -46,14 +46,15 @@ Deliver the profile-onboarding features that let a verified member describe thei
 **Outcome:** Authorized administrators can maintain the initial questionnaire using the Phase 1 restricted administration boundary.
 
 **Implementation:**
-1. Add or complete server-side administration operations for question definitions, categories, answer validation rules, scoring configuration, and approved explanation templates, using the existing Phase 1 persistence and authorization/auditing foundations.
-2. Validate question types, allowed answer shapes/options, category assignments, scoring configuration, and explanation-template references before saving or publishing changes.
+1. Provide an Administrator-only client page and protected server API for question definitions, fixed categories, answer validation rules, and scoring configuration, using the existing persistence and authorization/auditing foundations.
+2. Validate question types, allowed answer shapes/options, category assignments, and scoring configuration before saving changes. Questionnaire data is used only for matching; question visibility and compatibility explanation templates are out of scope.
 3. Preserve stable question IDs. Track question update timestamps as defined in Phase 1 so changes can identify responses that members should refresh; do not introduce questionnaire versioning in this phase.
-4. Keep administration UI/API access restricted to the approved administrative surface and record required audit events.
+4. Store question prompts and option labels as English and French database translations. The EF model requires translation tables and schema changes; migration files are managed separately and are not created in this phase.
+5. Keep administration UI/API access restricted to Administrators and record required audit events. Preserve option IDs and reject removal of options referenced by saved answers.
 
 **Acceptance criteria:**
 - Unauthorized users cannot read or change questionnaire administration data.
-- Invalid definitions, scoring settings, and explanation references cannot be published.
+- Invalid definitions, scoring settings, and unsupported category values cannot be saved.
 - A changed question can be identified for response refresh using its update timestamp without invalidating the stable question ID.
 
 ### Feature 4: Member questionnaire responses

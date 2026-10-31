@@ -450,10 +450,6 @@ namespace MeetCampus.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<string>("ExplanationTemplateKey")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
                     b.Property<string>("Group")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -464,16 +460,6 @@ namespace MeetCampus.Migrations
 
                     b.Property<int?>("MaxSelections")
                         .HasColumnType("integer");
-
-                    b.Property<string>("PromptResourceKey")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("QuestionVisibility")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
 
                     b.Property<int?>("ScaleMax")
                         .HasColumnType("integer");
@@ -499,7 +485,7 @@ namespace MeetCampus.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("QuestionDefinitions");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOption", b =>
@@ -507,11 +493,6 @@ namespace MeetCampus.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("LabelResourceKey")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("OptionCode")
                         .IsRequired()
@@ -539,6 +520,44 @@ namespace MeetCampus.Migrations
                     b.ToTable("QuestionOptions");
                 });
 
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOptionTranslation", b =>
+                {
+                    b.Property<Guid>("QuestionOptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CultureCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("QuestionOptionId", "CultureCode");
+
+                    b.ToTable("QuestionOptionTranslations");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionTranslation", b =>
+                {
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CultureCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.HasKey("QuestionId", "CultureCode");
+
+                    b.ToTable("QuestionTranslations");
+                });
+
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.UserAnswer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -560,7 +579,7 @@ namespace MeetCampus.Migrations
 
                     b.HasIndex("ApplicationUserId", "CreatedAt");
 
-                    b.ToTable("QuestionnaireAnswerSets");
+                    b.ToTable("UserAnswers");
                 });
 
             modelBuilder.Entity("MeetCampus.Data.Safety.ModerationAction", b =>
@@ -1727,6 +1746,28 @@ namespace MeetCampus.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOptionTranslation", b =>
+                {
+                    b.HasOne("MeetCampus.Data.Questionnaire.QuestionOption", "QuestionOption")
+                        .WithMany("Translations")
+                        .HasForeignKey("QuestionOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestionOption");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionTranslation", b =>
+                {
+                    b.HasOne("MeetCampus.Data.Questionnaire.Question", "Question")
+                        .WithMany("Translations")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.UserAnswer", b =>
                 {
                     b.HasOne("MeetCampus.Data.User.ApplicationUser", "ApplicationUser")
@@ -1976,6 +2017,13 @@ namespace MeetCampus.Migrations
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.Question", b =>
                 {
                     b.Navigation("Options");
+
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOption", b =>
+                {
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("MeetCampus.Data.User.ApplicationUser", b =>

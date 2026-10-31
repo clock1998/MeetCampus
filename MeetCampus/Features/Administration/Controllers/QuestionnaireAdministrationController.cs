@@ -33,7 +33,7 @@ public sealed class QuestionnaireAdministrationController(AdministrativeDataServ
         try
         {
             var question = await administrativeDataService.CreateQuestionAsync(User, ToEntity(request), cancellationToken);
-            return CreatedAtAction(nameof(GetQuestionsAsync), new { }, ToResponse(question));
+            return StatusCode(StatusCodes.Status201Created, ToResponse(question));
         }
         catch (ArgumentException exception)
         {

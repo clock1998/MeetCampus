@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+	<xsd:element name="root" msdata:IsDataSet="true"><xsd:complexType><xsd:choice maxOccurs="unbounded"><xsd:element name="data"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence><xsd:attribute name="name" type="xsd:string" /><xsd:attribute ref="xml:space" /></xsd:complexType></xsd:element></xsd:choice></xsd:complexType></xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="QuestionnaireAdmin_PageTitle" xml:space="preserve"><value>Administration du questionnaire</value></data>
+  <data name="QuestionnaireAdmin_Title" xml:space="preserve"><value>Administration du questionnaire</value></data>
+  <data name="QuestionnaireAdmin_Description" xml:space="preserve"><value>Créez et gérez les questions de compatibilité ainsi que leurs textes en anglais et en français.</value></data>
+  <data name="QuestionnaireAdmin_Loading" xml:space="preserve"><value>Chargement du questionnaire…</value></data>
+  <data name="QuestionnaireAdmin_EditTitle" xml:space="preserve"><value>Modifier la question</value></data>
+  <data name="QuestionnaireAdmin_NewTitle" xml:space="preserve"><value>Nouvelle question</value></data>
+  <data name="QuestionnaireAdmin_Code" xml:space="preserve"><value>Code stable de la question</value></data>
+  <data name="QuestionnaireAdmin_Type" xml:space="preserve"><value>Type de réponse</value></data>
+  <data name="QuestionnaireAdmin_TypeSingleChoice" xml:space="preserve"><value>Choix unique</value></data>
+  <data name="QuestionnaireAdmin_TypeMultipleChoice" xml:space="preserve"><value>Choix multiples</value></data>
+  <data name="QuestionnaireAdmin_TypeScale" xml:space="preserve"><value>Échelle</value></data>
+  <data name="QuestionnaireAdmin_Category" xml:space="preserve"><value>Catégorie de compatibilité</value></data>
+  <data name="QuestionnaireAdmin_ScoringWeight" xml:space="preserve"><value>Poids de compatibilité (0–1)</value></data>
+  <data name="QuestionnaireAdmin_SortOrder" xml:space="preserve"><value>Ordre d’affichage</value></data>
+  <data name="QuestionnaireAdmin_MaxSelections" xml:space="preserve"><value>Nombre maximal de choix</value></data>
+  <data name="QuestionnaireAdmin_ScaleMin" xml:space="preserve"><value>Minimum de l’échelle</value></data>
+  <data name="QuestionnaireAdmin_ScaleMax" xml:space="preserve"><value>Maximum de l’échelle</value></data>
+  <data name="QuestionnaireAdmin_PromptEn" xml:space="preserve"><value>Question (anglais)</value></data>
+  <data name="QuestionnaireAdmin_PromptFr" xml:space="preserve"><value>Question (français)</value></data>
+  <data name="QuestionnaireAdmin_Required" xml:space="preserve"><value>Réponse obligatoire pour terminer le questionnaire</value></data>
+  <data name="QuestionnaireAdmin_Options" xml:space="preserve"><value>Choix de réponse</value></data>
+  <data name="QuestionnaireAdmin_OptionCode" xml:space="preserve"><value>Code stable du choix</value></data>
+  <data name="QuestionnaireAdmin_LabelEn" xml:space="preserve"><value>Libellé du choix (anglais)</value></data>
+  <data name="QuestionnaireAdmin_LabelFr" xml:space="preserve"><value>Libellé du choix (français)</value></data>
+  <data name="QuestionnaireAdmin_RemoveOption" xml:space="preserve"><value>Supprimer le choix</value></data>
+  <data name="QuestionnaireAdmin_AddOption" xml:space="preserve"><value>Ajouter un choix</value></data>
+  <data name="QuestionnaireAdmin_Save" xml:space="preserve"><value>Enregistrer la question</value></data>
+  <data name="QuestionnaireAdmin_Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="QuestionnaireAdmin_QuestionsTitle" xml:space="preserve"><value>Questions configurées</value></data>
+  <data name="QuestionnaireAdmin_Empty" xml:space="preserve"><value>Aucune question n’a été configurée.</value></data>
+  <data name="QuestionnaireAdmin_Edit" xml:space="preserve"><value>Modifier</value></data>
+  <data name="QuestionnaireAdmin_Delete" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="QuestionnaireAdmin_SaveSuccess" xml:space="preserve"><value>Question enregistrée.</value></data>
+  <data name="QuestionnaireAdmin_DeleteSuccess" xml:space="preserve"><value>Question supprimée.</value></data>
+  <data name="Administration.Questionnaire.Category.Interests" xml:space="preserve"><value>Intérêts et activités</value></data>
+  <data name="Administration.Questionnaire.Category.Values" xml:space="preserve"><value>Valeurs et priorités</value></data>
+  <data name="Administration.Questionnaire.Category.Social" xml:space="preserve"><value>Préférences sociales et de communication</value></data>
+  <data name="Administration.Questionnaire.Category.Lifestyle" xml:space="preserve"><value>Mode de vie et disponibilités</value></data>
+  <data name="Administration.Questionnaire.Category.ConnectionIntent" xml:space="preserve"><value>Intentions et attentes relationnelles</value></data>
+</root>

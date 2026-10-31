@@ -159,4 +159,7 @@
   <data name="Nav_Menu" xml:space="preserve">
     <value>Menu</value>
   </data>
+  <data name="Nav_QuestionnaireAdmin" xml:space="preserve">
+    <value>Questionnaire administration</value>
+  </data>
 </root>

@@ -37,7 +37,7 @@ A phase may begin only when its prerequisites are complete and its open product 
 Do not resolve these in code until product direction is provided:
 
 1. **Verification limits:** Verification-token lifetime and rate-limit values are unspecified and need validated defaults before implementation.
-2. **Operational administration:** The MVP permits restricted administrative data management instead of a general-purpose admin UI. Confirm the approved operational surface (seed/configuration only, protected APIs, or a restricted UI) for domain allowlists, questionnaires, intent compatibility, and moderation.
+2. **Operational administration:** Questionnaire administration uses a restricted Administrator-only UI and protected API. Other operational surfaces remain scoped to their individual feature plans.
 
 The following decisions are resolved for MVP or explicitly deferred: daily recommendations (3 new per user/day, 9 maximum unseen); dummy/no-op email delivery; age policy and image-approval workflow deferred beyond MVP; sensitive traits are not categorically excluded from required configured fields.
 
