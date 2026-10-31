@@ -28,7 +28,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
             new Claim(ClaimTypes.NameIdentifier, administrator.Id.ToString()),
             new Claim(ClaimTypes.Role, "Administrator")
         ], "integration-test"));
-        var service = scope.ServiceProvider.GetRequiredService<AdministrativeDataService>();
+        var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = new Question
         {
             Code = $"q-{Guid.NewGuid():N}",
@@ -87,7 +87,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var administrator = await CreateUserAsync(dbContext);
         var respondent = await CreateUserAsync(dbContext);
         var principal = CreateAdministratorPrincipal(administrator.Id);
-        var service = scope.ServiceProvider.GetRequiredService<AdministrativeDataService>();
+        var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
         await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
         var option = question.Options.Single();
@@ -101,7 +101,17 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var update = CreateUpdatedQuestion(question);
-        update.Options.Clear();
+        update.Options = update.Options.Where(item => item.OptionCode != option.OptionCode).ToList();
+        update.Options.Add(new QuestionOption
+        {
+            OptionCode = "no",
+            SortOrder = 1,
+            Translations =
+            [
+                new QuestionOptionTranslation { CultureCode = "en", Text = "No" },
+                new QuestionOptionTranslation { CultureCode = "fr", Text = "Non" }
+            ]
+        });
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateQuestionAsync(
             principal, question.Id, update, TestContext.Current.CancellationToken));
@@ -118,7 +128,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var administrator = await CreateUserAsync(dbContext);
         var respondent = await CreateUserAsync(dbContext);
         var principal = CreateAdministratorPrincipal(administrator.Id);
-        var service = scope.ServiceProvider.GetRequiredService<AdministrativeDataService>();
+        var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
         await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
         var option = question.Options.Single();
@@ -145,7 +155,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var administrator = await CreateUserAsync(dbContext);
         var principal = CreateAdministratorPrincipal(administrator.Id);
-        var service = scope.ServiceProvider.GetRequiredService<AdministrativeDataService>();
+        var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
         await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
 
@@ -161,7 +171,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         services.AddLogging();
         services.AddAuthorization(options => options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator")));
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(fixture.ConnectionString));
-        services.AddScoped<AdministrativeDataService>();
+        services.AddScoped<QuestionnaireAdministrationService>();
         return services.BuildServiceProvider();
     }
 
