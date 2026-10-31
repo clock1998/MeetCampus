@@ -1,3 +1,4 @@
+using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.User;
@@ -35,15 +36,13 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Status = AccountStatus.Active,
             DiscoverabilityOptIn = true
         });
-        dbContext.QuestionDefinitions.Add(new Question
+        dbContext.Questions.Add(new Question
         {
             Id = Guid.NewGuid(),
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
-            PromptResourceKey = "Eligibility.Test.Prompt",
             IsRequired = true,
             Group = "eligibility",
-            QuestionVisibility = QuestionVisibility.Shareable,
             ScoringWeight = 1
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);

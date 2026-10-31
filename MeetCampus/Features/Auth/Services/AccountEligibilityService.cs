@@ -43,11 +43,11 @@ public sealed class AccountEligibilityService(
             .AsNoTracking()
             .AnyAsync(item => item.UserProfileId == profile.Id, cancellationToken);
 
-        var requiredQuestions = dbContext.QuestionDefinitions
+        var requiredQuestions = dbContext.Questions
             .AsNoTracking()
             .Where(question => question.IsRequired);
         var requiredQuestionCount = await requiredQuestions.CountAsync(cancellationToken);
-        var answeredRequiredQuestionCount = await dbContext.QuestionnaireAnswerSets
+        var answeredRequiredQuestionCount = await dbContext.UserAnswers
             .AsNoTracking()
             .Where(answer => answer.ApplicationUserId == userId)
             .Select(answer => answer.QuestionOption.QuestionId)

@@ -37,4 +37,8 @@
     <ProjectReference Include="..\MeetCampus.Contracts\MeetCampus.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Features\Administration\" />
+  </ItemGroup>
+
 </Project>

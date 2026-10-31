@@ -26,9 +26,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         public DbSet<AccountLifecycle> AccountLifecycles => Set<AccountLifecycle>();
         public DbSet<AllowedEmailDomain> AllowedEmailDomains => Set<AllowedEmailDomain>();
         public DbSet<IntentCompatibilityRule> IntentCompatibilityRules => Set<IntentCompatibilityRule>();
-        public DbSet<Question> QuestionDefinitions => Set<Question>();
+        public DbSet<Question> Questions => Set<Question>();
         public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
-        public DbSet<UserAnswer> QuestionnaireAnswerSets => Set<UserAnswer>();
+        public DbSet<QuestionTranslation> QuestionTranslations => Set<QuestionTranslation>();
+        public DbSet<QuestionOptionTranslation> QuestionOptionTranslations => Set<QuestionOptionTranslation>();
+        public DbSet<UserAnswer> UserAnswers => Set<UserAnswer>();
         public DbSet<UserProfileIntention> UserProfileIntentions => Set<UserProfileIntention>();
         public DbSet<RecommendationBatch> RecommendationBatches => Set<RecommendationBatch>();
         public DbSet<RecommendationItem> RecommendationItems => Set<RecommendationItem>();

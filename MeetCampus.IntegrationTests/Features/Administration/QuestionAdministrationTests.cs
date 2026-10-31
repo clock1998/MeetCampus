@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.User;
@@ -31,11 +32,28 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var question = new Question
         {
             Code = $"q-{Guid.NewGuid():N}",
-            PromptResourceKey = "Question.Test.Prompt",
+            Type = QuestionType.SingleChoice,
+            Translations =
+            [
+                new QuestionTranslation { CultureCode = "en", Text = "Test question" },
+                new QuestionTranslation { CultureCode = "fr", Text = "Question de test" }
+            ],
             Group = "interests",
-            QuestionVisibility = QuestionVisibility.Shareable,
             ScoringWeight = 0.1m,
-            UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1)
+            UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1),
+            Options =
+            [
+                new QuestionOption
+                {
+                    OptionCode = "yes",
+                    SortOrder = 0,
+                    Translations =
+                    [
+                        new QuestionOptionTranslation { CultureCode = "en", Text = "Yes" },
+                        new QuestionOptionTranslation { CultureCode = "fr", Text = "Oui" }
+                    ]
+                }
+            ]
         };
         await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
         var oldUpdatedAt = question.UpdatedAt;
@@ -43,13 +61,18 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await service.UpdateQuestionAsync(principal, question.Id, new Question
         {
             Code = question.Code,
-            PromptResourceKey = "Question.Test.UpdatedPrompt",
+            Type = QuestionType.SingleChoice,
+            Translations =
+            [
+                new QuestionTranslation { CultureCode = "en", Text = "Updated test question" },
+                new QuestionTranslation { CultureCode = "fr", Text = "Question de test modifiée" }
+            ],
             Group = question.Group,
-            QuestionVisibility = question.QuestionVisibility,
-            ScoringWeight = question.ScoringWeight
+            ScoringWeight = question.ScoringWeight,
+            Options = question.Options.ToList()
         }, TestContext.Current.CancellationToken);
 
-        var updatedQuestion = await dbContext.QuestionDefinitions.SingleAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken);
+        var updatedQuestion = await dbContext.Questions.SingleAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken);
         Assert.True(updatedQuestion.UpdatedAt > oldUpdatedAt);
         Assert.True(await dbContext.AuditEvents.AnyAsync(item => item.Action == "Question.Updated" && item.EntityId == question.Id.ToString(), TestContext.Current.CancellationToken));
     }

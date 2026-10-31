@@ -171,10 +171,7 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.Code).HasMaxLength(128).IsRequired();
-                entity.Property(item => item.PromptResourceKey).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.Group).HasMaxLength(64).IsRequired();
-                entity.Property(item => item.QuestionVisibility).HasConversion<string>().HasMaxLength(32);
-                entity.Property(item => item.ExplanationTemplateKey).HasMaxLength(256);
                 entity.Property(item => item.ScoringWeight).HasPrecision(8, 5);
                 entity.Property(item => item.UpdatedAt).IsRequired();
                 entity.HasIndex(item => item.Code).IsUnique();
@@ -184,7 +181,6 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.OptionCode).HasMaxLength(128).IsRequired();
-                entity.Property(item => item.LabelResourceKey).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.ScoringValue).HasMaxLength(128);
                 entity.HasOne(item => item.Question)
                     .WithMany(question => question.Options)
@@ -192,6 +188,28 @@ namespace MeetCampus.Data
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => new { item.QuestionId, item.OptionCode }).IsUnique();
                 entity.HasIndex(item => new { item.QuestionId, item.SortOrder }).IsUnique();
+            });
+
+            builder.Entity<QuestionTranslation>(entity =>
+            {
+                entity.HasKey(item => new { item.QuestionId, item.CultureCode });
+                entity.Property(item => item.CultureCode).HasMaxLength(10).IsRequired();
+                entity.Property(item => item.Text).HasMaxLength(2000).IsRequired();
+                entity.HasOne(item => item.Question)
+                    .WithMany(question => question.Translations)
+                    .HasForeignKey(item => item.QuestionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<QuestionOptionTranslation>(entity =>
+            {
+                entity.HasKey(item => new { item.QuestionOptionId, item.CultureCode });
+                entity.Property(item => item.CultureCode).HasMaxLength(10).IsRequired();
+                entity.Property(item => item.Text).HasMaxLength(512).IsRequired();
+                entity.HasOne(item => item.QuestionOption)
+                    .WithMany(option => option.Translations)
+                    .HasForeignKey(item => item.QuestionOptionId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<UserAnswer>(entity =>
