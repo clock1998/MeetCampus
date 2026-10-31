@@ -10,19 +10,19 @@ namespace MeetCampus.Features.Administration.Controllers;
 [ApiController]
 [Route("api/admin/questionnaire")]
 [Authorize(Policy = "AdministratorOnly")]
-public sealed class QuestionnaireAdministrationController(AdministrativeDataService administrativeDataService) : ControllerBase
+public sealed class QuestionnaireAdministrationController(QuestionnaireAdministrationService questionnaireAdministrationService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<QuestionResponse>>> GetQuestionsAsync(CancellationToken cancellationToken)
     {
-        var questions = await administrativeDataService.GetQuestionsAsync(User, cancellationToken);
+        var questions = await questionnaireAdministrationService.GetQuestionsAsync(User, cancellationToken);
         return Ok(questions.Select(ToResponse).ToList());
     }
 
     [HttpGet("catalog")]
     public async Task<ActionResult<QuestionCatalogResponse>> GetCatalogAsync(CancellationToken cancellationToken)
     {
-        return Ok(await administrativeDataService.GetQuestionnaireAdminCatalogAsync(User));
+        return Ok(await questionnaireAdministrationService.GetQuestionnaireAdminCatalogAsync(User));
     }
 
     [HttpPost]
@@ -32,7 +32,7 @@ public sealed class QuestionnaireAdministrationController(AdministrativeDataServ
     {
         try
         {
-            var question = await administrativeDataService.CreateQuestionAsync(User, ToEntity(request), cancellationToken);
+            var question = await questionnaireAdministrationService.CreateQuestionAsync(User, ToEntity(request), cancellationToken);
             return StatusCode(StatusCodes.Status201Created, ToResponse(question));
         }
         catch (ArgumentException exception)
@@ -49,7 +49,7 @@ public sealed class QuestionnaireAdministrationController(AdministrativeDataServ
     {
         try
         {
-            await administrativeDataService.UpdateQuestionAsync(User, questionId, ToEntity(request), cancellationToken);
+            await questionnaireAdministrationService.UpdateQuestionAsync(User, questionId, ToEntity(request), cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException exception)
@@ -71,7 +71,7 @@ public sealed class QuestionnaireAdministrationController(AdministrativeDataServ
     {
         try
         {
-            await administrativeDataService.DeleteQuestionAsync(User, questionId, cancellationToken);
+            await questionnaireAdministrationService.DeleteQuestionAsync(User, questionId, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException exception)
