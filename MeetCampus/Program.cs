@@ -7,6 +7,7 @@ using MeetCampus.Features.Auth.Services;
 using MeetCampus.Features.Administration.Services;
 using MeetCampus.Features.Configuration;
 using MeetCampus.Features.Profile.Services;
+using MeetCampus.Features.Questionnaire.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
@@ -56,6 +57,7 @@ builder.Services.AddScoped<AccountEligibilityService>();
 builder.Services.AddScoped<AccountLifecycleService>();
 builder.Services.AddScoped<AdministrativeDataService>();
 builder.Services.AddScoped<QuestionnaireAdministrationService>();
+builder.Services.AddScoped<QuestionnaireResponseService>();
 
 builder.Services.AddAuthentication(options =>
     {

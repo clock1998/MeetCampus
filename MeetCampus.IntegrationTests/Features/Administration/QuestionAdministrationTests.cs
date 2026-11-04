@@ -95,8 +95,9 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         {
             Id = Guid.NewGuid(),
             ApplicationUserId = respondent.Id,
+            QuestionId = question.Id,
             QuestionOptionId = option.Id,
-            CreatedAt = DateTimeOffset.UtcNow
+            UpdatedAt = DateTimeOffset.UtcNow
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -136,8 +137,9 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         {
             Id = Guid.NewGuid(),
             ApplicationUserId = respondent.Id,
+            QuestionId = question.Id,
             QuestionOptionId = option.Id,
-            CreatedAt = DateTimeOffset.UtcNow
+            UpdatedAt = DateTimeOffset.UtcNow
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 

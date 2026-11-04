@@ -3,6 +3,7 @@ using MeetCampus.Client.Features.Auth;
 using MeetCampus.Client.Features.Auth.HttpClients;
 using MeetCampus.Client.Features.Administration.HttpClients;
 using MeetCampus.Client.Features.Profile.HttpClients;
+using MeetCampus.Client.Features.Questionnaire.HttpClients;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 
@@ -22,6 +23,10 @@ builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });
 builder.Services.AddHttpClient<IQuestionnaireAdminClient, QuestionnaireAdminClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
+builder.Services.AddHttpClient<IQuestionnaireClient, QuestionnaireClient>(client =>
 {
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });

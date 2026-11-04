@@ -93,7 +93,8 @@ public sealed class QuestionnaireAdministrationService(
         if (removedOptions.Count > 0)
         {
             var removedOptionIds = removedOptions.Select(option => option.Id).ToArray();
-            if (await dbContext.UserAnswers.AnyAsync(answer => removedOptionIds.Contains(answer.QuestionOptionId), cancellationToken))
+            if (await dbContext.UserAnswers.AnyAsync(answer => answer.QuestionOptionId.HasValue
+                && removedOptionIds.Contains(answer.QuestionOptionId.Value), cancellationToken))
                 throw new InvalidOperationException("Options referenced by saved answers cannot be removed.");
             foreach (var removedOption in removedOptions)
                 question.Options.Remove(removedOption);
@@ -136,9 +137,7 @@ public sealed class QuestionnaireAdministrationService(
             .SingleOrDefaultAsync(item => item.Id == questionId, cancellationToken)
             ?? throw new KeyNotFoundException("Question was not found.");
 
-        var optionIds = question.Options.Select(option => option.Id).ToArray();
-        if (optionIds.Length > 0 && await dbContext.UserAnswers
-                .AnyAsync(answer => optionIds.Contains(answer.QuestionOptionId), cancellationToken))
+        if (await dbContext.UserAnswers.AnyAsync(answer => answer.QuestionId == questionId, cancellationToken))
             throw new InvalidOperationException("Questions referenced by saved answers cannot be deleted.");
 
         dbContext.AuditEvents.Add(CreateAuditEvent(actorId, "Question.Deleted", question.Id.ToString(), new { question.Code }));

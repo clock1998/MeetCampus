@@ -216,6 +216,11 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.ApplicationUserId).IsRequired();
+                entity.Property(item => item.UpdatedAt).IsRequired();
+                entity.HasOne(item => item.Question)
+                    .WithMany(question => question.Answers)
+                    .HasForeignKey(item => item.QuestionId)
+                    .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(item => item.ApplicationUser)
                     .WithMany()
                     .HasForeignKey(item => item.ApplicationUserId)
@@ -223,8 +228,8 @@ namespace MeetCampus.Data
                 entity.HasOne(item => item.QuestionOption)
                     .WithMany()
                     .HasForeignKey(item => item.QuestionOptionId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(item => new { item.ApplicationUserId, item.CreatedAt });
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.ApplicationUserId, item.QuestionId, item.UpdatedAt });
             });
 
             builder.Entity<RecommendationBatch>(entity =>

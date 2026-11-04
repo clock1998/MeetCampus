@@ -162,4 +162,7 @@
   <data name="Nav_QuestionnaireAdmin" xml:space="preserve">
     <value>Administration du questionnaire</value>
   </data>
+  <data name="Nav_Questionnaire" xml:space="preserve">
+    <value>Questionnaire</value>
+  </data>
 </root>

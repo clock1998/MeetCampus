@@ -22,4 +22,5 @@ public sealed class Question
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     public ICollection<QuestionOption> Options { get; set; } = [];
     public ICollection<QuestionTranslation> Translations { get; set; } = [];
+    public ICollection<UserAnswer> Answers { get; set; } = [];
 }

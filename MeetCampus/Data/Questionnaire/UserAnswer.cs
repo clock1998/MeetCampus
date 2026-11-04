@@ -7,7 +7,10 @@ public sealed class UserAnswer
     public Guid Id { get; set; }
     public Guid ApplicationUserId { get; set; }
     public ApplicationUser ApplicationUser { get; set; } = default!;
-    public Guid QuestionOptionId { get; set; }
-    public QuestionOption QuestionOption { get; set; } = default!;
-    public DateTimeOffset CreatedAt { get; set; }
+    public Guid QuestionId { get; set; }
+    public Question Question { get; set; } = default!;
+    public Guid? QuestionOptionId { get; set; }
+    public QuestionOption? QuestionOption { get; set; }
+    public int? ScaleValue { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

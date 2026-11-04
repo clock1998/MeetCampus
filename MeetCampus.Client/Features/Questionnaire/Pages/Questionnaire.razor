@@ -1,0 +1,193 @@
+﻿@page "/questionnaire"
+@attribute [Authorize]
+@using System.Globalization
+@using MeetCampus.Client.Features.Questionnaire.HttpClients
+@using MeetCampus.Client.Features.Questionnaire.Resources
+@using MeetCampus.Contracts.Features.Administration
+@using MeetCampus.Contracts.Features.Questionnaire
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@inject IQuestionnaireClient QuestionnaireClient
+@inject IStringLocalizer<QuestionnaireResource> L
+
+<PageTitle>@L["Questionnaire_PageTitle"]</PageTitle>
+
+<div class="bg-base-100 px-6 py-10">
+    <div class="mx-auto max-w-4xl space-y-6">
+        <header class="space-y-2">
+            <h1 class="text-3xl font-bold">@L["Questionnaire_Title"]</h1>
+            <p class="text-base-content/70">@L["Questionnaire_Description"]</p>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-error" role="alert">@errorMessage</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success" role="status">@successMessage</div>
+        }
+        @if (isLoading)
+        {
+            <p role="status">@L["Questionnaire_Loading"]</p>
+        }
+        else if (response is not null)
+        {
+            <p class="text-base-content/70 text-sm" role="status">@L["Questionnaire_Completion"]: @response.Questions.Count(question => !question.IsRequired || IsAnswered(question)) / @response.Questions.Count</p>
+                <EditForm EditContext="editContext" OnSubmit="SaveAsync" class="space-y-5">
+                @foreach (var question in response.Questions)
+                {
+                    var answer = answers[question.Id];
+                    <fieldset @key="question.Id" class="card bg-base-200 border-base-300 space-y-4 border p-5 shadow-sm" aria-describedby="question-state-@question.Id">
+                        <legend class="w-full text-lg font-semibold">
+                            @question.Prompt
+                            @if (question.IsRequired)
+                            {
+                                <span class="badge badge-outline ml-2">@L["Questionnaire_Required"]</span>
+                            }
+                        </legend>
+                        @if (question.IsRefreshRequired)
+                        {
+                            <p id="question-state-@question.Id" class="text-warning text-sm">@L["Questionnaire_RefreshRequired"]</p>
+                        }
+                        @if (question.Type == QuestionType.SingleChoice)
+                        {
+                            <p class="text-base-content/70 text-sm">@L["Questionnaire_Type_SingleChoice"]</p>
+                            @foreach (var option in question.Options)
+                            {
+                                <label class="label cursor-pointer justify-start gap-3">
+                                    <input type="radio" class="radio radio-primary" name="answer-@question.Id" value="@option.Code" checked="@(answer.SelectedOptionCodes.Contains(option.Code))" @onchange="() => SetSingleChoice(question.Id, option.Code)" />
+                                    <span>@option.Label</span>
+                                </label>
+                            }
+                        }
+                        else if (question.Type == QuestionType.MultipleChoice)
+                        {
+                            <p class="text-base-content/70 text-sm">@L["Questionnaire_Type_MultipleChoice"]</p>
+                            @foreach (var option in question.Options)
+                            {
+                                <label class="label cursor-pointer justify-start gap-3">
+                                    <input type="checkbox" class="checkbox checkbox-primary" checked="@(answer.SelectedOptionCodes.Contains(option.Code))" @onchange="args => SetMultipleChoice(question.Id, option.Code, args)" />
+                                    <span>@option.Label</span>
+                                </label>
+                            }
+                        }
+                        else if (question.Type == QuestionType.Scale)
+                        {
+                            <label class="fieldset">
+                                <span class="fieldset-legend">@L["Questionnaire_ScaleLabel", question.ScaleMin, question.ScaleMax]</span>
+                                <InputNumber @bind-Value="answer.ScaleValue" min="@question.ScaleMin" max="@question.ScaleMax" class="input input-bordered w-full" />
+                            </label>
+                        }
+                    </fieldset>
+                }
+                <button type="submit" class="btn btn-primary" disabled="@isSaving">@(isSaving ? L["Questionnaire_Saving"] : L["Questionnaire_Save"])</button>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    private QuestionnaireResponse? response;
+    private Dictionary<Guid, AnswerEditModel> answers = [];
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private string? successMessage;
+    private EditContext editContext = new(new object());
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            response = await QuestionnaireClient.GetAsync(GetCultureCode());
+            ResetAnswers();
+        }
+        catch
+        {
+            errorMessage = L["Questionnaire_LoadError"];
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static string GetCultureCode() => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName is "fr" ? "fr" : "en";
+
+    private void SetSingleChoice(Guid questionId, string code) => answers[questionId].SelectedOptionCodes = [code];
+
+    private void SetMultipleChoice(Guid questionId, string code, ChangeEventArgs args)
+    {
+        var selectedCodes = answers[questionId].SelectedOptionCodes;
+        if (args.Value is true && !selectedCodes.Contains(code, StringComparer.Ordinal))
+            selectedCodes.Add(code);
+        else if (args.Value is false)
+            selectedCodes.Remove(code);
+    }
+
+    private bool IsAnswered(QuestionnaireQuestionResponse question)
+    {
+        var answer = answers[question.Id];
+        return question.Type == QuestionType.Scale
+            ? answer.ScaleValue.HasValue
+            : answer.SelectedOptionCodes.Count > 0;
+    }
+
+    private async Task SaveAsync(EditContext _)
+    {
+        if (response is null || isSaving)
+            return;
+
+        if (response.Questions.Any(question => question.IsRequired && !IsAnswered(question)))
+        {
+            errorMessage = L["Questionnaire_RequiredError"];
+            successMessage = null;
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = null;
+        successMessage = null;
+        try
+        {
+            var request = new SubmitQuestionnaireResponseRequest(response.Questions
+                .Select(question =>
+                {
+                    var answer = answers[question.Id];
+                    return new QuestionnaireAnswerRequest(
+                        question.Id,
+                        answer.SelectedOptionCodes.ToList(),
+                        answer.ScaleValue);
+                }).ToList());
+            await QuestionnaireClient.SubmitAsync(request);
+            response = await QuestionnaireClient.GetAsync(GetCultureCode());
+            ResetAnswers();
+            successMessage = L["Questionnaire_SaveSuccess"];
+        }
+        catch
+        {
+            errorMessage = L["Questionnaire_SaveError"];
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void ResetAnswers()
+    {
+        answers = response!.Questions.ToDictionary(question => question.Id, question => new AnswerEditModel
+        {
+            SelectedOptionCodes = question.SelectedOptionCodes.ToList(),
+            ScaleValue = question.ScaleValue
+        });
+        editContext = new EditContext(answers);
+    }
+
+    private sealed class AnswerEditModel
+    {
+        public List<string> SelectedOptionCodes { get; set; } = [];
+        public int? ScaleValue { get; set; }
+    }
+}

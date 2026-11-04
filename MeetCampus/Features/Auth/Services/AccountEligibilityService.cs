@@ -43,17 +43,28 @@ public sealed class AccountEligibilityService(
             .AsNoTracking()
             .AnyAsync(item => item.UserProfileId == profile.Id, cancellationToken);
 
-        var requiredQuestions = dbContext.Questions
+        var requiredQuestions = await dbContext.Questions
             .AsNoTracking()
-            .Where(question => question.IsRequired);
-        var requiredQuestionCount = await requiredQuestions.CountAsync(cancellationToken);
-        var answeredRequiredQuestionCount = await dbContext.UserAnswers
+            .Where(question => question.IsRequired)
+            .Select(question => new { question.Id, question.UpdatedAt })
+            .ToListAsync(cancellationToken);
+        var requiredQuestionIds = requiredQuestions
+            .Select(question => question.Id)
+            .ToHashSet();
+        var latestRequiredAnswerByQuestionId = await dbContext.UserAnswers
             .AsNoTracking()
-            .Where(answer => answer.ApplicationUserId == userId)
-            .Select(answer => answer.QuestionOption.QuestionId)
-            .Distinct()
-            .CountAsync(questionId => requiredQuestions.Any(question => question.Id == questionId), cancellationToken);
-        var hasCompletedRequiredQuestions = answeredRequiredQuestionCount == requiredQuestionCount;
+            .Where(answer => answer.ApplicationUserId == userId
+                && requiredQuestionIds.Contains(answer.QuestionId))
+            .GroupBy(answer => answer.QuestionId)
+            .Select(group => new
+            {
+                QuestionId = group.Key,
+                UpdatedAt = group.Max(answer => answer.UpdatedAt)
+            })
+            .ToDictionaryAsync(item => item.QuestionId, item => item.UpdatedAt, cancellationToken);
+        var hasCompletedRequiredQuestions = requiredQuestions.All(question =>
+            latestRequiredAnswerByQuestionId.TryGetValue(question.Id, out var answerUpdatedAt)
+            && answerUpdatedAt >= question.UpdatedAt);
 
         var isEmailVerified = await userManager.IsEmailConfirmedAsync(user);
         var discoverabilityOptIn = lifecycle?.DiscoverabilityOptIn == true;

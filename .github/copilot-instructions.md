@@ -136,7 +136,6 @@ Authentication uses ASP.NET Core Identity with application cookies, not JWT or b
 - Inject the feature-specific `IStringLocalizer<[Feature]Resource>` in Razor components.
 - Use shared resources only for truly global strings. Do not put feature-specific keys in a shared resource.
 - Keep validation, status, error, and navigation text localizable.
-- For questionnaire administration, store English and French question prompts and answer-option labels in the database so administrators can edit translations at runtime; do not use resource keys for this content.
 
 ## Styling
 
@@ -214,6 +213,10 @@ Before implementing a new feature, create a focused implementation plan and pres
 ## Package Vulnerability Management
 
 - For explicitly acknowledged and accepted package vulnerability risk, suppress the corresponding NuGet advisory warning at the specific package reference rather than globally; keep other advisory warnings visible.
+
+## Service Method Guidelines
+
+- For authenticated questionnaire service methods, resolve the `ApplicationUser` in the controller via `UserManager` and pass the `ApplicationUser` into the service; avoid extracting user IDs from `ClaimsPrincipal` inside the service.
 
 ---
 
