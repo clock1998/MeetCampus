@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using MeetCampus.Contracts.Features.Administration;
+using MeetCampus.Data.User;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Features.Administration.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetCampus.Features.Administration.Controllers;
@@ -10,19 +12,21 @@ namespace MeetCampus.Features.Administration.Controllers;
 [ApiController]
 [Route("api/admin/questionnaire")]
 [Authorize(Policy = "AdministratorOnly")]
-public sealed class QuestionnaireAdministrationController(QuestionnaireAdministrationService questionnaireAdministrationService) : ControllerBase
+public sealed class QuestionnaireAdministrationController(
+    QuestionnaireAdministrationService questionnaireAdministrationService,
+    UserManager<ApplicationUser> userManager) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<QuestionResponse>>> GetQuestionsAsync(CancellationToken cancellationToken)
     {
-        var questions = await questionnaireAdministrationService.GetQuestionsAsync(User, cancellationToken);
+        var questions = await questionnaireAdministrationService.GetQuestionsAsync(cancellationToken);
         return Ok(questions.Select(ToResponse).ToList());
     }
 
     [HttpGet("catalog")]
     public async Task<ActionResult<QuestionCatalogResponse>> GetCatalogAsync(CancellationToken cancellationToken)
     {
-        return Ok(await questionnaireAdministrationService.GetQuestionnaireAdminCatalogAsync(User));
+        return Ok(questionnaireAdministrationService.GetQuestionnaireAdminCatalog());
     }
 
     [HttpPost]
@@ -30,9 +34,13 @@ public sealed class QuestionnaireAdministrationController(QuestionnaireAdministr
         QuestionRequest request,
         CancellationToken cancellationToken)
     {
+        var actor = await userManager.GetUserAsync(User);
+        if (actor is null)
+            return Unauthorized();
+
         try
         {
-            var question = await questionnaireAdministrationService.CreateQuestionAsync(User, ToEntity(request), cancellationToken);
+            var question = await questionnaireAdministrationService.CreateQuestionAsync(actor, ToEntity(request), cancellationToken);
             return StatusCode(StatusCodes.Status201Created, ToResponse(question));
         }
         catch (ArgumentException exception)
@@ -47,9 +55,13 @@ public sealed class QuestionnaireAdministrationController(QuestionnaireAdministr
         QuestionRequest request,
         CancellationToken cancellationToken)
     {
+        var actor = await userManager.GetUserAsync(User);
+        if (actor is null)
+            return Unauthorized();
+
         try
         {
-            await questionnaireAdministrationService.UpdateQuestionAsync(User, questionId, ToEntity(request), cancellationToken);
+            await questionnaireAdministrationService.UpdateQuestionAsync(actor, questionId, ToEntity(request), cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException exception)
@@ -69,9 +81,13 @@ public sealed class QuestionnaireAdministrationController(QuestionnaireAdministr
     [HttpDelete("{questionId:guid}")]
     public async Task<IActionResult> DeleteQuestionAsync(Guid questionId, CancellationToken cancellationToken)
     {
+        var actor = await userManager.GetUserAsync(User);
+        if (actor is null)
+            return Unauthorized();
+
         try
         {
-            await questionnaireAdministrationService.DeleteQuestionAsync(User, questionId, cancellationToken);
+            await questionnaireAdministrationService.DeleteQuestionAsync(actor, questionId, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException exception)
