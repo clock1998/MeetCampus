@@ -59,19 +59,19 @@ Deliver the profile-onboarding features that let a verified member describe thei
 
 ### Feature 4: Member questionnaire responses
 
-**Outcome:** A member can answer and update the active questionnaire with validated structured values.
+**Outcome:** A member can answer and update the current questionnaire with validated structured values.
 
 **Implementation:**
 1. Define shared request/status contracts using stable question IDs; accept only the answer shape allowed by each current question definition.
-2. Implement server-side submission and update operations that validate question existence, active status, answer type, allowed options, and any required-answer rules against current definitions.
-3. Store response revisions and submission timestamps using the Phase 1 data model, and identify responses that need refresh after a question definition changes.
+2. Implement server-side submission and update operations that validate question existence, answer type, allowed options, and any required-answer rules against current definitions. Questions do not have an active/inactive state.
+3. Store only each member's current answers, with `UpdatedAt` on each `UserAnswer`; do not retain response history. Identify answers that need refresh after a question definition changes.
 4. Add the Questionnaire typed client and localized, accessible answer/edit UI. Render the active definitions and return validation/status information without returning raw private or matching-only answer values.
 5. Ensure questionnaire completeness is calculated from valid current responses, not from client-submitted completion flags.
 
 **Acceptance criteria:**
-- Unknown, inactive, stale, or malformed question answers are rejected with actionable validation results.
+- Unknown or malformed question answers are rejected with actionable validation results.
 - Members can update their own responses but cannot read or change another member's private responses.
-- Missing or refresh-required answers make the questionnaire incomplete; they are not treated as disagreement by scoring.
+- Missing or refresh-required required answers make the questionnaire incomplete; they are not treated as disagreement by scoring.
 
 ### Feature 5: Onboarding completion and discoverability integration
 
@@ -99,4 +99,4 @@ Deliver the profile-onboarding features that let a verified member describe thei
 - Questionnaire administration tests cover authorization, validation, stable IDs, update timestamps, and audit events.
 - Eligibility tests cover each missing prerequisite and restoration after completion; missing answers never become score disagreement.
 - Client onboarding text is localized and controls are accessible by keyboard and assistive technology.
-- Build the affected projects and solution, then run relevant automated tests. No database migration files are created or changed as part of this phase; migration work is managed separately.
+- Build the affected projects and solution, then run relevant automated tests. Database migrations are managed separately from feature implementation.

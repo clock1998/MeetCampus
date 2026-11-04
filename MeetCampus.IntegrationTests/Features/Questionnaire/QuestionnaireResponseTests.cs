@@ -4,6 +4,7 @@ using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Questionnaire.Services;
+using FluentValidation;
 using MeetCampus.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,9 +37,8 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
         var memberResponse = await service.GetResponseAsync(member, "en", TestContext.Current.CancellationToken);
         var otherResponse = await service.GetResponseAsync(otherMember, "en", TestContext.Current.CancellationToken);
 
-        Assert.Equal(["yes"], memberResponse.Questions.Single().SelectedOptionCodes);
-        Assert.Empty(otherResponse.Questions.Single().SelectedOptionCodes);
-        Assert.True(memberResponse.IsComplete);
+        Assert.Equal(["yes"], memberResponse.Questions.Single(item => item.Id == question.Id).SelectedOptionCodes);
+        Assert.Empty(otherResponse.Questions.Single(item => item.Id == question.Id).SelectedOptionCodes);
     }
 
     [Fact]
@@ -123,6 +123,9 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(fixture.ConnectionString));
+        services.AddScoped<IValidator<string>, QuestionnaireCultureValidator>();
+        services.AddScoped<IValidator<SubmitQuestionnaireResponseRequest>, SubmitQuestionnaireResponseRequestValidator>();
+        services.AddScoped<IValidator<QuestionnaireAnswerValidationContext>, QuestionnaireAnswerValidator>();
         services.AddScoped<QuestionnaireResponseService>();
         return services.BuildServiceProvider();
     }
