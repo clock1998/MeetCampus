@@ -19,13 +19,13 @@ public sealed class QuestionnaireController(
         [FromQuery] string culture = "en",
         CancellationToken cancellationToken = default)
     {
-        var member = await userManager.GetUserAsync(User);
-        if (member is null)
+        var actor = await userManager.GetUserAsync(User);
+        if (actor is null)
             return Unauthorized();
 
         try
         {
-            return Ok(await questionnaireResponseService.GetResponseAsync(member, culture, cancellationToken));
+            return Ok(await questionnaireResponseService.GetResponseAsync(actor, culture, cancellationToken));
         }
         catch (ArgumentException exception)
         {

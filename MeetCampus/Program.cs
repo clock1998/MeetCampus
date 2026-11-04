@@ -8,6 +8,9 @@ using MeetCampus.Features.Administration.Services;
 using MeetCampus.Features.Configuration;
 using MeetCampus.Features.Profile.Services;
 using MeetCampus.Features.Questionnaire.Services;
+using MeetCampus.Contracts.Features.Questionnaire;
+using MeetCampus.Data.Questionnaire;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
@@ -58,6 +61,10 @@ builder.Services.AddScoped<AccountLifecycleService>();
 builder.Services.AddScoped<AdministrativeDataService>();
 builder.Services.AddScoped<QuestionnaireAdministrationService>();
 builder.Services.AddScoped<QuestionnaireResponseService>();
+builder.Services.AddScoped<IValidator<string>, QuestionnaireCultureValidator>();
+builder.Services.AddScoped<IValidator<SubmitQuestionnaireResponseRequest>, SubmitQuestionnaireResponseRequestValidator>();
+builder.Services.AddScoped<IValidator<QuestionnaireAnswerValidationContext>, QuestionnaireAnswerValidator>();
+builder.Services.AddScoped<IValidator<Question>, QuestionnaireDefinitionValidator>();
 
 builder.Services.AddAuthentication(options =>
     {

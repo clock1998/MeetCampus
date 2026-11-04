@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using FluentValidation;
 using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
@@ -23,11 +23,6 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var administrator = await CreateUserAsync(dbContext);
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(ClaimTypes.NameIdentifier, administrator.Id.ToString()),
-            new Claim(ClaimTypes.Role, "Administrator")
-        ], "integration-test"));
         var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = new Question
         {
@@ -55,10 +50,10 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
                 }
             ]
         };
-        await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
+        await service.CreateQuestionAsync(administrator, question, TestContext.Current.CancellationToken);
         var oldUpdatedAt = question.UpdatedAt;
 
-        await service.UpdateQuestionAsync(principal, question.Id, new Question
+        await service.UpdateQuestionAsync(administrator, question.Id, new Question
         {
             Code = question.Code,
             Type = QuestionType.SingleChoice,
@@ -86,10 +81,9 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var administrator = await CreateUserAsync(dbContext);
         var respondent = await CreateUserAsync(dbContext);
-        var principal = CreateAdministratorPrincipal(administrator.Id);
         var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
-        await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
+        await service.CreateQuestionAsync(administrator, question, TestContext.Current.CancellationToken);
         var option = question.Options.Single();
         dbContext.UserAnswers.Add(new UserAnswer
         {
@@ -115,7 +109,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         });
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateQuestionAsync(
-            principal, question.Id, update, TestContext.Current.CancellationToken));
+            administrator, question.Id, update, TestContext.Current.CancellationToken));
         Assert.True(await dbContext.UserAnswers.AnyAsync(answer => answer.QuestionOptionId == option.Id, TestContext.Current.CancellationToken));
     }
 
@@ -128,10 +122,9 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var administrator = await CreateUserAsync(dbContext);
         var respondent = await CreateUserAsync(dbContext);
-        var principal = CreateAdministratorPrincipal(administrator.Id);
         var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
-        await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
+        await service.CreateQuestionAsync(administrator, question, TestContext.Current.CancellationToken);
         var option = question.Options.Single();
         dbContext.UserAnswers.Add(new UserAnswer
         {
@@ -144,7 +137,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.DeleteQuestionAsync(
-            principal, question.Id, TestContext.Current.CancellationToken));
+            administrator, question.Id, TestContext.Current.CancellationToken));
         Assert.True(await dbContext.Questions.AnyAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken));
     }
 
@@ -156,12 +149,11 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var administrator = await CreateUserAsync(dbContext);
-        var principal = CreateAdministratorPrincipal(administrator.Id);
         var service = scope.ServiceProvider.GetRequiredService<QuestionnaireAdministrationService>();
         var question = CreateQuestion();
-        await service.CreateQuestionAsync(principal, question, TestContext.Current.CancellationToken);
+        await service.CreateQuestionAsync(administrator, question, TestContext.Current.CancellationToken);
 
-        await service.DeleteQuestionAsync(principal, question.Id, TestContext.Current.CancellationToken);
+        await service.DeleteQuestionAsync(administrator, question.Id, TestContext.Current.CancellationToken);
 
         Assert.False(await dbContext.Questions.AnyAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken));
         Assert.True(await dbContext.AuditEvents.AnyAsync(item => item.Action == "Question.Deleted" && item.EntityId == question.Id.ToString(), TestContext.Current.CancellationToken));
@@ -171,17 +163,11 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddAuthorization(options => options.AddPolicy("AdministratorOnly", policy => policy.RequireRole("Administrator")));
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(fixture.ConnectionString));
+        services.AddScoped<IValidator<Question>, QuestionnaireDefinitionValidator>();
         services.AddScoped<QuestionnaireAdministrationService>();
         return services.BuildServiceProvider();
     }
-
-    private static ClaimsPrincipal CreateAdministratorPrincipal(Guid userId) => new(new ClaimsIdentity(
-    [
-        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-        new Claim(ClaimTypes.Role, "Administrator")
-    ], "integration-test"));
 
     private static Question CreateQuestion() => new()
     {

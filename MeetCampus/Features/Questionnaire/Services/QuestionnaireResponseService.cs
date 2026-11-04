@@ -3,20 +3,26 @@ using MeetCampus.Contracts.Features.Questionnaire;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.User;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace MeetCampus.Features.Questionnaire.Services;
 
-public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
+public sealed class QuestionnaireResponseService(
+    ApplicationDbContext dbContext,
+    IValidator<string> cultureValidator,
+    IValidator<SubmitQuestionnaireResponseRequest> requestValidator,
+    IValidator<QuestionnaireAnswerValidationContext> answerValidator)
 {
     public async Task<QuestionnaireResponse> GetResponseAsync(
-        ApplicationUser member,
+        ApplicationUser actor,
         string cultureCode,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(member);
-        var memberId = member.Id;
-        ValidateCulture(cultureCode);
+        ArgumentNullException.ThrowIfNull(actor);
+        var cultureValidationResult = await cultureValidator.ValidateAsync(cultureCode, cancellationToken);
+        if (!cultureValidationResult.IsValid)
+            throw new ArgumentException(string.Join(" ", cultureValidationResult.Errors.Select(error => error.ErrorMessage)), nameof(cultureCode));
 
         var questions = await dbContext.Questions
             .AsNoTracking()
@@ -28,7 +34,7 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
             .ToListAsync(cancellationToken);
         var answers = await dbContext.UserAnswers
             .AsNoTracking()
-            .Where(answer => answer.ApplicationUserId == memberId)
+            .Where(answer => answer.ApplicationUserId == actor.Id)
             .Include(answer => answer.QuestionOption)
             .ToListAsync(cancellationToken);
         var answerGroups = answers.GroupBy(answer => answer.QuestionId).ToDictionary(group => group.Key, group => group.ToList());
@@ -76,11 +82,10 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(member);
-        var memberId = member.Id;
-        ArgumentNullException.ThrowIfNull(request.Answers);
-
-        if (request.Answers.Select(answer => answer.QuestionId).Distinct().Count() != request.Answers.Count)
-            throw new ArgumentException("Each question may appear only once in a questionnaire submission.", nameof(request));
+        var actorId = member.Id;
+        var requestValidationResult = await requestValidator.ValidateAsync(request, cancellationToken);
+        if (!requestValidationResult.IsValid)
+            throw new ArgumentException(string.Join(" ", requestValidationResult.Errors.Select(error => error.ErrorMessage)), nameof(request));
 
         var questions = await dbContext.Questions
             .Include(question => question.Options)
@@ -90,13 +95,16 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
         {
             if (!questions.TryGetValue(answer.QuestionId, out var question))
                 throw new ArgumentException("The submission contains an unknown question.", nameof(request));
-            ValidateAnswer(question, answer);
+            var answerValidationResult = await answerValidator.ValidateAsync(
+                new QuestionnaireAnswerValidationContext(question, answer), cancellationToken);
+            if (!answerValidationResult.IsValid)
+                throw new ArgumentException(string.Join(" ", answerValidationResult.Errors.Select(error => error.ErrorMessage)), nameof(request));
         }
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var questionIds = request.Answers.Select(answer => answer.QuestionId).ToArray();
         var existingAnswers = await dbContext.UserAnswers
-            .Where(answer => answer.ApplicationUserId == memberId && questionIds.Contains(answer.QuestionId))
+            .Where(answer => answer.ApplicationUserId == actorId && questionIds.Contains(answer.QuestionId))
             .ToListAsync(cancellationToken);
         dbContext.UserAnswers.RemoveRange(existingAnswers);
         var updatedAt = DateTimeOffset.UtcNow;
@@ -114,7 +122,7 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
                     dbContext.UserAnswers.Add(new UserAnswer
                     {
                         Id = Guid.NewGuid(),
-                        ApplicationUserId = memberId,
+                        ApplicationUserId = actorId,
                         QuestionId = question.Id,
                         QuestionOptionId = option.Id,
                         UpdatedAt = updatedAt
@@ -126,7 +134,7 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
                 dbContext.UserAnswers.Add(new UserAnswer
                 {
                     Id = Guid.NewGuid(),
-                    ApplicationUserId = memberId,
+                    ApplicationUserId = actorId,
                     QuestionId = question.Id,
                     ScaleValue = answer.ScaleValue,
                     UpdatedAt = updatedAt
@@ -136,44 +144,6 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-    }
-
-    private static void ValidateAnswer(Question question, QuestionnaireAnswerRequest answer)
-    {
-        if (answer.OptionCodes is null)
-            throw new ArgumentException("Option selections cannot be null.", nameof(answer));
-
-        if (answer.OptionCodes.Distinct(StringComparer.Ordinal).Count() != answer.OptionCodes.Count)
-            throw new ArgumentException("An option can only be selected once per question.", nameof(answer));
-
-        switch ((QuestionType)question.Type)
-        {
-            case QuestionType.SingleChoice:
-                if (answer.ScaleValue.HasValue || answer.OptionCodes.Count > 1)
-                    throw new ArgumentException("Single-choice questions allow at most one option selection.", nameof(answer));
-                ValidateOptions(question, answer.OptionCodes);
-                break;
-            case QuestionType.MultipleChoice:
-                if (answer.ScaleValue.HasValue
-                    || question.MaxSelections.HasValue && answer.OptionCodes.Count > question.MaxSelections.Value)
-                    throw new ArgumentException("The multiple-choice answer has an invalid number of selections.", nameof(answer));
-                ValidateOptions(question, answer.OptionCodes);
-                break;
-            case QuestionType.Scale:
-                if (answer.OptionCodes.Count > 0 || answer.ScaleValue.HasValue
-                    && (answer.ScaleValue < question.ScaleMin || answer.ScaleValue > question.ScaleMax))
-                    throw new ArgumentException("The scale answer is outside the configured range.", nameof(answer));
-                break;
-            default:
-                throw new ArgumentException("The question type is not supported.", nameof(question));
-        }
-    }
-
-    private static void ValidateOptions(Question question, IReadOnlyList<string> optionCodes)
-    {
-        var validCodes = question.Options.Select(option => option.OptionCode).ToHashSet(StringComparer.Ordinal);
-        if (optionCodes.Any(code => !validCodes.Contains(code)))
-            throw new ArgumentException("The answer contains an option that does not belong to the question.", nameof(optionCodes));
     }
 
     private static bool IsValidAnswer(Question question, IReadOnlyList<UserAnswer> answers)
@@ -194,9 +164,4 @@ public sealed class QuestionnaireResponseService(ApplicationDbContext dbContext)
         };
     }
 
-    private static void ValidateCulture(string cultureCode)
-    {
-        if (cultureCode is not ("en" or "fr"))
-            throw new ArgumentException("Supported questionnaire cultures are 'en' and 'fr'.", nameof(cultureCode));
-    }
 }
