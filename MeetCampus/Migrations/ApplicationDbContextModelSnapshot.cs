@@ -567,17 +567,25 @@ namespace MeetCampus.Migrations
                     b.Property<Guid>("ApplicationUserId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("QuestionOptionId")
+                    b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
+
+                    b.Property<Guid?>("QuestionOptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("ScaleValue")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("QuestionId");
+
                     b.HasIndex("QuestionOptionId");
 
-                    b.HasIndex("ApplicationUserId", "CreatedAt");
+                    b.HasIndex("ApplicationUserId", "QuestionId", "UpdatedAt");
 
                     b.ToTable("UserAnswers");
                 });
@@ -1776,13 +1784,20 @@ namespace MeetCampus.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MeetCampus.Data.Questionnaire.Question", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("MeetCampus.Data.Questionnaire.QuestionOption", "QuestionOption")
                         .WithMany()
                         .HasForeignKey("QuestionOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ApplicationUser");
+
+                    b.Navigation("Question");
 
                     b.Navigation("QuestionOption");
                 });
@@ -2016,6 +2031,8 @@ namespace MeetCampus.Migrations
 
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.Question", b =>
                 {
+                    b.Navigation("Answers");
+
                     b.Navigation("Options");
 
                     b.Navigation("Translations");
