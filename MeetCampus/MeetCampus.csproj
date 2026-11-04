@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Contracts\**" />
+    <Content Remove="Contracts\**" />
+    <EmbeddedResource Remove="Contracts\**" />
+    <None Remove="Contracts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MeetCampus.Client\MeetCampus.Client.csproj" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.104.6" />
@@ -36,10 +43,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MeetCampus.Contracts\MeetCampus.Contracts.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Contracts\Features\Administration\" />
   </ItemGroup>
 
 </Project>
