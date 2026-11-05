@@ -1,11 +1,11 @@
 using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Account.Services;
+using MeetCampus.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace MeetCampus.Features.Account;
 
@@ -81,7 +81,7 @@ public sealed class AccountController(
         cancellationToken.ThrowIfCancellationRequested();
         return Ok(await accountService.SendEmailVerificationAsync(
             User,
-            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
+            (userId, code) => ClientUrlBuilder.Build(Request.Scheme, Request.Host, "/auth/confirm-email", new Dictionary<string, object?>
             {
                 ["userId"] = userId,
                 ["code"] = code,
@@ -99,7 +99,7 @@ public sealed class AccountController(
         return Ok(await accountService.RequestEmailChangeAsync(
             User,
             request.NewEmail,
-            (userId, code) => BuildClientUrl("/auth/confirm-email-change", new Dictionary<string, object?>
+            (userId, code) => ClientUrlBuilder.Build(Request.Scheme, Request.Host, "/auth/confirm-email-change", new Dictionary<string, object?>
             {
                 ["userId"] = userId,
                 ["email"] = request.NewEmail,
@@ -158,13 +158,5 @@ public sealed class AccountController(
     {
         cancellationToken.ThrowIfCancellationRequested();
         return Ok(await accountService.DeleteAccountAsync(User, request.Password));
-    }
-
-    private string BuildClientUrl(string path, Dictionary<string, object?> parameters)
-    {
-        var baseUri = $"{Request.Scheme}://{Request.Host}{path}";
-        return QueryHelpers.AddQueryString(
-            baseUri,
-            parameters.ToDictionary(pair => pair.Key, pair => pair.Value?.ToString()));
     }
 }

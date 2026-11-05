@@ -3,12 +3,12 @@ using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Models;
 using MeetCampus.Features.Auth.Services;
+using MeetCampus.Shared;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace MeetCampus.Features.Auth.Controllers;
 
@@ -63,7 +63,7 @@ public sealed class AuthController(
         cancellationToken.ThrowIfCancellationRequested();
         await registrationService.RegisterAsync(
             new RegisterUserRequest(request.Email, request.Password),
-            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
+            (userId, code) => ClientUrlBuilder.Build(Request.Scheme, Request.Host, "/auth/confirm-email", new Dictionary<string, object?>
             {
                 ["userId"] = userId,
                 ["code"] = code,
@@ -92,7 +92,7 @@ public sealed class AuthController(
         cancellationToken.ThrowIfCancellationRequested();
         await emailConfirmationService.ResendConfirmationAsync(
             request.Email,
-            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
+            (userId, code) => ClientUrlBuilder.Build(Request.Scheme, Request.Host, "/auth/confirm-email", new Dictionary<string, object?>
             {
                 ["userId"] = userId,
                 ["code"] = code,
@@ -129,7 +129,7 @@ public sealed class AuthController(
         cancellationToken.ThrowIfCancellationRequested();
         await passwordRecoveryService.RequestResetAsync(
             request.Email,
-            code => BuildClientUrl("/auth/reset-password", new Dictionary<string, object?>
+            code => ClientUrlBuilder.Build(Request.Scheme, Request.Host, "/auth/reset-password", new Dictionary<string, object?>
             {
                 ["code"] = code,
             }));
@@ -194,11 +194,4 @@ public sealed class AuthController(
         return Ok(await authService.LoginWithRecoveryCodeAsync(request.RecoveryCode));
     }
 
-    private string BuildClientUrl(string path, Dictionary<string, object?> parameters)
-    {
-        var baseUri = $"{Request.Scheme}://{Request.Host}{path}";
-        return QueryHelpers.AddQueryString(
-            baseUri,
-            parameters.ToDictionary(pair => pair.Key, pair => pair.Value?.ToString()));
-    }
 }
