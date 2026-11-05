@@ -45,4 +45,8 @@
     <ProjectReference Include="..\MeetCampus.Contracts\MeetCampus.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Shared\" />
+  </ItemGroup>
+
 </Project>

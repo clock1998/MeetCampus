@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
 using Serilog;
+using MeetCampus.Features.Account.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration

@@ -48,7 +48,7 @@ public sealed class QuestionnaireResponseService(
                 option.Translations.SingleOrDefault(item => item.CultureCode == cultureCode)?.Text ?? string.Empty,
                 option.SortOrder)).ToList();
             var validCurrentAnswer = questionAnswers.All(answer => answer.UpdatedAt >= question.UpdatedAt)
-                && IsValidAnswer(question, questionAnswers);
+                && QuestionnaireAnswerRules.IsValidStoredAnswer(question, questionAnswers);
 
             return new QuestionnaireQuestionResponse(
                 question.Id,
@@ -144,24 +144,6 @@ public sealed class QuestionnaireResponseService(
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-    }
-
-    private static bool IsValidAnswer(Question question, IReadOnlyList<UserAnswer> answers)
-    {
-        if (answers.Count == 0)
-            return false;
-
-        return (QuestionType)question.Type switch
-        {
-            QuestionType.SingleChoice => answers.Count == 1 && answers[0].QuestionOptionId.HasValue && answers[0].ScaleValue is null
-                && question.Options.Any(option => option.Id == answers[0].QuestionOptionId),
-            QuestionType.MultipleChoice => answers.All(answer => answer.QuestionOptionId.HasValue && answer.ScaleValue is null
-                && question.Options.Any(option => option.Id == answer.QuestionOptionId))
-                && (!question.MaxSelections.HasValue || answers.Count <= question.MaxSelections.Value),
-            QuestionType.Scale => answers.Count == 1 && answers[0].QuestionOptionId is null && answers[0].ScaleValue is int value
-                && value >= question.ScaleMin && value <= question.ScaleMax,
-            _ => false
-        };
     }
 
 }

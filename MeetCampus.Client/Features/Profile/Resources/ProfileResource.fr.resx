@@ -115,4 +115,18 @@
   <data name="ProfileImages_BackToProfile" xml:space="preserve"><value>Retour au profil</value></data>
   <data name="ProfileImages_Finish" xml:space="preserve"><value>Terminer</value></data>
   <data name="ProfileSetup_ManageImages" xml:space="preserve"><value>Gérer les photos de profil</value></data>
+  <data name="OnboardingStatus_PageTitle" xml:space="preserve"><value>État de visibilité</value></data>
+  <data name="OnboardingStatus_Title" xml:space="preserve"><value>Configuration de votre visibilité</value></data>
+  <data name="OnboardingStatus_Description" xml:space="preserve"><value>Consultez les conditions de visibilité et terminez les étapes restantes.</value></data>
+  <data name="OnboardingStatus_Loading" xml:space="preserve"><value>Vérification de votre état...</value></data>
+  <data name="OnboardingStatus_LoadError" xml:space="preserve"><value>Impossible de charger ou de mettre à jour votre état. Veuillez réessayer.</value></data>
+  <data name="OnboardingStatus_Eligible" xml:space="preserve"><value>Votre compte répond actuellement aux conditions de visibilité.</value></data>
+  <data name="OnboardingStatus_Incomplete" xml:space="preserve"><value>Terminez ou vérifiez ces éléments pour être visible :</value></data>
+  <data name="OnboardingStatus_ProfileLink" xml:space="preserve"><value>Compléter votre profil</value></data>
+  <data name="OnboardingStatus_ImagesLink" xml:space="preserve"><value>Ajouter une photo de profil</value></data>
+  <data name="OnboardingStatus_QuestionnaireLink" xml:space="preserve"><value>Compléter ou actualiser votre questionnaire</value></data>
+  <data name="OnboardingStatus_EmailLink" xml:space="preserve"><value>Vérifier votre adresse courriel</value></data>
+  <data name="OnboardingStatus_OptInAction" xml:space="preserve"><value>Accepter d’être visible</value></data>
+  <data name="OnboardingStatus_OptInUpdating" xml:space="preserve"><value>Mise à jour...</value></data>
+  <data name="OnboardingStatus_AccountRestriction" xml:space="preserve"><value>La visibilité est indisponible en raison de l’état du compte, de la capacité de demandes ou d’une restriction de sécurité.</value></data>
 </root>

@@ -5,7 +5,7 @@ using MeetCampus.Data.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace MeetCampus.Features.Auth.Services;
+namespace MeetCampus.Features.Account.Services;
 
 public sealed class AccountLifecycleService(
     ApplicationDbContext dbContext,

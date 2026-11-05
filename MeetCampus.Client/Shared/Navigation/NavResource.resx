@@ -165,4 +165,7 @@
   <data name="Nav_Questionnaire" xml:space="preserve">
     <value>Questionnaire</value>
   </data>
+  <data name="Nav_OnboardingStatus" xml:space="preserve">
+    <value>Discoverability</value>
+  </data>
 </root>

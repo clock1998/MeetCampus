@@ -78,10 +78,10 @@ Deliver the profile-onboarding features that let a verified member describe thei
 **Outcome:** Profile setup, image presence, and valid questionnaire responses consistently feed the existing central eligibility decision.
 
 **Implementation:**
-1. Add or confirm the required profile and questionnaire completion checks in the central eligibility service; do not create a second client- or feature-specific eligibility authority.
-2. Ensure profile, image, intent, or answer changes cause subsequent eligibility checks to use the latest persisted state.
-3. Return only the privacy-safe onboarding/eligibility status needed by the client to guide the member to incomplete steps.
-4. Verify downstream recommendation/contact entry points continue to use the shared eligibility service from Phase 2.
+1. Use `AccountEligibilityService` as the single eligibility authority. It checks account/email status, discoverability opt-in, required profile fields and intentions, profile image presence, current valid/fresh required questionnaire answers, contact capacity, and active moderation restrictions.
+2. Recompute eligibility from persisted state on each request so profile, image, intention, answer, lifecycle, moderation, and contact-capacity changes affect subsequent results.
+3. Expose the privacy-safe eligibility flags through the authenticated API and localized client onboarding status page, with links/actions for incomplete profile, image, questionnaire, email verification, and discoverability opt-in steps.
+4. Call the shared eligibility service from recommendation/contact entry points when those APIs are implemented; those entry points do not currently exist.
 
 **Acceptance criteria:**
 - Missing required profile data, an uploaded image, or valid current questionnaire answers prevents discoverability.
@@ -97,6 +97,8 @@ Deliver the profile-onboarding features that let a verified member describe thei
 - Profile and questionnaire API tests cover valid saves, invalid lookup IDs/intents/questions/answer shapes, ownership, and authorization.
 - Image tests cover validation, optimization/storage outcomes, replacement/removal, ownership, and eligibility changes without requiring approval states.
 - Questionnaire administration tests cover authorization, validation, stable IDs, update timestamps, and audit events.
-- Eligibility tests cover each missing prerequisite and restoration after completion; missing answers never become score disagreement.
+- Eligibility integration tests cover missing prerequisites, fully completed prerequisites, opt-out changes, and malformed/stale required answers; missing answers never become score disagreement.
 - Client onboarding text is localized and controls are accessible by keyboard and assistive technology.
 - Build the affected projects and solution, then run relevant automated tests. Database migrations are managed separately from feature implementation.
+
+**Implementation status:** Central eligibility checks, the authenticated eligibility API, typed client support, and the localized onboarding status page are implemented. Recommendation/contact API enforcement remains pending until those feature entry points exist.

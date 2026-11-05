@@ -1,0 +1,119 @@
+@page "/onboarding/status"
+@attribute [Authorize]
+@using MeetCampus.Client.Features.Auth.HttpClients
+@using MeetCampus.Client.Features.Profile.Resources
+@using MeetCampus.Contracts.Features.Auth
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@inject IAuthClient AuthClient
+@inject IStringLocalizer<ProfileResource> L
+
+<PageTitle>@L["OnboardingStatus_PageTitle"]</PageTitle>
+
+<div class="bg-base-100 px-6 py-12 lg:py-20">
+    <div class="mx-auto max-w-3xl">
+        <section class="card bg-base-200 border-base-300 rounded-3xl border p-6 shadow-sm lg:p-8">
+            <div class="mb-6 space-y-2">
+                <h1 class="text-base-content text-3xl font-bold">@L["OnboardingStatus_Title"]</h1>
+                <p class="text-base-content/70">@L["OnboardingStatus_Description"]</p>
+            </div>
+
+            @if (isLoading)
+            {
+                <p role="status" class="text-base-content/70">@L["OnboardingStatus_Loading"]</p>
+            }
+            else if (hasError || eligibility is null)
+            {
+                <div class="alert alert-error" role="alert">@L["OnboardingStatus_LoadError"]</div>
+            }
+            else if (eligibility.IsEligibleForDiscoverability)
+            {
+                <div class="alert alert-success" role="status">@L["OnboardingStatus_Eligible"]</div>
+            }
+            else
+            {
+                <p class="text-base-content/70 mb-4">@L["OnboardingStatus_Incomplete"]</p>
+                <ul class="space-y-3">
+                    @if (!eligibility.IsProfileComplete)
+                    {
+                        <li><a class="link link-primary" href="/profile/setup">@L["OnboardingStatus_ProfileLink"]</a></li>
+                    }
+                    @if (!eligibility.HasUploadedProfileImage)
+                    {
+                        <li><a class="link link-primary" href="/profile/images">@L["OnboardingStatus_ImagesLink"]</a></li>
+                    }
+                    @if (!eligibility.HasCompletedRequiredQuestions)
+                    {
+                        <li><a class="link link-primary" href="/questionnaire">@L["OnboardingStatus_QuestionnaireLink"]</a></li>
+                    }
+                    @if (!eligibility.IsEmailVerified)
+                    {
+                        <li><a class="link link-primary" href="/auth/manage/email">@L["OnboardingStatus_EmailLink"]</a></li>
+                    }
+                    @if (!eligibility.DiscoverabilityOptIn)
+                    {
+                        <li>
+                            <button class="btn btn-outline btn-sm" type="button" disabled="@isUpdatingOptIn" @onclick="EnableDiscoverabilityAsync">
+                                @(isUpdatingOptIn ? L["OnboardingStatus_OptInUpdating"] : L["OnboardingStatus_OptInAction"])
+                            </button>
+                        </li>
+                    }
+                    @if (!eligibility.IsAccountActive || !eligibility.HasRecipientCapacity || !eligibility.HasNoActiveModerationRestriction)
+                    {
+                        <li><p class="text-base-content/70">@L["OnboardingStatus_AccountRestriction"]</p></li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+</div>
+
+@code {
+    private AccountEligibilityResponse? eligibility;
+    private bool isLoading = true;
+    private bool hasError;
+    private bool isUpdatingOptIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            eligibility = await AuthClient.GetAccountEligibilityAsync();
+        }
+        catch (ApiClientException)
+        {
+            hasError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task EnableDiscoverabilityAsync()
+    {
+        isUpdatingOptIn = true;
+        hasError = false;
+        try
+        {
+            var result = await AuthClient.UpdateAccountLifecycleAsync(new UpdateAccountLifecycleRequest(
+                AccountLifecycleAction.SetDiscoverabilityOptIn,
+                true));
+            if (!result.Succeeded)
+            {
+                hasError = true;
+                return;
+            }
+
+            eligibility = await AuthClient.GetAccountEligibilityAsync();
+        }
+        catch (ApiClientException)
+        {
+            hasError = true;
+        }
+        finally
+        {
+            isUpdatingOptIn = false;
+        }
+    }
+}

@@ -1,4 +1,5 @@
 using MeetCampus.Data.User;
+using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Features.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -49,5 +50,23 @@ public sealed class AuthService(
         }
 
         return LoginResult.Failed("Error: Invalid login attempt.");
+    }
+
+    public async Task<TwoFactorLoginResponse> LoginWithAuthenticatorAsync(
+        string code,
+        bool rememberMe,
+        bool rememberMachine)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(code);
+        var normalizedCode = code.Replace(" ", string.Empty).Replace("-", string.Empty);
+        var result = await signInManager.TwoFactorAuthenticatorSignInAsync(normalizedCode, rememberMe, rememberMachine);
+        return new TwoFactorLoginResponse(result.Succeeded, result.IsLockedOut, result.Succeeded ? null : "Invalid authenticator code.");
+    }
+
+    public async Task<RecoveryCodeLoginResponse> LoginWithRecoveryCodeAsync(string recoveryCode)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(recoveryCode);
+        var result = await signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode.Replace(" ", string.Empty));
+        return new RecoveryCodeLoginResponse(result.Succeeded, result.IsLockedOut, result.Succeeded ? null : "Invalid recovery code entered.");
     }
 }

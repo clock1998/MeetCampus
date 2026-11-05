@@ -115,4 +115,18 @@
   <data name="ProfileImages_BackToProfile" xml:space="preserve"><value>Back to profile</value></data>
   <data name="ProfileImages_Finish" xml:space="preserve"><value>Finish</value></data>
   <data name="ProfileSetup_ManageImages" xml:space="preserve"><value>Manage profile images</value></data>
+  <data name="OnboardingStatus_PageTitle" xml:space="preserve"><value>Discoverability status</value></data>
+  <data name="OnboardingStatus_Title" xml:space="preserve"><value>Your discoverability setup</value></data>
+  <data name="OnboardingStatus_Description" xml:space="preserve"><value>Review your eligibility requirements and continue any unfinished setup.</value></data>
+  <data name="OnboardingStatus_Loading" xml:space="preserve"><value>Checking your status...</value></data>
+  <data name="OnboardingStatus_LoadError" xml:space="preserve"><value>Could not update or load your status. Please try again.</value></data>
+  <data name="OnboardingStatus_Eligible" xml:space="preserve"><value>Your account currently meets the discoverability requirements.</value></data>
+  <data name="OnboardingStatus_Incomplete" xml:space="preserve"><value>Complete or review these items to become discoverable:</value></data>
+  <data name="OnboardingStatus_ProfileLink" xml:space="preserve"><value>Complete your profile</value></data>
+  <data name="OnboardingStatus_ImagesLink" xml:space="preserve"><value>Add a profile image</value></data>
+  <data name="OnboardingStatus_QuestionnaireLink" xml:space="preserve"><value>Complete or refresh your questionnaire</value></data>
+  <data name="OnboardingStatus_EmailLink" xml:space="preserve"><value>Verify your email address</value></data>
+  <data name="OnboardingStatus_OptInAction" xml:space="preserve"><value>Opt in to discoverability</value></data>
+  <data name="OnboardingStatus_OptInUpdating" xml:space="preserve"><value>Updating...</value></data>
+  <data name="OnboardingStatus_AccountRestriction" xml:space="preserve"><value>Discoverability is unavailable because of account status, contact capacity, or a safety restriction.</value></data>
 </root>

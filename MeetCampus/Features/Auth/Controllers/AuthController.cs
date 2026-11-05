@@ -19,9 +19,6 @@ public sealed class AuthController(
     RegistrationService registrationService,
     PasswordRecoveryService passwordRecoveryService,
     EmailConfirmationService emailConfirmationService,
-    AccountEligibilityService accountEligibilityService,
-    AccountLifecycleService accountLifecycleService,
-    AccountService accountService,
     SignInManager<ApplicationUser> signInManager,
     IAntiforgery antiforgery) : ControllerBase
 {
@@ -73,30 +70,6 @@ public sealed class AuthController(
             }));
 
         return Ok(new RegisterResponse(true, true, null));
-    }
-
-    [HttpGet("account/eligibility")]
-    [Authorize]
-    public async Task<ActionResult<AccountEligibilityResponse>> GetAccountEligibilityAsync(CancellationToken cancellationToken)
-    {
-        var user = await signInManager.UserManager.GetUserAsync(User);
-        if (user is null)
-        {
-            return Unauthorized();
-        }
-
-        var eligibility = await accountEligibilityService.GetEligibilityAsync(user.Id, cancellationToken);
-        return eligibility is null ? Unauthorized() : Ok(eligibility);
-    }
-
-    [HttpPost("account/lifecycle")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> UpdateAccountLifecycleAsync(
-        [FromBody] UpdateAccountLifecycleRequest request,
-        CancellationToken cancellationToken)
-    {
-        return Ok(await accountLifecycleService.UpdateAsync(User, request, cancellationToken));
     }
 
     [HttpPost("logout")]
@@ -207,7 +180,7 @@ public sealed class AuthController(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.LoginWithAuthenticatorAsync(request.Code, request.RememberMe, request.RememberMachine));
+        return Ok(await authService.LoginWithAuthenticatorAsync(request.Code, request.RememberMe, request.RememberMachine));
     }
 
     [HttpPost("login/recovery-code")]
@@ -218,148 +191,7 @@ public sealed class AuthController(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.LoginWithRecoveryCodeAsync(request.RecoveryCode));
-    }
-
-    [HttpGet("account")]
-    [Authorize]
-    public async Task<ActionResult<AccountProfileResponse>> GetAccountAsync()
-    {
-        var response = await accountService.GetProfileAsync(User);
-        return response is null ? Unauthorized() : Ok(response);
-    }
-
-    [HttpPut("account/phone")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> UpdatePhoneAsync(
-        [FromBody] UpdatePhoneNumberRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.UpdatePhoneNumberAsync(User, request.PhoneNumber));
-    }
-
-    [HttpPost("account/password")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> ChangePasswordAsync(
-        [FromBody] ChangePasswordRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.ChangePasswordAsync(User, request.CurrentPassword, request.NewPassword));
-    }
-
-    [HttpPost("account/set-password")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> SetPasswordAsync(
-        [FromBody] SetPasswordRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.SetPasswordAsync(User, request.NewPassword));
-    }
-
-    [HttpPost("account/email/verification")]
-    [Authorize]
-    [EnableRateLimiting("verification")]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> SendEmailVerificationAsync(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.SendEmailVerificationAsync(
-            User,
-            (userId, code) => BuildClientUrl("/auth/confirm-email", new Dictionary<string, object?>
-            {
-                ["userId"] = userId,
-                ["code"] = code,
-            })));
-    }
-
-    [HttpPost("account/email")]
-    [Authorize]
-    [EnableRateLimiting("verification")]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> ChangeEmailAsync(
-        [FromBody] ChangeEmailRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.RequestEmailChangeAsync(
-            User,
-            request.NewEmail,
-            (userId, code) => BuildClientUrl("/auth/confirm-email-change", new Dictionary<string, object?>
-            {
-                ["userId"] = userId,
-                ["email"] = request.NewEmail,
-                ["code"] = code,
-            })));
-    }
-
-    [HttpGet("account/2fa")]
-    [Authorize]
-    public async Task<ActionResult<TwoFactorStatusResponse>> GetTwoFactorStatusAsync()
-    {
-        var response = await accountService.GetTwoFactorStatusAsync(User, HttpContext);
-        return response is null ? Unauthorized() : Ok(response);
-    }
-
-    [HttpPost("account/2fa/forget-browser")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> ForgetTwoFactorBrowserAsync()
-    {
-        return Ok(await accountService.ForgetTwoFactorBrowserAsync());
-    }
-
-    [HttpGet("account/authenticator")]
-    [Authorize]
-    public async Task<ActionResult<AuthenticatorSetupResponse>> GetAuthenticatorSetupAsync()
-    {
-        var response = await accountService.GetAuthenticatorSetupAsync(User);
-        return response is null ? Unauthorized() : Ok(response);
-    }
-
-    [HttpPost("account/authenticator")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<RecoveryCodesResponse>> VerifyAuthenticatorAsync(
-        [FromBody] VerifyAuthenticatorRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var response = await accountService.VerifyAuthenticatorAsync(User, request.Code);
-        return response is null ? Unauthorized() : Ok(response);
-    }
-
-    [HttpPost("account/2fa/disable")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> DisableTwoFactorAsync()
-    {
-        return Ok(await accountService.DisableTwoFactorAsync(User));
-    }
-
-    [HttpPost("account/2fa/recovery-codes")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<RecoveryCodesResponse>> GenerateRecoveryCodesAsync()
-    {
-        var response = await accountService.GenerateRecoveryCodesAsync(User);
-        return response is null ? Unauthorized() : Ok(response);
-    }
-
-    [HttpPost("account/delete")]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<ActionResult<AccountOperationResponse>> DeleteAccountAsync(
-        [FromBody] DeleteAccountRequest request,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Ok(await accountService.DeleteAccountAsync(User, request.Password));
+        return Ok(await authService.LoginWithRecoveryCodeAsync(request.RecoveryCode));
     }
 
     private string BuildClientUrl(string path, Dictionary<string, object?> parameters)

@@ -1,14 +1,16 @@
 using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data;
 using MeetCampus.Data.Contact;
+using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.Safety;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Configuration;
+using MeetCampus.Features.Questionnaire.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace MeetCampus.Features.Auth.Services;
+namespace MeetCampus.Features.Account.Services;
 
 public sealed class AccountEligibilityService(
     ApplicationDbContext dbContext,
@@ -46,25 +48,21 @@ public sealed class AccountEligibilityService(
         var requiredQuestions = await dbContext.Questions
             .AsNoTracking()
             .Where(question => question.IsRequired)
-            .Select(question => new { question.Id, question.UpdatedAt })
+            .Include(question => question.Options)
             .ToListAsync(cancellationToken);
-        var requiredQuestionIds = requiredQuestions
-            .Select(question => question.Id)
-            .ToHashSet();
-        var latestRequiredAnswerByQuestionId = await dbContext.UserAnswers
+        var requiredQuestionIds = requiredQuestions.Select(question => question.Id).ToArray();
+        var requiredAnswersByQuestionId = await dbContext.UserAnswers
             .AsNoTracking()
             .Where(answer => answer.ApplicationUserId == userId
                 && requiredQuestionIds.Contains(answer.QuestionId))
+            .ToListAsync(cancellationToken);
+        var answersByQuestionId = requiredAnswersByQuestionId
             .GroupBy(answer => answer.QuestionId)
-            .Select(group => new
-            {
-                QuestionId = group.Key,
-                UpdatedAt = group.Max(answer => answer.UpdatedAt)
-            })
-            .ToDictionaryAsync(item => item.QuestionId, item => item.UpdatedAt, cancellationToken);
+            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<UserAnswer>)group.ToList());
         var hasCompletedRequiredQuestions = requiredQuestions.All(question =>
-            latestRequiredAnswerByQuestionId.TryGetValue(question.Id, out var answerUpdatedAt)
-            && answerUpdatedAt >= question.UpdatedAt);
+            answersByQuestionId.TryGetValue(question.Id, out var answers)
+            && answers.All(answer => answer.UpdatedAt >= question.UpdatedAt)
+            && QuestionnaireAnswerRules.IsValidStoredAnswer(question, answers));
 
         var isEmailVerified = await userManager.IsEmailConfirmedAsync(user);
         var discoverabilityOptIn = lifecycle?.DiscoverabilityOptIn == true;
@@ -79,7 +77,7 @@ public sealed class AccountEligibilityService(
             .AsNoTracking()
             .AnyAsync(action => action.Report.ReportedUserId == userId
                 && (action.Action == ModerationActionType.PermanentRemoval
-                    || action.Action == ModerationActionType.TemporarySuspension || action.Action == ModerationActionType.MessagingRestriction
+                    || (action.Action == ModerationActionType.TemporarySuspension || action.Action == ModerationActionType.MessagingRestriction)
                         && (action.EndsAt == null || action.EndsAt > now)), cancellationToken);
         var isEligible = isActive
             && isEmailVerified
