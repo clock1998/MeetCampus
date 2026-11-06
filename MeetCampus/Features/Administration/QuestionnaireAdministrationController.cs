@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MeetCampus.Features.Administration.Controllers;
+namespace MeetCampus.Features.Administration;
 
 [ApiController]
 [Route("api/admin/questionnaire")]
