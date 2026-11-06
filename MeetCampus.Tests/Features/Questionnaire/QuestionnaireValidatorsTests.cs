@@ -66,7 +66,7 @@ public sealed class QuestionnaireValidatorsTests
         Code = "test-question",
         Type = QuestionType.SingleChoice,
         IsRequired = true,
-        Group = "interests",
+        Category = "interests",
         ScoringWeight = 0.5m,
         Translations =
         [

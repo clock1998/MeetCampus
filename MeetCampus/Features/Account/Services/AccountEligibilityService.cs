@@ -1,10 +1,10 @@
+using MeetCampus.Configuration;
 using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data;
 using MeetCampus.Data.Contact;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.Safety;
 using MeetCampus.Data.User;
-using MeetCampus.Features.Configuration;
 using MeetCampus.Features.Questionnaire.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

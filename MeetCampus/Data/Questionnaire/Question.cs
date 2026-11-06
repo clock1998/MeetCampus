@@ -8,7 +8,7 @@ public sealed class Question
     public string Code { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
     public bool IsRequired { get; set; }
-    public string Group { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
     public decimal ScoringWeight { get; set; }
     public int SortOrder { get; set; } = 0;
 

@@ -83,7 +83,7 @@ public sealed class QuestionnaireAdministrationService(
             (cultureCode, promptText) => new QuestionTranslation { QuestionId = question.Id, CultureCode = cultureCode, Text = promptText });
         question.IsRequired = updatedQuestion.IsRequired;
         question.Type = updatedQuestion.Type;
-        question.Group = updatedQuestion.Group;
+        question.Category = updatedQuestion.Category;
         question.ScoringWeight = updatedQuestion.ScoringWeight;
         question.SortOrder = updatedQuestion.SortOrder;
         question.MaxSelections = updatedQuestion.MaxSelections;

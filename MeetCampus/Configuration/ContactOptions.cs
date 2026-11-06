@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MeetCampus.Features.Configuration;
+namespace MeetCampus.Configuration;
 
 public sealed class ContactOptions : IValidatableObject
 {

@@ -9,7 +9,7 @@ public sealed class QuestionnaireDefinitionValidator : AbstractValidator<Questio
     public QuestionnaireDefinitionValidator()
     {
         RuleFor(question => question.Code).NotEmpty();
-        RuleFor(question => question.Group)
+        RuleFor(question => question.Category)
             .NotEmpty()
             .Must(group => QuestionnaireAdminCatalog.Value.Categories.Any(category => category.Code == group))
             .WithMessage("Question category is not supported.");

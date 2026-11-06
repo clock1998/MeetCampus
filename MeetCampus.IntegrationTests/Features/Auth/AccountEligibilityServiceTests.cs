@@ -4,7 +4,6 @@ using MeetCampus.Data.Profiles;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Account.Services;
-using MeetCampus.Features.Configuration;
 using MeetCampus.IntegrationTests.Infrastructure;
 using MeetCampus.Features.Recommendations.Controllers;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Xunit;
+using MeetCampus.Configuration;
 
 namespace MeetCampus.IntegrationTests.Features.Auth;
 
@@ -47,7 +47,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
             IsRequired = true,
-            Group = "eligibility",
+            Category = "eligibility",
             ScoringWeight = 1
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -232,7 +232,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
             IsRequired = true,
-            Group = "interests",
+            Category = "interests",
             ScoringWeight = 1,
             Options = [option]
         };

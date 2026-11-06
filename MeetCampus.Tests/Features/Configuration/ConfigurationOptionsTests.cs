@@ -1,5 +1,5 @@
+using MeetCampus.Configuration;
 using System.ComponentModel.DataAnnotations;
-using MeetCampus.Features.Configuration;
 using Xunit;
 
 namespace MeetCampus.Tests.Features.Configuration;

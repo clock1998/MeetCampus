@@ -4,7 +4,6 @@ using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Infrastructure;
 using MeetCampus.Features.Auth.Services;
 using MeetCampus.Features.Administration.Services;
-using MeetCampus.Features.Configuration;
 using MeetCampus.Features.Profile.Services;
 using MeetCampus.Features.Questionnaire.Services;
 using MeetCampus.Contracts.Features.Questionnaire;
@@ -15,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
 using Serilog;
 using MeetCampus.Features.Account.Services;
+using MeetCampus.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration

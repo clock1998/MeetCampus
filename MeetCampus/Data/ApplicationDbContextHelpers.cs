@@ -171,7 +171,7 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.Code).HasMaxLength(128).IsRequired();
-                entity.Property(item => item.Group).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.Category).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.ScoringWeight).HasPrecision(8, 5);
                 entity.Property(item => item.UpdatedAt).IsRequired();
                 entity.HasIndex(item => item.Code).IsUnique();

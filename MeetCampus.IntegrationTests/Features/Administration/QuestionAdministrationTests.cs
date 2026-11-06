@@ -33,7 +33,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
                 new QuestionTranslation { CultureCode = "en", Text = "Test question" },
                 new QuestionTranslation { CultureCode = "fr", Text = "Question de test" }
             ],
-            Group = "interests",
+            Category = "interests",
             ScoringWeight = 0.1m,
             UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1),
             Options =
@@ -62,7 +62,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
                 new QuestionTranslation { CultureCode = "en", Text = "Updated test question" },
                 new QuestionTranslation { CultureCode = "fr", Text = "Question de test modifiée" }
             ],
-            Group = question.Group,
+            Category = question.Category,
             ScoringWeight = question.ScoringWeight,
             Options = question.Options.ToList()
         }, TestContext.Current.CancellationToken);
@@ -178,7 +178,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
             new QuestionTranslation { CultureCode = "en", Text = "Test question" },
             new QuestionTranslation { CultureCode = "fr", Text = "Question de test" }
         ],
-        Group = "interests",
+        Category = "interests",
         ScoringWeight = 0.1m,
         Options =
         [
@@ -199,7 +199,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
     {
         Code = question.Code,
         Type = question.Type,
-        Group = question.Group,
+        Category = question.Category,
         ScoringWeight = question.ScoringWeight,
         Translations =
         [

@@ -1,4 +1,4 @@
-namespace MeetCampus.Features.Configuration;
+namespace MeetCampus.Configuration;
 
 public sealed class MatchingWeightsOptions
 {

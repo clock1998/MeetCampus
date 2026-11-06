@@ -56,7 +56,7 @@ public sealed class QuestionnaireResponseService(
                 (QuestionType)question.Type,
                 prompt,
                 question.IsRequired,
-                question.Group,
+                question.Category,
                 question.ScaleMin,
                 question.ScaleMax,
                 options,

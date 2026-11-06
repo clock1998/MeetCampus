@@ -153,7 +153,7 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
         Code = $"question-{Guid.NewGuid():N}",
         Type = QuestionType.SingleChoice,
         IsRequired = true,
-        Group = "interests",
+        Category = "interests",
         ScoringWeight = 0.1m,
         Translations =
         [
