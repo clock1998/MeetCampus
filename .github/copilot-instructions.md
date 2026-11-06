@@ -214,9 +214,9 @@ Before implementing a new feature, create a focused implementation plan and pres
 
 - For explicitly acknowledged and accepted package vulnerability risk, suppress the corresponding NuGet advisory warning at the specific package reference rather than globally; keep other advisory warnings visible.
 
-## Service Method Guidelines
+## Code Organization
 
-- For authenticated questionnaire service methods, resolve the `ApplicationUser` in the controller via `UserManager` and pass the `ApplicationUser` into the service; avoid extracting user IDs from `ClaimsPrincipal` inside the service.
+- When a service method combines multiple business rules, prefer extracting each rule into a focused private function to improve readability and make the orchestration easier to understand.
 
 ---
 

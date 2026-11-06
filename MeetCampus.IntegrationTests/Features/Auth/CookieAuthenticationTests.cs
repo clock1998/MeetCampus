@@ -20,4 +20,19 @@ public sealed class CookieAuthenticationTests
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task WhenAnonymousUserRequestsRecommendationAvailabilityThenApplicationCookieChallengeIsReturned()
+    {
+        await using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder => builder.UseSetting("ConnectionStrings:DefaultConnection", "Host=127.0.0.1;Database=unused;Username=unused;Password=unused"));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        using var response = await client.GetAsync("/api/recommendations/availability", TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 }

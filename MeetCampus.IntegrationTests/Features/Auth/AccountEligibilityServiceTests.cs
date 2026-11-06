@@ -6,10 +6,14 @@ using MeetCampus.Data.User;
 using MeetCampus.Features.Account.Services;
 using MeetCampus.Features.Configuration;
 using MeetCampus.IntegrationTests.Infrastructure;
+using MeetCampus.Features.Recommendations.Controllers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 using Xunit;
 
 namespace MeetCampus.IntegrationTests.Features.Auth;
@@ -65,6 +69,61 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         Assert.True(response.HasNoActiveModerationRestriction);
         Assert.False(response.IsEligibleForDiscoverability);
     }
+
+    [Fact]
+    public async Task WhenMemberIsEligibleThenRecommendationAvailabilityIsTrue()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: true);
+        var controller = new RecommendationsController(
+            new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions())),
+            userManager);
+        controller.ControllerContext = CreateControllerContext(user.Id);
+
+        var result = await controller.GetAvailabilityAsync(TestContext.Current.CancellationToken);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<MeetCampus.Contracts.Features.Recommendations.RecommendationAvailabilityResponse>(okResult.Value);
+        Assert.True(response.IsAvailable);
+    }
+
+    [Fact]
+    public async Task WhenMemberIsIneligibleThenRecommendationAvailabilityIsFalse()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var email = $"ineligible-{Guid.NewGuid():N}@example.edu";
+        var user = new ApplicationUser { UserName = email, Email = email };
+        var createResult = await userManager.CreateAsync(user, "Test-password1!");
+        Assert.True(createResult.Succeeded);
+        var controller = new RecommendationsController(
+            new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions())),
+            userManager);
+        controller.ControllerContext = CreateControllerContext(user.Id);
+
+        var result = await controller.GetAvailabilityAsync(TestContext.Current.CancellationToken);
+
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<MeetCampus.Contracts.Features.Recommendations.RecommendationAvailabilityResponse>(okResult.Value);
+        Assert.False(response.IsAvailable);
+    }
+
+    private static ControllerContext CreateControllerContext(Guid userId) => new()
+    {
+        HttpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                [new Claim(ClaimTypes.NameIdentifier, userId.ToString())],
+                "Test"))
+        }
+    };
 
     [Fact]
     public async Task WhenMemberHasEveryCurrentPrerequisiteThenEligibilityReflectsPersistedChanges()
