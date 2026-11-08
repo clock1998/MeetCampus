@@ -214,13 +214,11 @@ Before implementing a new feature, create a focused implementation plan and pres
 
 - For explicitly acknowledged and accepted package vulnerability risk, suppress the corresponding NuGet advisory warning at the specific package reference rather than globally; keep other advisory warnings visible.
 
-## Code Organization
-
-- When a service method combines multiple business rules, prefer extracting each rule into a focused private function to improve readability and make the orchestration easier to understand.
-
----
-
-**Last updated:** .NET 10 hosted Blazor WebAssembly architecture with client-owned UI and typed HTTP clients, server-owned Identity/API infrastructure, and shared feature contracts.
-
 ## Project Guidelines
+
 - For MeetCampus database and integration-test work, use the functioning remote PostgreSQL service rather than requiring local database setup; keep automated tests isolated from the app's default/shared database.
+
+## Implementation Plans
+
+- Prefer plain, simple language without jargon or buzzwords in implementation plans.
+- Keep designs appropriately simple for the MVP.
