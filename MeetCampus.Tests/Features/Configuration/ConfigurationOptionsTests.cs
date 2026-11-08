@@ -27,6 +27,47 @@ public sealed class ConfigurationOptionsTests
         AssertInvalid(options);
     }
 
+    [Theory]
+    [InlineData("interests", 0.25)]
+    [InlineData("values", 0.30)]
+    [InlineData("social", 0.20)]
+    [InlineData("lifestyle", 0.15)]
+    [InlineData("connection-intent", 0.10)]
+    public void WhenCategoryIsSupportedThenConfiguredWeightIsReturned(string category, decimal expected)
+    {
+        var weights = new MatchingWeightsOptions();
+
+        var weight = weights.GetCategoryWeight(category);
+
+        Assert.Equal(expected, weight);
+    }
+
+    [Fact]
+    public void WhenCategoryIsUnknownThenItIsRejected()
+    {
+        var weights = new MatchingWeightsOptions();
+
+        Assert.Throws<ArgumentException>(() => weights.GetCategoryWeight("unknown"));
+    }
+
+    [Fact]
+    public void WhenCategoryWeightIsConfiguredThenLookupUsesConfiguredValue()
+    {
+        var weights = new MatchingWeightsOptions { Interests = 0.30m, Values = 0.25m };
+
+        var weight = weights.GetCategoryWeight("interests");
+
+        Assert.Equal(0.30m, weight);
+    }
+
+    [Fact]
+    public void WhenMatchingWeightsAreInvalidThenCategoryLookupIsRejected()
+    {
+        var weights = new MatchingWeightsOptions { Interests = 0.2m };
+
+        Assert.Throws<InvalidOperationException>(() => weights.GetCategoryWeight("interests"));
+    }
+
     [Fact]
     public void WhenMatchingLimitsAreContradictoryThenValidationFails()
     {

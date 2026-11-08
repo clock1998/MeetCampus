@@ -20,12 +20,12 @@ Build a simple server-side service that compares two members' answers and calcul
 1. Define a simple comparison rule for each question type and any question that needs special handling. Use stable question and option IDs, not translated text.
 2. Connect the existing question categories (`interests`, `values`, `social`, `lifestyle`, `connection-intent`) to `MatchingWeightsOptions`. Reject unknown categories, invalid weights, and incomplete rules.
 3. Mark which answers may be used for scoring and which may appear in explanations. Treat answers as private unless sharing is explicitly approved. Add approved explanation text only where needed.
-4. Give each set of scoring rules a version. Decide how to keep the rules needed to understand older results when questions or settings change.
-5. Describe any required database changes. Migrations are managed by the user; do not create or modify them unless requested.
+4. Keep scoring rules in server-side code. Do not store them in the database or assign them versions. Do not save an evaluation history.
+5. Describe any database changes needed for other parts of this phase. Migrations are managed by the user; do not create or modify them unless requested.
 
 **Acceptance criteria:**
 - Invalid or incomplete rules cannot be used for scoring.
-- Older results can be associated with the rules used to calculate them.
+- Scoring rules are implemented in code and are not stored or versioned in the database.
 - Private or unapproved information is never used in explanations.
 
 ### Feature 2: Load answers for scoring
@@ -36,7 +36,7 @@ Build a simple server-side service that compares two members' answers and calcul
 1. Add simple server-only data types for the two members' answers, intents, and scoring rules. Keep database access separate from the calculation.
 2. Load questions and answers using read-only database queries, and pass cancellation tokens through database calls.
 3. Reuse `QuestionnaireAnswerRules.IsValidStoredAnswer`. Use an answer only if it is valid and was updated at or after the question's `UpdatedAt`. Ignore missing, invalid, or outdated answers; do not count them as disagreements.
-4. Decide what to do if the current question no longer matches the scoring rules. Never silently score an answer using the wrong rules.
+4. Keep the question comparison logic in code. If a question's type or answer shape is unsupported, leave it out of the comparison rather than silently scoring it with another rule.
 5. Use stable IDs and a consistent order. Do not log answers or send them to the client as part of scoring.
 
 **Acceptance criteria:**
@@ -93,16 +93,18 @@ Build a simple server-side service that compares two members' answers and calcul
 
 ### Feature 6: Prepare for recommendations
 
-**Outcome:** Later phases can use the score safely and identify the rules used for each recommendation.
+**Outcome:** Later phases can use the score safely without versioning or storing every evaluation.
 
 **Implementation:**
-1. Return the score, category results, coverage, rule versions, and approved explanations to server code. Keep private details out of client responses.
-2. Record what Phase 5 needs to save for each recommendation: the rule versions, score, coverage, information needed to explain and reproduce the score, and explanation inputs. Phase 5 also owns batch dates, ordering, selection seed, and decisions.
-3. Decide how to reproduce an older score when members can change their answers, without introducing answer history by accident. Agree on what to save, who can access it, how long to keep it, and any database changes before implementation.
+1. Return the score, category results, coverage, and approved explanations to server code. Do not save each evaluation or keep an evaluation history. Keep private details out of client responses.
+2. Phase 5 may save the score, coverage, and approved explanation text needed to show a selected recommendation. Do not store scoring rules or their versions with the recommendation.
+3. Do not build a feature to reproduce old scores after answers or scoring code change. Keep only the recommendation data needed by the MVP.
 4. Phase 5 must check eligibility and safety before using scores to select recommendations. Phase 6 must check eligibility and intent again before processing interest.
 
 **Acceptance criteria:**
-- Saved recommendations identify the rules used and include enough approved information to reproduce their scores even after answers change.
+- Selected recommendations save only the result information needed to show them to members.
+- Individual evaluations are not versioned or stored as a history.
+- Scoring rules remain in code and have no database version.
 - Client responses do not expose database entities, exact scores, or private answers.
 - Recommendation and contact entry points are not considered protected until their own checks are implemented.
 
@@ -110,7 +112,7 @@ Build a simple server-side service that compares two members' answers and calcul
 - Agree on question comparison rules, question weights, which answers can be shared, intent rules, match restrictions, and explanation text.
 - Decide how multiple intents are matched, how missing rules are handled, and how dating is identified without relying on translated labels.
 - Decide how to score when answers or categories are missing, how to round scores, which labels to use, and what to show when there are too few explanations.
-- Decide how to save enough information to reproduce older scores without keeping answer history, and identify any database changes needed.
+- Decide which score, coverage, and explanation data Phase 5 must save to show selected recommendations.
 - Decide which question version determines whether an answer is up to date.
 
 ## Non-negotiable rules
@@ -123,5 +125,5 @@ Build a simple server-side service that compares two members' answers and calcul
 - Test all comparison rules, category weights, score limits, rounding, coverage, and missing or outdated answers.
 - Test dating, other intent rules in both directions, multiple intents, missing rules, and safety restrictions.
 - Test that explanations use only approved information and remain consistent for the same answers.
-- Test loading current answers and the agreed way of checking older scores without exposing private data.
+- Test that current answers are loaded and that no evaluation history or scoring-rule database storage is introduced.
 - Build the affected projects and solution, and run the relevant tests. The user manages database migrations.
