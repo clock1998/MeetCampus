@@ -6,61 +6,69 @@ Build a simple server-side service that compares two members' answers and calcul
 ## Prerequisites and current state
 - Phase 3 provides profile setup, questionnaire answers, and account eligibility checks. The recommendation availability endpoint does not create or return recommendations.
 - Questions already have categories, weights, options, and update times. Only current answers are stored; old answers are not kept.
-- `MatchingWeightsOptions` contains the five category weights. `IntentCompatibilityRule` stores which connection intents may match in each direction.
-- Scoring rules, complete intent rules, question privacy settings, and approved explanation text still need to be defined.
-- Follow `docs/mvp-spec.md`. Recommendation batches and decisions are part of later phases.
+- `MatchingWeightsOptions` contains the five category weights. The matching check uses intent rules in code; it does not read the existing `IntentCompatibilityRule` table.
+- Answer comparison, answer loading, and pair checks are implemented. Overall scores, answer coverage, match labels, and explanations are not yet implemented.
+- Recommendation batches and decisions are part of later phases. Scoring rules are kept in code without versions or evaluation history, as agreed for this MVP; this differs from the version and historical reproduction requirements in `docs/mvp-spec.md`.
 
 ## Features
 
 ### Feature 1: Set up scoring rules
 
-**Outcome:** The service knows how to compare each question and which information it may share.
+**Status:** Answer comparison rules and category-weight lookup are implemented. Match explanations are pending in Feature 5.
+
+**Outcome:** The server can compare answers for the supported question types.
 
 **Implementation:**
-1. Define a simple comparison rule for each question type and any question that needs special handling. Use stable question and option IDs, not translated text.
-2. Connect the existing question categories (`interests`, `values`, `social`, `lifestyle`, `connection-intent`) to `MatchingWeightsOptions`. Reject unknown categories, invalid weights, and incomplete rules.
-3. Mark which answers may be used for scoring and which may appear in explanations. Treat answers as private unless sharing is explicitly approved. Add approved explanation text only where needed.
-4. Keep scoring rules in server-side code. Do not store them in the database or assign them versions. Do not save an evaluation history.
-5. Describe any database changes needed for other parts of this phase. Migrations are managed by the user; do not create or modify them unless requested.
+1. `AnswerScoringRuleService` compares single choices by option ID: identical choices score 100; different choices score 0.
+2. Multiple choices use the Sørensen–Dice coefficient: `200 × shared options / (first option count + second option count)`. Scale answers use `100 × (1 − distance / scale range)`.
+3. `MatchingWeightsOptions` maps `interests`, `values`, `social`, `lifestyle`, and `connection-intent` to their configured weights. It rejects unknown categories and invalid weights.
+4. Comparison rules are in server-side code. They do not store evaluations or require scoring rules to be stored in the database. Existing configuration and recommendation models still contain version fields; the comparison service does not use them.
+5. Generic category-level explanations are planned in Feature 5. They must not reveal individual answers. No database changes were needed for the comparison rules.
 
 **Acceptance criteria:**
-- Invalid or incomplete rules cannot be used for scoring.
-- Scoring rules are implemented in code and are not stored or versioned in the database.
-- Private or unapproved information is never used in explanations.
+- The comparison methods reject invalid inputs, including empty or repeated choices and invalid scale ranges.
+- Scoring rules are implemented in code; comparisons do not store or version evaluations.
+- Explanations must not reveal private or unapproved information; this remains to be implemented.
 
 ### Feature 2: Load answers for scoring
+
+**Status:** The server-side loader is implemented. Stable ordering for questions with the same sort order still needs attention.
 
 **Outcome:** The server collects the current answers and selected intents needed to compare two members.
 
 **Implementation:**
-1. Add simple server-only data types for the two members' answers, intents, and scoring rules. Keep database access separate from the calculation.
-2. Load questions and answers using read-only database queries, and pass cancellation tokens through database calls.
-3. Reuse `QuestionnaireAnswerRules.IsValidStoredAnswer`. Use an answer only if it is valid and was updated at or after the question's `UpdatedAt`. Ignore missing, invalid, or outdated answers; do not count them as disagreements.
-4. Keep the question comparison logic in code. If a question's type or answer shape is unsupported, leave it out of the comparison rather than silently scoring it with another rule.
-5. Use stable IDs and a consistent order. Do not log answers or send them to the client as part of scoring.
+1. `ScoringInputService` loads question details, both members' answers, and their selected intent IDs using read-only queries and cancellation tokens. Its result uses server-only data types, not database entities.
+2. It reuses `QuestionnaireAnswerRules.IsValidStoredAnswer` and requires every answer row to be at least as recent as the question's `UpdatedAt`. Missing, invalid, duplicate-choice, or outdated answers are returned as unavailable.
+3. Supported questions remain in the result even when an answer is unavailable, so answer coverage can be calculated later. Unsupported question types and invalid scale ranges are omitted.
+4. Option and intent IDs are sorted. Questions are currently ordered by `SortOrder` only; add a stable ID tie-breaker before relying on consistent ordering when questions share the same sort order.
+5. Keep answer data on the server and do not log it or expose it through scoring responses.
 
 **Acceptance criteria:**
-- The same saved answers give the same inputs regardless of database row order or language.
+- The same saved answers must give the same inputs regardless of database row order or language; question ordering still needs a tie-breaker.
 - Missing, outdated, and invalid answers are not counted as disagreements.
 - The calculation does not depend on database entities or client-provided eligibility flags.
 
 ### Feature 3: Check intent and safety rules
 
+**Status:** The pair check and the two-intent selection limit are implemented. Future recommendation and contact operations must call the pair check.
+
 **Outcome:** Members who should not be matched are excluded even if their answers would give a high score.
 
 **Implementation:**
-1. Compare selected intents using the configured rules. Both members must select dating for a dating match; check other intents from the viewer's choice toward the candidate's choice.
-2. Agree on how to handle multiple selected intents. If required intent rules are missing, do not allow the match. Do not assume a rule works in both directions.
-3. Add any required match restrictions only after their rules have been agreed. Do not reveal private reasons for excluding a member.
-4. Before a later feature creates or returns a recommendation, check both members' eligibility with `AccountEligibilityService`, intent rules, blocks, and moderation restrictions. Check again before returning a profile or processing interest.
-5. Build recommendation lists and contact operations in their later phases. Do not treat missing safety checks as passed.
+1. Profile setup requires one or two distinct, valid intents on the server. The client shows the limit in English and French and prevents selecting a third intent.
+2. `IntentCompatibilityService` checks intent codes using rules in code: identical supported intents match; different intents do not. This means dating matches only when both members select dating. Unknown intent codes cause a configuration error.
+3. With multiple selected intents, each direction needs at least one allowed pair, and both directions must pass. The current rules are the same in both directions.
+4. `MatchEligibilityService` rejects self-matches, checks each member through `AccountEligibilityService`, checks blocks in both directions, and then checks intents. The account check includes applicable moderation restrictions and recipient capacity. The pair service returns only a yes/no result.
+5. Recommendation and contact operations do not yet use this pair check. Later features must call it and recheck eligibility and safety before returning a profile or processing interest. Additional match restrictions remain pending until their rules are agreed.
 
 **Acceptance criteria:**
-- Dating requires both members to select dating; other intent rules can differ by direction.
+- Dating requires both members to select dating. Current intent rules are identical in both directions.
 - A high score cannot override an incompatible intent, block, moderation restriction, or other required restriction.
 - Missing rules do not allow a match or reveal private information.
 
 ### Feature 4: Calculate the score and answer coverage
+
+**Status:** Pending. Individual answer comparisons exist, but category scores, overall score, and coverage do not.
 
 **Outcome:** One calculation produces a score and, separately, how many relevant questions both members answered.
 
@@ -78,11 +86,13 @@ Build a simple server-side service that compares two members' answers and calcul
 
 ### Feature 5: Explain a match
 
+**Status:** Pending. Use generic category-level explanations rather than exposing individual answers.
+
 **Outcome:** Members see a simple match label and explanations based only on approved information.
 
 **Implementation:**
 1. Convert the score to an agreed label without showing the exact number. Show an indication of how many questions both members answered; translate labels when they are displayed.
-2. Use approved text only when both members' current answers support it and the information is approved for sharing. Never expose private answers, exact matching-only answers, or guessed sensitive traits.
+2. Use generic category-level text, such as a similarity in values, only when both members' current answers support it and the information is approved for sharing. Never expose private answers, exact matching-only answers, or guessed sensitive traits.
 3. Choose explanations in a consistent order. Aim for two or three shared points and an optional conversation starter when the available information supports them.
 4. Agree on what to show when fewer than two shared points are available. Never invent an explanation. The recommendation page is part of a later phase.
 
@@ -92,6 +102,8 @@ Build a simple server-side service that compares two members' answers and calcul
 - Members never see exact scores or claims that a score predicts relationship success.
 
 ### Feature 6: Prepare for recommendations
+
+**Status:** Pending. The existing recommendation item model has score and coverage fields, but recommendations are not generated or saved yet.
 
 **Outcome:** Later phases can use the score safely without versioning or storing every evaluation.
 
@@ -109,11 +121,10 @@ Build a simple server-side service that compares two members' answers and calcul
 - Recommendation and contact entry points are not considered protected until their own checks are implemented.
 
 ## Decisions required before implementation
-- Agree on question comparison rules, question weights, which answers can be shared, intent rules, match restrictions, and explanation text.
-- Decide how multiple intents are matched, how missing rules are handled, and how dating is identified without relying on translated labels.
+- Agree on any additional match restrictions, which information may support generic explanations, and the explanation text.
 - Decide how to score when answers or categories are missing, how to round scores, which labels to use, and what to show when there are too few explanations.
 - Decide which score, coverage, and explanation data Phase 5 must save to show selected recommendations.
-- Decide which question version determines whether an answer is up to date.
+- Decide how to handle question ordering ties before relying on a consistent order for scoring.
 
 ## Non-negotiable rules
 - Missing answers are not disagreements, and limited information does not mean members are incompatible.
