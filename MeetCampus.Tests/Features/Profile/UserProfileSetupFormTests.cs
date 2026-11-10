@@ -54,4 +54,22 @@ public sealed class UserProfileSetupFormTests
         Assert.True(isValid);
         Assert.Empty(validationResults);
     }
+
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    [InlineData(3, false)]
+    public void WhenIntentCountIsValidatedThenOnlyOneOrTwoAreAllowed(int count, bool expected)
+    {
+        var form = new UserProfileSetupForm
+        {
+            StudyDomainId = Guid.NewGuid(), SchoolId = Guid.NewGuid(), LanguageId = Guid.NewGuid(),
+            IntentionIds = Enumerable.Range(0, count).Select(_ => Guid.NewGuid()).ToList(),
+            EthnicityId = Guid.NewGuid()
+        };
+
+        var result = Validator.TryValidateObject(form, new ValidationContext(form), [], validateAllProperties: true);
+
+        Assert.Equal(expected, result);
+    }
 }

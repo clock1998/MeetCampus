@@ -97,11 +97,12 @@
 
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">@L["Profile_Intention"]</legend>
+                        <p id="intention-limit" class="text-base-content/70 text-sm">@L["ProfileSetup_Max_Intention"]</p>
                         <div class="space-y-2">
                             @foreach (var option in intentions)
                             {
                                 <label class="label cursor-pointer justify-start gap-3">
-                                    <input type="checkbox" class="checkbox checkbox-primary" checked="@profile.IntentionIds.Contains(option.Id)" @onchange="args => SetIntention(option.Id, args.Value is true)" />
+                                    <input type="checkbox" class="checkbox checkbox-primary" aria-describedby="intention-limit" checked="@profile.IntentionIds.Contains(option.Id)" disabled="@(profile.IntentionIds.Count >= 2 && !profile.IntentionIds.Contains(option.Id))" @onchange="args => SetIntention(option.Id, args.Value is true)" />
                                     <span class="label-text">@GetDisplay(option)</span>
                                 </label>
                             }
@@ -257,7 +258,7 @@
 
     private void SetIntention(Guid intentionId, bool isSelected)
     {
-        if (isSelected && !profile.IntentionIds.Contains(intentionId))
+        if (isSelected && profile.IntentionIds.Count < 2 && !profile.IntentionIds.Contains(intentionId))
             profile.IntentionIds.Add(intentionId);
         else if (!isSelected)
             profile.IntentionIds.Remove(intentionId);

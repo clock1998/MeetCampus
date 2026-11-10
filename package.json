@@ -9,9 +9,9 @@
   },
   "postinstall": "npm run build:icons",
   "dependencies": {
-    "@tailwindcss/cli": "^4.3.3",
-    "tailwindcss": "^4.2.2",
-    "lucide-static": "1.59.0"
+    "@tailwindcss/cli": "^4.3.5",
+    "lucide-static": "1.59.0",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",

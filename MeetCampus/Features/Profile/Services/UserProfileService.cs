@@ -94,8 +94,8 @@ public sealed class UserProfileService(ApplicationDbContext dbContext, ProfileIm
         if (!await dbContext.CampusLanguages.AnyAsync(l => l.Id == request.LanguageId, cancellationToken))
             throw new InvalidOperationException("Invalid language.");
 
-        if (request.IntentionIds.Count == 0 || request.IntentionIds.Distinct().Count() != request.IntentionIds.Count)
-            throw new InvalidOperationException("Select one or more unique intentions.");
+        if (request.IntentionIds is null || request.IntentionIds.Count is < 1 or > 2 || request.IntentionIds.Distinct().Count() != request.IntentionIds.Count)
+            throw new InvalidOperationException("Select one or two unique intentions.");
 
         var availableIntentionIds = await dbContext.UserIntentions
             .Select(intention => intention.Id)

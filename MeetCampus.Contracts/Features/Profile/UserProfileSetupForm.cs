@@ -18,6 +18,7 @@ public sealed record UserProfileSetupForm
     public Guid? LanguageId { get; set; }
 
     [MinLength(1, ErrorMessage = "ProfileSetup_Required_Intention")]
+    [MaxLength(2, ErrorMessage = "ProfileSetup_Max_Intention")]
     public List<Guid> IntentionIds { get; set; } = [];
 
     [Required(ErrorMessage = "ProfileSetup_Required_Ethnicity")]
