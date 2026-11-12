@@ -99,10 +99,7 @@
                             <ValidationMessage For="@(() => editQuestion.PromptFr)" />
                         </label>
                     </div>
-                    <label class="label cursor-pointer justify-start gap-3">
-                        <InputCheckbox @bind-Value="editQuestion.IsRequired" class="checkbox" />
-                        <span>@L["QuestionnaireAdmin_Required"]</span>
-                    </label>
+                    <p class="text-sm">@L["QuestionnaireAdmin_Required"]</p>
                     @if (editQuestion.Type != QuestionType.Scale)
                     {
                         <fieldset class="space-y-3">
@@ -223,7 +220,6 @@
             Type = question.Type,
             PromptEn = question.PromptEn,
             PromptFr = question.PromptFr,
-            IsRequired = question.IsRequired,
             CategoryCode = question.CategoryCode,
             ScoringWeight = question.ScoringWeight,
             SortOrder = question.SortOrder,
@@ -262,7 +258,6 @@
                 Type = editQuestion.Type,
                 PromptEn = editQuestion.PromptEn,
                 PromptFr = editQuestion.PromptFr,
-                IsRequired = editQuestion.IsRequired,
                 CategoryCode = editQuestion.CategoryCode,
                 ScoringWeight = editQuestion.ScoringWeight,
                 SortOrder = editQuestion.SortOrder,
@@ -339,7 +334,6 @@
         public string PromptEn { get; set; } = string.Empty;
         [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
         public string PromptFr { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
         [System.ComponentModel.DataAnnotations.Required]
         public string CategoryCode { get; set; } = string.Empty;
         [System.ComponentModel.DataAnnotations.Range(typeof(decimal), "0", "1")]

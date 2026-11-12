@@ -26,7 +26,7 @@
   <data name="QuestionnaireAdmin_ScaleMax" xml:space="preserve"><value>Scale maximum</value></data>
   <data name="QuestionnaireAdmin_PromptEn" xml:space="preserve"><value>Question prompt (English)</value></data>
   <data name="QuestionnaireAdmin_PromptFr" xml:space="preserve"><value>Question prompt (French)</value></data>
-  <data name="QuestionnaireAdmin_Required" xml:space="preserve"><value>Required to complete the questionnaire</value></data>
+	<data name="QuestionnaireAdmin_Required" xml:space="preserve"><value>All questions are required to complete the questionnaire.</value></data>
   <data name="QuestionnaireAdmin_Options" xml:space="preserve"><value>Answer options</value></data>
   <data name="QuestionnaireAdmin_OptionCode" xml:space="preserve"><value>Stable option code</value></data>
   <data name="QuestionnaireAdmin_LabelEn" xml:space="preserve"><value>Option label (English)</value></data>

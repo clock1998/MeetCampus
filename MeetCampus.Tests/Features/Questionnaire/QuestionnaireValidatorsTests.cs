@@ -65,7 +65,6 @@ public sealed class QuestionnaireValidatorsTests
         Id = Guid.NewGuid(),
         Code = "test-question",
         Type = QuestionType.SingleChoice,
-        IsRequired = true,
         Category = "interests",
         ScoringWeight = 0.5m,
         Translations =

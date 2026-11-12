@@ -21,6 +21,7 @@ public sealed class ScoringInputService(ApplicationDbContext dbContext)
             .AsNoTracking()
             .Include(question => question.Options)
             .OrderBy(question => question.SortOrder)
+            .ThenBy(question => question.Id)
             .ToListAsync(cancellationToken);
         var answers = await dbContext.UserAnswers
             .AsNoTracking()

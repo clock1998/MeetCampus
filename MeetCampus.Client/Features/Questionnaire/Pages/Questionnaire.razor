@@ -33,7 +33,7 @@
         }
         else if (response is not null)
         {
-            <p class="text-base-content/70 text-sm" role="status">@L["Questionnaire_Completion"]: @response.Questions.Count(question => !question.IsRequired || IsAnswered(question)) / @response.Questions.Count</p>
+            <p class="text-base-content/70 text-sm" role="status">@L["Questionnaire_Completion"]: @response.Questions.Count(IsAnswered) / @response.Questions.Count</p>
                 <EditForm EditContext="editContext" OnSubmit="SaveAsync" class="space-y-5">
                 @foreach (var question in response.Questions)
                 {
@@ -41,10 +41,7 @@
                     <fieldset @key="question.Id" class="card bg-base-200 border-base-300 space-y-4 border p-5 shadow-sm" aria-describedby="question-state-@question.Id">
                         <legend class="w-full text-lg font-semibold">
                             @question.Prompt
-                            @if (question.IsRequired)
-                            {
-                                <span class="badge badge-outline ml-2">@L["Questionnaire_Required"]</span>
-                            }
+                            <span class="badge badge-outline ml-2">@L["Questionnaire_Required"]</span>
                         </legend>
                         @if (question.IsRefreshRequired)
                         {
@@ -139,7 +136,7 @@
         if (response is null || isSaving)
             return;
 
-        if (response.Questions.Any(question => question.IsRequired && !IsAnswered(question)))
+        if (response.Questions.Any(question => !IsAnswered(question)))
         {
             errorMessage = L["Questionnaire_RequiredError"];
             successMessage = null;

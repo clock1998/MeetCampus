@@ -16,6 +16,25 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
     : IClassFixture<PostgreSqlContainerFixture>
 {
     [Fact]
+    public async Task WhenQuestionHasNoAnswerThenQuestionnaireIsIncomplete()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var member = await CreateUserAsync(dbContext);
+        var question = CreateQuestion();
+        dbContext.Questions.Add(question);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var response = await scope.ServiceProvider.GetRequiredService<QuestionnaireResponseService>()
+            .GetResponseAsync(member, "en", TestContext.Current.CancellationToken);
+
+        Assert.False(response.IsComplete);
+        Assert.False(response.IsComplete);
+    }
+
+    [Fact]
     public async Task WhenMemberSubmitsAnswersThenOnlyTheirCurrentAnswersAreReturned()
     {
         using var services = CreateServices();
@@ -152,7 +171,6 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
     {
         Code = $"question-{Guid.NewGuid():N}",
         Type = QuestionType.SingleChoice,
-        IsRequired = true,
         Category = "interests",
         ScoringWeight = 0.1m,
         Translations =

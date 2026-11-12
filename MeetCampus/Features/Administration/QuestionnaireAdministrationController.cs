@@ -106,7 +106,6 @@ public sealed class QuestionnaireAdministrationController(
         {
             Code = request.Code.Trim(),
             Type = (QuestionType)request.Type,
-            IsRequired = request.IsRequired,
             Category = request.CategoryCode,
             ScoringWeight = request.ScoringWeight,
             SortOrder = request.SortOrder,
@@ -141,7 +140,6 @@ public sealed class QuestionnaireAdministrationController(
             (QuestionType)question.Type,
             translations.GetValueOrDefault("en", string.Empty),
             translations.GetValueOrDefault("fr", string.Empty),
-            question.IsRequired,
             question.Category,
             question.ScoringWeight,
             question.SortOrder,

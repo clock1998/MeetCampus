@@ -81,7 +81,6 @@ public sealed class QuestionnaireAdministrationService(
             translation => translation.CultureCode,
             (translation, text) => translation.Text = text,
             (cultureCode, promptText) => new QuestionTranslation { QuestionId = question.Id, CultureCode = cultureCode, Text = promptText });
-        question.IsRequired = updatedQuestion.IsRequired;
         question.Type = updatedQuestion.Type;
         question.Category = updatedQuestion.Category;
         question.ScoringWeight = updatedQuestion.ScoringWeight;

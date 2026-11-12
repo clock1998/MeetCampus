@@ -85,22 +85,21 @@ public sealed class AccountEligibilityService(
 
     private async Task<bool> HasCompletedRequiredQuestionsAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var requiredQuestions = await dbContext.Questions
+        var questions = await dbContext.Questions
             .AsNoTracking()
-            .Where(question => question.IsRequired)
             .Include(question => question.Options)
             .ToListAsync(cancellationToken);
-        var requiredQuestionIds = requiredQuestions.Select(question => question.Id).ToArray();
+        var questionIds = questions.Select(question => question.Id).ToArray();
         var requiredAnswersByQuestionId = await dbContext.UserAnswers
             .AsNoTracking()
             .Where(answer => answer.ApplicationUserId == userId
-                && requiredQuestionIds.Contains(answer.QuestionId))
+                && questionIds.Contains(answer.QuestionId))
             .ToListAsync(cancellationToken);
         var answersByQuestionId = requiredAnswersByQuestionId
             .GroupBy(answer => answer.QuestionId)
             .ToDictionary(group => group.Key, group => (IReadOnlyCollection<UserAnswer>)group.ToList());
 
-        return requiredQuestions.All(question =>
+        return questions.All(question =>
             answersByQuestionId.TryGetValue(question.Id, out var answers)
             && answers.All(answer => answer.UpdatedAt >= question.UpdatedAt)
             && QuestionnaireAnswerRules.IsValidStoredAnswer(question, answers));

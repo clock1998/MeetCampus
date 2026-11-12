@@ -6,7 +6,6 @@ public sealed record QuestionResponse(
     QuestionType Type,
     string PromptEn,
     string PromptFr,
-    bool IsRequired,
     string CategoryCode,
     decimal ScoringWeight,
     int SortOrder,

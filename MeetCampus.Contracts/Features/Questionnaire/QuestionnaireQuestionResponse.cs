@@ -7,7 +7,6 @@ public sealed record QuestionnaireQuestionResponse(
     string Code,
     QuestionType Type,
     string Prompt,
-    bool IsRequired,
     string CategoryCode,
     int? ScaleMin,
     int? ScaleMax,

@@ -46,7 +46,6 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Id = Guid.NewGuid(),
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
-            IsRequired = true,
             Category = "eligibility",
             ScoringWeight = 1
         });
@@ -68,6 +67,29 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         Assert.True(response.HasRecipientCapacity);
         Assert.True(response.HasNoActiveModerationRestriction);
         Assert.False(response.IsEligibleForDiscoverability);
+    }
+
+    [Fact]
+    public async Task WhenPreviouslyOptionalQuestionIsUnansweredThenMemberIsIneligible()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: true);
+        dbContext.Questions.Add(new Question
+        {
+            Id = Guid.NewGuid(), Code = $"required-{Guid.NewGuid():N}", Type = QuestionType.Scale,
+            Category = "interests", ScaleMin = 1, ScaleMax = 5, ScoringWeight = 1
+        });
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
+
+        var result = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result);
+        Assert.False(result.HasCompletedRequiredQuestions);
     }
 
     [Fact]
@@ -185,8 +207,8 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         UserManager<ApplicationUser> userManager,
         bool validAnswer)
     {
-        await dbContext.Questions.Where(question => question.IsRequired)
-            .ExecuteUpdateAsync(update => update.SetProperty(question => question.IsRequired, false), TestContext.Current.CancellationToken);
+        await dbContext.UserAnswers.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        await dbContext.Questions.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
 
         var email = $"eligible-{Guid.NewGuid():N}@example.edu";
         var user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true };
@@ -231,7 +253,6 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Id = Guid.NewGuid(),
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
-            IsRequired = true,
             Category = "interests",
             ScoringWeight = 1,
             Options = [option]

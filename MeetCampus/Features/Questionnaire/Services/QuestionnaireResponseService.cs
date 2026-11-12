@@ -55,7 +55,6 @@ public sealed class QuestionnaireResponseService(
                 question.Code,
                 (QuestionType)question.Type,
                 prompt,
-                question.IsRequired,
                 question.Category,
                 question.ScaleMin,
                 question.ScaleMax,
@@ -65,9 +64,8 @@ public sealed class QuestionnaireResponseService(
                 questionAnswers.Count > 0 && !validCurrentAnswer);
         }).ToList();
 
-        var requiredQuestions = questions.Where(question => question.IsRequired).ToList();
         var responseById = questionResponses.ToDictionary(question => question.Id);
-        var isComplete = requiredQuestions.All(question =>
+        var isComplete = questions.All(question =>
             responseById.TryGetValue(question.Id, out var response)
             && !response.IsRefreshRequired
             && (response.SelectedOptionCodes.Count > 0 || response.ScaleValue.HasValue));
