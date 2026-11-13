@@ -1,4 +1,3 @@
-using MeetCampus.Configuration;
 using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Features.Matching.Models;
 
@@ -6,31 +5,31 @@ namespace MeetCampus.Features.Matching.Services;
 
 public static class CompatibilityScoringService
 {
-    private static readonly string[] Categories = ["interests", "values", "social", "lifestyle", "connection-intent"];
-
     /// <summary>Calculates category scores, overall compatibility, and answer coverage.</summary>
-    public static CompatibilityScoreResult Calculate(ScoringInput input, MatchingWeightsOptions weights)
+    public static CompatibilityScoreResult Calculate(ScoringInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(weights);
+        ArgumentNullException.ThrowIfNull(input.Categories);
         ArgumentNullException.ThrowIfNull(input.Questions);
 
+        var categories = input.Categories.ToDictionary(category => category.Code, StringComparer.Ordinal);
         foreach (var question in input.Questions)
         {
-            weights.GetCategoryWeight(question.Category);
+            if (!categories.ContainsKey(question.Category))
+                throw new ArgumentException("Question category is not present in the scoring categories.", nameof(input));
             if (question.ScoringWeight is < 0 or > 1)
                 throw new ArgumentOutOfRangeException(nameof(input), "Question weights must be between zero and one.");
             if (question.FirstAnswer is null || question.SecondAnswer is null)
                 throw new ArgumentException("Compatibility scoring requires an answer from both members for every question.", nameof(input));
         }
 
-        var results = Categories.Select(category => CalculateCategory(category, input.Questions)).ToArray();
+        var results = categories.Values.Select(category => CalculateCategory(category.Code, input.Questions)).ToArray();
         var populated = results.Where(category => category.QuestionCount > 0).ToArray();
-        var coverageWeight = populated.Sum(category => weights.GetCategoryWeight(category.Category));
+        var coverageWeight = populated.Sum(category => categories[category.Category].MatchingWeight);
         var coverage = coverageWeight == 0 ? 0 : 1m;
-        var score = results.Any(category => weights.GetCategoryWeight(category.Category) > 0 && category.Score is null)
+        var score = results.Any(category => categories[category.Category].MatchingWeight > 0 && category.Score is null)
             ? (decimal?)null
-            : results.Sum(category => weights.GetCategoryWeight(category.Category) * (category.Score ?? 0));
+            : results.Sum(category => categories[category.Category].MatchingWeight * (category.Score ?? 0));
 
         return new CompatibilityScoreResult(score, coverage, results);
     }

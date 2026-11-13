@@ -1,4 +1,5 @@
 ﻿using MeetCampus.Data.User;
+using MeetCampus.Data.Questionnaire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,13 @@ namespace MeetCampus.Data
     {
         internal static void SeedProfileLookups(ModelBuilder builder)
         {
+            builder.Entity<QuestionCategory>().HasData(
+                new QuestionCategory { Id = Guid.Parse("80000000-0000-0000-0000-000000000001"), Code = "interests", NameEn = "Interests and activities", NameFr = "Intérêts et activités", MatchingWeight = 0.25m, SortOrder = 0 },
+                new QuestionCategory { Id = Guid.Parse("80000000-0000-0000-0000-000000000002"), Code = "values", NameEn = "Values and priorities", NameFr = "Valeurs et priorités", MatchingWeight = 0.30m, SortOrder = 1 },
+                new QuestionCategory { Id = Guid.Parse("80000000-0000-0000-0000-000000000003"), Code = "social", NameEn = "Social and communication preferences", NameFr = "Préférences sociales et de communication", MatchingWeight = 0.20m, SortOrder = 2 },
+                new QuestionCategory { Id = Guid.Parse("80000000-0000-0000-0000-000000000004"), Code = "lifestyle", NameEn = "Lifestyle and availability", NameFr = "Mode de vie et disponibilités", MatchingWeight = 0.15m, SortOrder = 3 },
+                new QuestionCategory { Id = Guid.Parse("80000000-0000-0000-0000-000000000005"), Code = "connection-intent", NameEn = "Connection intent and expectations", NameFr = "Intentions et attentes relationnelles", MatchingWeight = 0.10m, SortOrder = 4 });
+
             builder.Entity<StudyDomain>().HasData(
                 new StudyDomain { Id = Guid.Parse("10000000-0000-0000-0000-000000000001"), Name = "Accounting" },
                 new StudyDomain { Id = Guid.Parse("10000000-0000-0000-0000-000000000002"), Name = "Aerospace Engineering" },

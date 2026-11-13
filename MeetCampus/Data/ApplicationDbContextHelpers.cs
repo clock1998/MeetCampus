@@ -171,10 +171,25 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.Code).HasMaxLength(128).IsRequired();
-                entity.Property(item => item.Category).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.ScoringWeight).HasPrecision(8, 5);
                 entity.Property(item => item.UpdatedAt).IsRequired();
+                entity.HasOne(item => item.Category)
+                    .WithMany(category => category.Questions)
+                    .HasForeignKey(item => item.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => item.CategoryId);
                 entity.HasIndex(item => item.Code).IsUnique();
+            });
+
+            builder.Entity<QuestionCategory>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Code).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.NameEn).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.NameFr).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.MatchingWeight).HasPrecision(5, 4);
+                entity.HasIndex(item => item.Code).IsUnique();
+                entity.HasIndex(item => item.SortOrder).IsUnique();
             });
 
             builder.Entity<QuestionOption>(entity =>

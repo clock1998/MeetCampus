@@ -26,7 +26,7 @@ public sealed class QuestionnaireAdministrationController(
     [HttpGet("catalog")]
     public async Task<ActionResult<QuestionCatalogResponse>> GetCatalogAsync(CancellationToken cancellationToken)
     {
-        return Ok(questionnaireAdministrationService.GetQuestionnaireAdminCatalog());
+        return Ok(await questionnaireAdministrationService.GetQuestionnaireAdminCatalogAsync(cancellationToken));
     }
 
     [HttpPost]
@@ -106,7 +106,7 @@ public sealed class QuestionnaireAdministrationController(
         {
             Code = request.Code.Trim(),
             Type = (QuestionType)request.Type,
-            Category = request.CategoryCode,
+            Category = new QuestionCategory { Code = request.CategoryCode },
             ScoringWeight = request.ScoringWeight,
             SortOrder = request.SortOrder,
             MaxSelections = request.MaxSelections,
@@ -140,7 +140,7 @@ public sealed class QuestionnaireAdministrationController(
             (QuestionType)question.Type,
             translations.GetValueOrDefault("en", string.Empty),
             translations.GetValueOrDefault("fr", string.Empty),
-            question.Category,
+            question.Category.Code,
             question.ScoringWeight,
             question.SortOrder,
             question.MaxSelections,

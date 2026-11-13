@@ -13,7 +13,6 @@ public sealed class MatchingOptions : IValidatableObject
     public int ScoringConfigurationVersion { get; set; } = 1;
     public bool UsePopularitySignals { get; set; }
     public bool DisplayExactScore { get; set; }
-    public MatchingWeightsOptions Weights { get; set; } = new();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -38,7 +37,5 @@ public sealed class MatchingOptions : IValidatableObject
         if (DisplayExactScore)
             yield return new ValidationResult("Exact compatibility scores must not be displayed.");
 
-        if (Weights is null || !Weights.IsValid())
-            yield return new ValidationResult("Matching category weights must be nonnegative and sum to 1.00.");
     }
 }

@@ -27,6 +27,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         public DbSet<AllowedEmailDomain> AllowedEmailDomains => Set<AllowedEmailDomain>();
         public DbSet<IntentCompatibilityRule> IntentCompatibilityRules => Set<IntentCompatibilityRule>();
         public DbSet<Question> Questions => Set<Question>();
+        public DbSet<QuestionCategory> QuestionCategories => Set<QuestionCategory>();
         public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
         public DbSet<QuestionTranslation> QuestionTranslations => Set<QuestionTranslation>();
         public DbSet<QuestionOptionTranslation> QuestionOptionTranslations => Set<QuestionOptionTranslation>();

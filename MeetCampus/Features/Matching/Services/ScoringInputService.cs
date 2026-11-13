@@ -19,9 +19,15 @@ public sealed class ScoringInputService(ApplicationDbContext dbContext)
 
         var questions = await dbContext.Questions
             .AsNoTracking()
+            .Include(question => question.Category)
             .Include(question => question.Options)
             .OrderBy(question => question.SortOrder)
             .ThenBy(question => question.Id)
+            .ToListAsync(cancellationToken);
+        var categories = await dbContext.QuestionCategories
+            .AsNoTracking()
+            .OrderBy(category => category.SortOrder)
+            .Select(category => new ScoringCategory(category.Code, category.MatchingWeight))
             .ToListAsync(cancellationToken);
         var answers = await dbContext.UserAnswers
             .AsNoTracking()
@@ -42,7 +48,7 @@ public sealed class ScoringInputService(ApplicationDbContext dbContext)
             .Select(question => new ScoringQuestion(
                 question.Id,
                 question.Type,
-                question.Category,
+                question.Category.Code,
                 question.ScoringWeight,
                 question.ScaleMin,
                 question.ScaleMax,
@@ -51,6 +57,7 @@ public sealed class ScoringInputService(ApplicationDbContext dbContext)
             .ToArray();
 
         return new ScoringInput(
+            categories,
             scoringQuestions,
             intentions.Where(item => item.UserId == firstUserId).Select(item => item.IntentionId).Order().ToArray(),
             intentions.Where(item => item.UserId == secondUserId).Select(item => item.IntentionId).Order().ToArray());

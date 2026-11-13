@@ -3,6 +3,7 @@
 @using MeetCampus.Client.Features.Administration.HttpClients
 @using MeetCampus.Client.Features.Administration.Resources
 @using MeetCampus.Contracts.Features.Administration
+@using System.Globalization
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Extensions.Localization
 @inject IQuestionnaireAdminClient AdminClient
@@ -56,7 +57,7 @@
                             <InputSelect @bind-Value="editQuestion.CategoryCode" class="select select-bordered w-full">
                                 @foreach (var category in catalog.Categories)
                                 {
-                                    <option value="@category.Code">@L[category.DisplayKey]</option>
+                                    <option value="@category.Code">@GetCategoryName(category)</option>
                                 }
                             </InputSelect>
                         </label>
@@ -148,7 +149,7 @@
                             <div class="space-y-1">
                                 <h3 class="font-semibold">@question.PromptEn</h3>
                                 <p class="text-sm text-base-content/70">@question.PromptFr</p>
-                                <p class="text-xs text-base-content/60">@question.Code · @L[$"QuestionnaireAdmin_Type{question.Type}"] · @L[catalog.Categories.Single(category => category.Code == question.CategoryCode).DisplayKey]</p>
+                                <p class="text-xs text-base-content/60">@question.Code · @L[$"QuestionnaireAdmin_Type{question.Type}"] · @GetCategoryName(catalog.Categories.Single(category => category.Code == question.CategoryCode))</p>
                             </div>
                             <div class="flex gap-2">
                                 <button type="button" class="btn btn-sm btn-outline" @onclick="() => BeginEdit(question)">@L["QuestionnaireAdmin_Edit"]</button>
@@ -171,6 +172,9 @@
     private bool isSaving;
     private string? errorMessage;
     private string? successMessage;
+
+    private static string GetCategoryName(QuestionCategoryOption category) =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "fr" ? category.NameFr : category.NameEn;
 
     protected override async Task OnInitializedAsync()
     {

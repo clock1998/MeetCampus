@@ -7,7 +7,8 @@ public sealed class Question
     public Guid Id { get; set; }
     public string Code { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
-    public string Category { get; set; } = string.Empty;
+    public Guid CategoryId { get; set; }
+    public QuestionCategory Category { get; set; } = default!;
     public decimal ScoringWeight { get; set; }
     public int SortOrder { get; set; } = 0;
 

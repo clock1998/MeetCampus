@@ -26,6 +26,7 @@ public sealed class QuestionnaireResponseService(
 
         var questions = await dbContext.Questions
             .AsNoTracking()
+            .Include(question => question.Category)
             .Include(question => question.Translations)
             .Include(question => question.Options)
                 .ThenInclude(option => option.Translations)
@@ -55,7 +56,7 @@ public sealed class QuestionnaireResponseService(
                 question.Code,
                 (QuestionType)question.Type,
                 prompt,
-                question.Category,
+                question.Category.Code,
                 question.ScaleMin,
                 question.ScaleMax,
                 options,

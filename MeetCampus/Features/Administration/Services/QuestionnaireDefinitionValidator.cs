@@ -1,5 +1,4 @@
 using FluentValidation;
-using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data.Questionnaire;
 
 namespace MeetCampus.Features.Administration.Services;
@@ -9,10 +8,6 @@ public sealed class QuestionnaireDefinitionValidator : AbstractValidator<Questio
     public QuestionnaireDefinitionValidator()
     {
         RuleFor(question => question.Code).NotEmpty();
-        RuleFor(question => question.Category)
-            .NotEmpty()
-            .Must(group => QuestionnaireAdminCatalog.Value.Categories.Any(category => category.Code == group))
-            .WithMessage("Question category is not supported.");
         RuleFor(question => question.Type).IsInEnum();
         RuleFor(question => question.ScoringWeight).InclusiveBetween(0, 1);
         RuleFor(question => question.Translations)
