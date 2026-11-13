@@ -3,7 +3,6 @@ using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
 using Microsoft.EntityFrameworkCore;
-using MeetCampus.Data;
 
 namespace MeetCampus.Features.Administration.Services;
 

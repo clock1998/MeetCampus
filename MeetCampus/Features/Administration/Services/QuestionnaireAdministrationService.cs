@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Audit;
@@ -11,7 +11,7 @@ namespace MeetCampus.Features.Administration.Services;
 
 public sealed class QuestionnaireAdministrationService(
     ApplicationDbContext dbContext,
-    IValidator<Question> questionValidator)
+    QuestionnaireDefinitionValidator questionValidator)
 {
     public async Task<Question> CreateQuestionAsync(
         ApplicationUser actor,

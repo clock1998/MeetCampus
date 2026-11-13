@@ -1,4 +1,4 @@
-using MeetCampus;
+﻿using MeetCampus;
 using MeetCampus.Data;
 using MeetCampus.Data.User;
 using MeetCampus.Features.Auth.Infrastructure;
@@ -67,7 +67,7 @@ builder.Services.AddScoped<MatchEligibilityService>();
 builder.Services.AddScoped<IValidator<string>, QuestionnaireCultureValidator>();
 builder.Services.AddScoped<IValidator<SubmitQuestionnaireResponseRequest>, SubmitQuestionnaireResponseRequestValidator>();
 builder.Services.AddScoped<IValidator<QuestionnaireAnswerValidationContext>, QuestionnaireAnswerValidator>();
-builder.Services.AddScoped<IValidator<Question>, QuestionnaireDefinitionValidator>();
+builder.Services.AddScoped<QuestionnaireDefinitionValidator>();
 
 builder.Services.AddAuthentication(options =>
     {
