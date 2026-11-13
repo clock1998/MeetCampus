@@ -1,4 +1,4 @@
-using MeetCampus.Contracts.Features.Administration;
+﻿using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Profiles;
 using MeetCampus.Data.Questionnaire;
@@ -214,7 +214,7 @@ public sealed class ScoringInputServiceTests(PostgreSqlContainerFixture fixture)
         {
             Id = Guid.NewGuid(),
             Code = $"scoring-{Guid.NewGuid():N}",
-            Category = "interests",
+            CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
             Type = type,
             ScoringWeight = 0.5m,
             UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(-5),

@@ -1,4 +1,4 @@
-using MeetCampus.Contracts.Features.Questionnaire;
+﻿using MeetCampus.Contracts.Features.Questionnaire;
 using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
@@ -171,7 +171,7 @@ public sealed class QuestionnaireResponseTests(PostgreSqlContainerFixture fixtur
     {
         Code = $"question-{Guid.NewGuid():N}",
         Type = QuestionType.SingleChoice,
-        Category = "interests",
+        CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
         ScoringWeight = 0.1m,
         Translations =
         [

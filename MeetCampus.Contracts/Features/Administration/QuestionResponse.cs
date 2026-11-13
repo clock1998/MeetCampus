@@ -6,7 +6,7 @@ public sealed record QuestionResponse(
     QuestionType Type,
     string PromptEn,
     string PromptFr,
-    string CategoryCode,
+    Guid CategoryId,
     decimal ScoringWeight,
     int SortOrder,
     int? MaxSelections,

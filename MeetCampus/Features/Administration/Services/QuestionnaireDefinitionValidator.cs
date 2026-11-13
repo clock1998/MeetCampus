@@ -1,13 +1,23 @@
 using FluentValidation;
+using MeetCampus.Contracts.Features.Administration;
+using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
+using Microsoft.EntityFrameworkCore;
+using MeetCampus.Data;
 
 namespace MeetCampus.Features.Administration.Services;
 
 public sealed class QuestionnaireDefinitionValidator : AbstractValidator<Question>
 {
-    public QuestionnaireDefinitionValidator()
+    public QuestionnaireDefinitionValidator(ApplicationDbContext dbContext)
     {
         RuleFor(question => question.Code).NotEmpty();
+        RuleFor(question => question.CategoryId)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .MustAsync((categoryId, cancellationToken) => dbContext.QuestionCategories
+                .AnyAsync(category => category.Id == categoryId, cancellationToken))
+            .WithMessage("Question category is not supported.");
         RuleFor(question => question.Type).IsInEnum();
         RuleFor(question => question.ScoringWeight).InclusiveBetween(0, 1);
         RuleFor(question => question.Translations)

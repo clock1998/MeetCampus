@@ -4,6 +4,8 @@ using MeetCampus.Contracts.Features.Questionnaire;
 using MeetCampus.Data.Questionnaire;
 using MeetCampus.Features.Administration.Services;
 using MeetCampus.Features.Questionnaire.Services;
+using MeetCampus.Data;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace MeetCampus.Tests.Features.Questionnaire;
@@ -11,16 +13,36 @@ namespace MeetCampus.Tests.Features.Questionnaire;
 public sealed class QuestionnaireValidatorsTests
 {
     [Fact]
-    public void WhenQuestionDefinitionHasIncompleteTranslationsThenValidationFails()
+    public async Task WhenQuestionDefinitionHasIncompleteTranslationsThenValidationFails()
     {
-        var validator = new QuestionnaireDefinitionValidator();
+        await using var dbContext = CreateDbContext();
+        var validator = new QuestionnaireDefinitionValidator(dbContext);
         var question = CreateQuestion();
+        question.CategoryId = Guid.Empty;
         question.Translations.Remove(question.Translations.Last());
 
-        var result = validator.TestValidate(question);
+        var result = await validator.TestValidateAsync(question);
 
-        Assert.False(result.IsValid);
+        result.ShouldHaveValidationErrorFor(item => item.Translations);
     }
+
+    [Fact]
+    public async Task WhenQuestionDefinitionHasNoCategoryThenValidationFails()
+    {
+        await using var dbContext = CreateDbContext();
+        var validator = new QuestionnaireDefinitionValidator(dbContext);
+        var question = CreateQuestion();
+        question.CategoryId = Guid.Empty;
+
+        var result = await validator.TestValidateAsync(question);
+
+        result.ShouldHaveValidationErrorFor(item => item.CategoryId);
+    }
+
+    private static ApplicationDbContext CreateDbContext() => new(
+        new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql("Host=localhost;Database=validation-test;Username=test;Password=test;Timeout=1")
+            .Options);
 
     [Fact]
     public void WhenScaleAnswerIsWithinRangeThenValidationSucceeds()
@@ -65,7 +87,7 @@ public sealed class QuestionnaireValidatorsTests
         Id = Guid.NewGuid(),
         Code = "test-question",
         Type = QuestionType.SingleChoice,
-        Category = "interests",
+        CategoryId = Guid.NewGuid(),
         ScoringWeight = 0.5m,
         Translations =
         [

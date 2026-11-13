@@ -1,4 +1,4 @@
-using MeetCampus.Contracts.Features.Administration;
+﻿using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Profiles;
 using MeetCampus.Data.Questionnaire;
@@ -46,7 +46,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Id = Guid.NewGuid(),
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
-            Category = "eligibility",
+            CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
             ScoringWeight = 1
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -81,7 +81,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         dbContext.Questions.Add(new Question
         {
             Id = Guid.NewGuid(), Code = $"required-{Guid.NewGuid():N}", Type = QuestionType.Scale,
-            Category = "interests", ScaleMin = 1, ScaleMax = 5, ScoringWeight = 1
+            CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
         var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
@@ -253,7 +253,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Id = Guid.NewGuid(),
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
-            Category = "interests",
+            CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
             ScoringWeight = 1,
             Options = [option]
         };

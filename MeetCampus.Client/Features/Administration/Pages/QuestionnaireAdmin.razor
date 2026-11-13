@@ -54,10 +54,10 @@
                         </label>
                         <label class="fieldset">
                             <span class="fieldset-legend">@L["QuestionnaireAdmin_Category"]</span>
-                            <InputSelect @bind-Value="editQuestion.CategoryCode" class="select select-bordered w-full">
+                            <InputSelect @bind-Value="editQuestion.CategoryId" class="select select-bordered w-full">
                                 @foreach (var category in catalog.Categories)
                                 {
-                                    <option value="@category.Code">@GetCategoryName(category)</option>
+                                    <option value="@category.Id">@GetCategoryName(category)</option>
                                 }
                             </InputSelect>
                         </label>
@@ -149,7 +149,7 @@
                             <div class="space-y-1">
                                 <h3 class="font-semibold">@question.PromptEn</h3>
                                 <p class="text-sm text-base-content/70">@question.PromptFr</p>
-                                <p class="text-xs text-base-content/60">@question.Code · @L[$"QuestionnaireAdmin_Type{question.Type}"] · @GetCategoryName(catalog.Categories.Single(category => category.Code == question.CategoryCode))</p>
+                                <p class="text-xs text-base-content/60">@question.Code · @L[$"QuestionnaireAdmin_Type{question.Type}"] · @GetCategoryName(catalog.Categories.Single(category => category.Id == question.CategoryId))</p>
                             </div>
                             <div class="flex gap-2">
                                 <button type="button" class="btn btn-sm btn-outline" @onclick="() => BeginEdit(question)">@L["QuestionnaireAdmin_Edit"]</button>
@@ -224,7 +224,7 @@
             Type = question.Type,
             PromptEn = question.PromptEn,
             PromptFr = question.PromptFr,
-            CategoryCode = question.CategoryCode,
+            CategoryId = question.CategoryId,
             ScoringWeight = question.ScoringWeight,
             SortOrder = question.SortOrder,
             MaxSelections = question.MaxSelections,
@@ -262,7 +262,7 @@
                 Type = editQuestion.Type,
                 PromptEn = editQuestion.PromptEn,
                 PromptFr = editQuestion.PromptFr,
-                CategoryCode = editQuestion.CategoryCode,
+                CategoryId = editQuestion.CategoryId,
                 ScoringWeight = editQuestion.ScoringWeight,
                 SortOrder = editQuestion.SortOrder,
                 MaxSelections = editQuestion.MaxSelections,
@@ -324,7 +324,7 @@
         editingId = null;
         editQuestion = new QuestionEditModel
         {
-            CategoryCode = catalog?.Categories.FirstOrDefault()?.Code ?? string.Empty,
+            CategoryId = catalog?.Categories.FirstOrDefault()?.Id ?? Guid.Empty,
             Options = [new QuestionOptionEditModel()]
         };
     }
@@ -339,7 +339,7 @@
         [System.ComponentModel.DataAnnotations.Required, System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
         public string PromptFr { get; set; } = string.Empty;
         [System.ComponentModel.DataAnnotations.Required]
-        public string CategoryCode { get; set; } = string.Empty;
+        public Guid CategoryId { get; set; }
         [System.ComponentModel.DataAnnotations.Range(typeof(decimal), "0", "1")]
         public decimal ScoringWeight { get; set; }
         public int SortOrder { get; set; }

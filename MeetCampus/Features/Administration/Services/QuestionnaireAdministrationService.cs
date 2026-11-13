@@ -20,7 +20,6 @@ public sealed class QuestionnaireAdministrationService(
     {
         ArgumentNullException.ThrowIfNull(question);
         ArgumentNullException.ThrowIfNull(actor);
-        await ResolveCategoryAsync(question, cancellationToken);
         var result = await questionValidator.ValidateAsync(question, cancellationToken);
         if (!result.IsValid)
             throw new ArgumentException(string.Join(" ", result.Errors.Select(error => error.ErrorMessage)), nameof(question));
@@ -55,7 +54,7 @@ public sealed class QuestionnaireAdministrationService(
         var categories = await dbContext.QuestionCategories
             .AsNoTracking()
             .OrderBy(category => category.SortOrder)
-            .Select(category => new QuestionCategoryOption(category.Code, category.NameEn, category.NameFr))
+            .Select(category => new QuestionCategoryOption(category.Id, category.NameEn, category.NameFr))
             .ToListAsync(cancellationToken);
         return new QuestionCatalogResponse(categories);
     }
@@ -68,7 +67,6 @@ public sealed class QuestionnaireAdministrationService(
     {
         ArgumentNullException.ThrowIfNull(updatedQuestion);
         ArgumentNullException.ThrowIfNull(actor);
-        await ResolveCategoryAsync(updatedQuestion, cancellationToken);
         var result = await questionValidator.ValidateAsync(updatedQuestion, cancellationToken);
         if (!result.IsValid)
             throw new ArgumentException(string.Join(" ", result.Errors.Select(error => error.ErrorMessage)), nameof(updatedQuestion));
@@ -109,43 +107,6 @@ public sealed class QuestionnaireAdministrationService(
                 question.Options.Remove(removedOption);
             dbContext.QuestionOptions.RemoveRange(removedOptions);
         }
-
-    private async Task ResolveCategoryAsync(Question question, CancellationToken cancellationToken)
-    {
-        var categoryCode = question.Category?.Code;
-        if (string.IsNullOrWhiteSpace(categoryCode))
-            throw new ArgumentException("A question category is required.", nameof(question));
-
-        var category = await dbContext.QuestionCategories
-            .SingleOrDefaultAsync(item => item.Code == categoryCode, cancellationToken);
-        if (category is null)
-            throw new ArgumentException("Question category is not supported.", nameof(question));
-
-        question.CategoryId = category.Id;
-        question.Category = category;
-    }
-
-        foreach (var updatedOption in updatedQuestion.Options)
-        {
-            var option = question.Options.SingleOrDefault(item => item.OptionCode == updatedOption.OptionCode);
-            if (option is null)
-            {
-                option = new QuestionOption { Id = Guid.NewGuid(), QuestionId = question.Id, OptionCode = updatedOption.OptionCode };
-                dbContext.QuestionOptions.Add(option);
-                question.Options.Add(option);
-            }
-
-            option.SortOrder = updatedOption.SortOrder;
-            option.ScoringValue = updatedOption.ScoringValue;
-            SynchronizeTranslations(option.Translations, updatedOption.Translations, translation => translation.CultureCode, translation => translation.Text,
-                translation => translation.CultureCode,
-                (translation, text) => translation.Text = text,
-                (cultureCode, labelText) => new QuestionOptionTranslation { QuestionOptionId = option.Id, CultureCode = cultureCode, Text = labelText });
-        }
-        question.UpdatedAt = DateTimeOffset.UtcNow;
-        dbContext.AuditEvents.Add(CreateAuditEvent(actor.Id, "Question.Updated", question.Id.ToString(), new { question.Code, question.UpdatedAt }));
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task DeleteQuestionAsync(

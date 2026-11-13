@@ -15,8 +15,8 @@ public sealed class QuestionRequest
     [Required, StringLength(2000, MinimumLength = 1)]
     public string PromptFr { get; set; } = string.Empty;
 
-    [Required, StringLength(64, MinimumLength = 1)]
-    public string CategoryCode { get; set; } = string.Empty;
+    [Required]
+    public Guid CategoryId { get; set; }
 
     [Range(typeof(decimal), "0", "1")]
     public decimal ScoringWeight { get; set; }

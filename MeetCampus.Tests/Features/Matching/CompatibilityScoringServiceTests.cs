@@ -1,5 +1,4 @@
-using MeetCampus.Configuration;
-using MeetCampus.Contracts.Features.Administration;
+﻿using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Features.Matching.Models;
 using MeetCampus.Features.Matching.Services;
 using Xunit;
@@ -12,7 +11,7 @@ public sealed class CompatibilityScoringServiceTests
     public void WhenEveryCategoryHasAnswersThenOverallScoreUsesCategoryWeights()
     {
         var questions = AllCategories();
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
         Assert.Equal(100m, result.Score);
     }
@@ -24,7 +23,7 @@ public sealed class CompatibilityScoringServiceTests
         questions[0] = new ScoringQuestion(Guid.NewGuid(), QuestionType.Scale, "interests", 1m, 1, 4,
             new ScoringAnswer([], 1), new ScoringAnswer([], 2));
 
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
         Assert.Equal(75m + (100m * (1m - 1m / 3m) * 0.25m), result.Score);
     }
@@ -36,13 +35,13 @@ public sealed class CompatibilityScoringServiceTests
         questions[0] = questions[0] with { SecondAnswer = null };
 
         Assert.Throws<ArgumentException>(() =>
-            CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions()));
+            CompatibilityScoringService.Calculate(CreateInput(questions)));
     }
 
     [Fact]
     public void WhenNoQuestionsCanBeComparedThenCoverageIsZero()
     {
-        var result = CompatibilityScoringService.Calculate(new ScoringInput([], [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput([]));
 
         Assert.Equal(0m, result.EvidenceCoverage);
     }
@@ -50,7 +49,7 @@ public sealed class CompatibilityScoringServiceTests
     [Fact]
     public void WhenNoQuestionsCanBeComparedThenOverallScoreIsUnavailable()
     {
-        var result = CompatibilityScoringService.Calculate(new ScoringInput([], [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput([]));
 
         Assert.Null(result.Score);
     }
@@ -62,16 +61,21 @@ public sealed class CompatibilityScoringServiceTests
         var missing = questions[0] with { Id = Guid.NewGuid(), SecondAnswer = null };
 
         Assert.Throws<ArgumentException>(() =>
-            CompatibilityScoringService.Calculate(new ScoringInput([questions[0], missing], [], []), new MatchingWeightsOptions()));
+            CompatibilityScoringService.Calculate(CreateInput([questions[0], missing])));
     }
 
     [Fact]
     public void WhenCategoryWeightIsZeroThenMissingCategoryDoesNotPreventOverallScore()
     {
         var questions = AllCategories().Where(question => question.Category != "interests").ToArray();
-        var weights = new MatchingWeightsOptions { Interests = 0m, Values = 0.55m };
+        var categories = Categories()
+            .Select(category => category with
+            {
+                MatchingWeight = category.Code == "values" ? 1m : 0m
+            })
+            .ToArray();
 
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), weights);
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions, categories));
 
         Assert.Equal(100m, result.Score);
     }
@@ -81,7 +85,7 @@ public sealed class CompatibilityScoringServiceTests
     {
         var questions = AllCategories().Where(question => question.Category == "values").ToArray();
 
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
         Assert.Equal(1m, result.EvidenceCoverage);
     }
@@ -92,7 +96,7 @@ public sealed class CompatibilityScoringServiceTests
         var questions = AllCategories();
         questions[0] = questions[0] with { ScoringWeight = 0m };
 
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
         Assert.Null(result.Categories.Single(category => category.Category == "interests").Score);
     }
@@ -106,7 +110,7 @@ public sealed class CompatibilityScoringServiceTests
             new ScoringAnswer([option], null), new ScoringAnswer([Guid.NewGuid()], null)));
         questions[0] = questions[0] with { ScoringWeight = 0.5m };
 
-        var result = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), new MatchingWeightsOptions());
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
         Assert.Equal(50m, result.Categories.Single(category => category.Category == "interests").Score);
     }
@@ -115,13 +119,26 @@ public sealed class CompatibilityScoringServiceTests
     public void WhenQuestionOrderChangesThenResultIsUnchanged()
     {
         var questions = AllCategories();
-        var weights = new MatchingWeightsOptions();
 
-        var first = CompatibilityScoringService.Calculate(new ScoringInput(questions, [], []), weights);
-        var second = CompatibilityScoringService.Calculate(new ScoringInput(questions.Reverse().ToArray(), [], []), weights);
+        var first = CompatibilityScoringService.Calculate(CreateInput(questions));
+        var second = CompatibilityScoringService.Calculate(CreateInput(questions.Reverse().ToArray()));
 
         Assert.Equal(first.Score, second.Score);
     }
+
+    private static ScoringInput CreateInput(
+        IReadOnlyList<ScoringQuestion> questions,
+        IReadOnlyList<ScoringCategory>? categories = null) =>
+        new(categories ?? Categories(), questions, [], []);
+
+    private static ScoringCategory[] Categories() =>
+    [
+        new("interests", 0.25m),
+        new("values", 0.30m),
+        new("social", 0.20m),
+        new("lifestyle", 0.15m),
+        new("connection-intent", 0.10m)
+    ];
 
     private static ScoringQuestion[] AllCategories() =>
         new[] { "interests", "values", "social", "lifestyle", "connection-intent" }

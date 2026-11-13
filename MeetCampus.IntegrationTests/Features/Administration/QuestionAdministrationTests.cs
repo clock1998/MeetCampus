@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using MeetCampus.Contracts.Features.Administration;
 using MeetCampus.Data;
 using MeetCampus.Data.Questionnaire;
@@ -33,7 +33,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
                 new QuestionTranslation { CultureCode = "en", Text = "Test question" },
                 new QuestionTranslation { CultureCode = "fr", Text = "Question de test" }
             ],
-            Category = "interests",
+            CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
             ScoringWeight = 0.1m,
             UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1),
             Options =
@@ -62,7 +62,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
                 new QuestionTranslation { CultureCode = "en", Text = "Updated test question" },
                 new QuestionTranslation { CultureCode = "fr", Text = "Question de test modifiée" }
             ],
-            Category = question.Category,
+            CategoryId = question.CategoryId,
             ScoringWeight = question.ScoringWeight,
             Options = question.Options.ToList()
         }, TestContext.Current.CancellationToken);
@@ -178,7 +178,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
             new QuestionTranslation { CultureCode = "en", Text = "Test question" },
             new QuestionTranslation { CultureCode = "fr", Text = "Question de test" }
         ],
-        Category = "interests",
+        CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
         ScoringWeight = 0.1m,
         Options =
         [
@@ -199,7 +199,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
     {
         Code = question.Code,
         Type = question.Type,
-        Category = question.Category,
+        CategoryId = question.CategoryId,
         ScoringWeight = question.ScoringWeight,
         Translations =
         [
