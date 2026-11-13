@@ -372,8 +372,8 @@ namespace MeetCampus.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<int>("CompatibilityScore")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("CompatibilityScore")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTimeOffset?>("DecidedAt")
                         .HasColumnType("timestamp with time zone");
@@ -445,18 +445,13 @@ namespace MeetCampus.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("boolean");
 
                     b.Property<int?>("MaxSelections")
                         .HasColumnType("integer");
@@ -482,10 +477,98 @@ namespace MeetCampus.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<decimal>("MatchingWeight")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("NameFr")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("SortOrder")
+                        .IsUnique();
+
+                    b.ToTable("QuestionCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000001"),
+                            Code = "interests",
+                            MatchingWeight = 0.25m,
+                            NameEn = "Interests and activities",
+                            NameFr = "Intérêts et activités",
+                            SortOrder = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000002"),
+                            Code = "values",
+                            MatchingWeight = 0.30m,
+                            NameEn = "Values and priorities",
+                            NameFr = "Valeurs et priorités",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000003"),
+                            Code = "social",
+                            MatchingWeight = 0.20m,
+                            NameEn = "Social and communication preferences",
+                            NameFr = "Préférences sociales et de communication",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000004"),
+                            Code = "lifestyle",
+                            MatchingWeight = 0.15m,
+                            NameEn = "Lifestyle and availability",
+                            NameFr = "Mode de vie et disponibilités",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000005"),
+                            Code = "connection-intent",
+                            MatchingWeight = 0.10m,
+                            NameEn = "Connection intent and expectations",
+                            NameFr = "Intentions et attentes relationnelles",
+                            SortOrder = 4
+                        });
                 });
 
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOption", b =>
@@ -1743,6 +1826,17 @@ namespace MeetCampus.Migrations
                     b.Navigation("UserProfile");
                 });
 
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.Question", b =>
+                {
+                    b.HasOne("MeetCampus.Data.Questionnaire.QuestionCategory", "Category")
+                        .WithMany("Questions")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOption", b =>
                 {
                     b.HasOne("MeetCampus.Data.Questionnaire.Question", "Question")
@@ -2036,6 +2130,11 @@ namespace MeetCampus.Migrations
                     b.Navigation("Options");
 
                     b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionCategory", b =>
+                {
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.QuestionOption", b =>
