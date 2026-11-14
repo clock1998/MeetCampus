@@ -67,7 +67,9 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
             Options = question.Options.ToList()
         }, TestContext.Current.CancellationToken);
 
-        var updatedQuestion = await dbContext.Questions.SingleAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken);
+        var updatedQuestion = await dbContext.Questions
+            .AsNoTracking()
+            .SingleAsync(item => item.Id == question.Id, TestContext.Current.CancellationToken);
         Assert.True(updatedQuestion.UpdatedAt > oldUpdatedAt);
         Assert.True(await dbContext.AuditEvents.AnyAsync(item => item.Action == "Question.Updated" && item.EntityId == question.Id.ToString(), TestContext.Current.CancellationToken));
     }
@@ -164,7 +166,7 @@ public sealed class QuestionAdministrationTests(PostgreSqlContainerFixture fixtu
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(fixture.ConnectionString));
-        services.AddScoped<IValidator<Question>, QuestionnaireDefinitionValidator>();
+        services.AddScoped<QuestionnaireDefinitionValidator>();
         services.AddScoped<QuestionnaireAdministrationService>();
         return services.BuildServiceProvider();
     }

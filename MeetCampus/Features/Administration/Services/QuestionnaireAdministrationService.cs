@@ -107,6 +107,49 @@ public sealed class QuestionnaireAdministrationService(
                 question.Options.Remove(removedOption);
             dbContext.QuestionOptions.RemoveRange(removedOptions);
         }
+
+        foreach (var updatedOption in updatedQuestion.Options)
+        {
+            var option = question.Options.SingleOrDefault(item => item.OptionCode == updatedOption.OptionCode);
+            if (option is null)
+            {
+                option = new QuestionOption
+                {
+                    QuestionId = question.Id,
+                    OptionCode = updatedOption.OptionCode,
+                    SortOrder = updatedOption.SortOrder,
+                    ScoringValue = updatedOption.ScoringValue
+                };
+                question.Options.Add(option);
+            }
+            else
+            {
+                option.SortOrder = updatedOption.SortOrder;
+                option.ScoringValue = updatedOption.ScoringValue;
+            }
+
+            SynchronizeTranslations(option.Translations, updatedOption.Translations,
+                translation => translation.CultureCode,
+                translation => translation.Text,
+                translation => translation.CultureCode,
+                (translation, text) => translation.Text = text,
+                (cultureCode, text) => new QuestionOptionTranslation
+                {
+                    QuestionOptionId = option.Id,
+                    QuestionOption = option,
+                    CultureCode = cultureCode,
+                    Text = text
+                });
+        }
+
+        var updatedAt = DateTimeOffset.UtcNow;
+        if (updatedAt < question.UpdatedAt.AddMilliseconds(1))
+            updatedAt = question.UpdatedAt.AddMilliseconds(1);
+        question.UpdatedAt = updatedAt;
+
+        dbContext.AuditEvents.Add(CreateAuditEvent(actor.Id, "Question.Updated", question.Id.ToString(), new { question.Code }));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task DeleteQuestionAsync(
