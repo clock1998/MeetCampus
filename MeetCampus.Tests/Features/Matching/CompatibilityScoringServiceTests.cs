@@ -20,7 +20,7 @@ public sealed class CompatibilityScoringServiceTests
     public void WhenScaleAnswersDifferThenDecimalScoreIsPreserved()
     {
         var questions = AllCategories();
-        questions[0] = new ScoringQuestion(Guid.NewGuid(), QuestionType.Scale, "interests", 1m, 1, 4,
+        questions[0] = new ScoringQuestion(Guid.NewGuid(), QuestionType.Scale, "interests", 0.5m, 1, 4,
             new ScoringAnswer([], 1), new ScoringAnswer([], 2));
 
         var result = CompatibilityScoringService.Calculate(CreateInput(questions));
@@ -90,15 +90,49 @@ public sealed class CompatibilityScoringServiceTests
         Assert.Equal(1m, result.EvidenceCoverage);
     }
 
-    [Fact]
-    public void WhenAllComparableQuestionWeightsAreZeroThenCategoryHasNoScore()
+    [Theory]
+    [InlineData(-0.1)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(1.1)]
+    public void WhenQuestionWeightIsOutsideExclusiveBoundsThenScoringIsRejected(double weight)
     {
         var questions = AllCategories();
-        questions[0] = questions[0] with { ScoringWeight = 0m };
+        questions[0] = questions[0] with { ScoringWeight = (decimal)weight };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => CompatibilityScoringService.Calculate(CreateInput(questions)));
+    }
+
+    [Fact]
+    public void WhenCategoryHasNoQuestionsThenItIsOmitted()
+    {
+        var questions = AllCategories().Where(question => question.Category == "values").ToArray();
 
         var result = CompatibilityScoringService.Calculate(CreateInput(questions));
 
-        Assert.Null(result.Categories.Single(category => category.Category == "interests").Score);
+        Assert.Single(result.Categories, category => category.Category == "values");
+    }
+
+    [Fact]
+    public void WhenCategoriesAreEmptyThenRemainingWeightsAreNormalized()
+    {
+        var questions = AllCategories().Where(question => question.Category is "interests" or "values").ToArray();
+        questions[0] = questions[0] with { SecondAnswer = new ScoringAnswer([Guid.NewGuid()], null) };
+
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions));
+
+        Assert.Equal(100m * 0.30m / 0.55m, result.Score);
+    }
+
+    [Fact]
+    public void WhenPopulatedCategoriesHaveNoMatchingWeightThenOverallScoreIsUnavailable()
+    {
+        var questions = AllCategories().Where(question => question.Category == "values").ToArray();
+        var categories = Categories().Select(category => category with { MatchingWeight = 0m }).ToArray();
+
+        var result = CompatibilityScoringService.Calculate(CreateInput(questions, categories));
+
+        Assert.Null(result.Score);
     }
 
     [Fact]
@@ -145,7 +179,7 @@ public sealed class CompatibilityScoringServiceTests
             .Select(category =>
             {
                 var option = Guid.NewGuid();
-                return new ScoringQuestion(Guid.NewGuid(), QuestionType.SingleChoice, category, 1m, null, null,
+                return new ScoringQuestion(Guid.NewGuid(), QuestionType.SingleChoice, category, 0.5m, null, null,
                     new ScoringAnswer([option], null), new ScoringAnswer([option], null));
             }).ToArray();
 }

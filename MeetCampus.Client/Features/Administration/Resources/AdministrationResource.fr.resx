@@ -19,7 +19,7 @@
   <data name="QuestionnaireAdmin_TypeMultipleChoice" xml:space="preserve"><value>Choix multiples</value></data>
   <data name="QuestionnaireAdmin_TypeScale" xml:space="preserve"><value>Échelle</value></data>
   <data name="QuestionnaireAdmin_Category" xml:space="preserve"><value>Catégorie de compatibilité</value></data>
-  <data name="QuestionnaireAdmin_ScoringWeight" xml:space="preserve"><value>Poids de compatibilité (0–1)</value></data>
+	<data name="QuestionnaireAdmin_ScoringWeight" xml:space="preserve"><value>Poids de compatibilité (supérieur à 0 et inférieur à 1)</value></data>
   <data name="QuestionnaireAdmin_SortOrder" xml:space="preserve"><value>Ordre d’affichage</value></data>
   <data name="QuestionnaireAdmin_MaxSelections" xml:space="preserve"><value>Nombre maximal de choix</value></data>
   <data name="QuestionnaireAdmin_ScaleMin" xml:space="preserve"><value>Minimum de l’échelle</value></data>

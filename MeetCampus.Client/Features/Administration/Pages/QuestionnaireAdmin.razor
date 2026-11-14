@@ -63,7 +63,8 @@
                         </label>
                         <label class="fieldset">
                             <span class="fieldset-legend">@L["QuestionnaireAdmin_ScoringWeight"]</span>
-                            <InputNumber @bind-Value="editQuestion.ScoringWeight" class="input input-bordered w-full" step="0.01" />
+                            <InputNumber @bind-Value="editQuestion.ScoringWeight" class="input input-bordered w-full" step="any" />
+                            <ValidationMessage For="@(() => editQuestion.ScoringWeight)" />
                         </label>
                         <label class="fieldset">
                             <span class="fieldset-legend">@L["QuestionnaireAdmin_SortOrder"]</span>
@@ -340,7 +341,7 @@
         public string PromptFr { get; set; } = string.Empty;
         [System.ComponentModel.DataAnnotations.Required]
         public Guid CategoryId { get; set; }
-        [System.ComponentModel.DataAnnotations.Range(typeof(decimal), "0", "1")]
+        [System.ComponentModel.DataAnnotations.Range(typeof(decimal), "0", "1", MinimumIsExclusive = true, MaximumIsExclusive = true, ParseLimitsInInvariantCulture = true)]
         public decimal ScoringWeight { get; set; }
         public int SortOrder { get; set; }
         public int? MaxSelections { get; set; }

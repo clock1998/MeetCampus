@@ -39,6 +39,36 @@ public sealed class QuestionnaireValidatorsTests
         result.ShouldHaveValidationErrorFor(item => item.CategoryId);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public async Task WhenQuestionWeightIsAtBoundaryThenValidationFails(double weight)
+    {
+        await using var dbContext = CreateDbContext();
+        var validator = new QuestionnaireDefinitionValidator(dbContext);
+        var question = CreateQuestion();
+        question.CategoryId = Guid.Empty;
+        question.ScoringWeight = (decimal)weight;
+
+        var result = await validator.TestValidateAsync(question);
+
+        result.ShouldHaveValidationErrorFor(item => item.ScoringWeight);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(0.5)]
+    public void WhenRequestWeightIsValidatedThenExclusiveBoundsApply(double weight)
+    {
+        var request = new QuestionRequest { ScoringWeight = (decimal)weight };
+        var context = new System.ComponentModel.DataAnnotations.ValidationContext(request) { MemberName = nameof(request.ScoringWeight) };
+
+        var valid = System.ComponentModel.DataAnnotations.Validator.TryValidateProperty(request.ScoringWeight, context, []);
+
+        Assert.Equal(weight > 0 && weight < 1, valid);
+    }
+
     private static ApplicationDbContext CreateDbContext() => new(
         new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql("Host=localhost;Database=validation-test;Username=test;Password=test;Timeout=1")

@@ -13,33 +13,37 @@ public static class CompatibilityScoringService
         ArgumentNullException.ThrowIfNull(input.Questions);
 
         var categories = input.Categories.ToDictionary(category => category.Code, StringComparer.Ordinal);
+        if (input.Categories.Any(category => category.MatchingWeight < 0))
+            throw new ArgumentOutOfRangeException(nameof(input), "Category weights must not be negative.");
         foreach (var question in input.Questions)
         {
             if (!categories.ContainsKey(question.Category))
                 throw new ArgumentException("Question category is not present in the scoring categories.", nameof(input));
-            if (question.ScoringWeight is < 0 or > 1)
-                throw new ArgumentOutOfRangeException(nameof(input), "Question weights must be between zero and one.");
+            if (question.ScoringWeight is <= 0 or >= 1)
+                throw new ArgumentOutOfRangeException(nameof(input), "Question weights must be greater than zero and less than one.");
             if (question.FirstAnswer is null || question.SecondAnswer is null)
                 throw new ArgumentException("Compatibility scoring requires an answer from both members for every question.", nameof(input));
         }
 
-        var results = categories.Values.Select(category => CalculateCategory(category.Code, input.Questions)).ToArray();
-        var populated = results.Where(category => category.QuestionCount > 0).ToArray();
-        var coverageWeight = populated.Sum(category => categories[category.Category].MatchingWeight);
-        var coverage = coverageWeight == 0 ? 0 : 1m;
-        var score = results.Any(category => categories[category.Category].MatchingWeight > 0 && category.Score is null)
+        var results = categories.Values
+            .Select(category => (category.Code, Questions: input.Questions.Where(question => question.Category == category.Code).ToArray()))
+            .Where(category => category.Questions.Length > 0)
+            .Select(category => CalculateScoreByCategory(category.Code, category.Questions))
+            .ToArray();
+        var totalWeight = results.Sum(category => categories[category.Category].MatchingWeight);
+        var coverage = totalWeight == 0 ? 0 : 1m;
+        var score = totalWeight == 0
             ? (decimal?)null
-            : results.Sum(category => categories[category.Category].MatchingWeight * (category.Score ?? 0));
+            : results.Sum(category => categories[category.Category].MatchingWeight * category.Score) / totalWeight;
 
         return new CompatibilityScoreResult(score, coverage, results);
     }
 
-    private static CategoryScore CalculateCategory(string category, IReadOnlyList<ScoringQuestion> questions)
+    private static CategoryScore CalculateScoreByCategory(string category, IReadOnlyList<ScoringQuestion> questions)
     {
-        var categoryQuestions = questions.Where(question => question.Category == category).ToArray();
-        var weight = categoryQuestions.Sum(question => question.ScoringWeight);
-        var score = weight == 0 ? (decimal?)null : categoryQuestions.Sum(question => ScoreQuestion(question) * question.ScoringWeight) / weight;
-        return new CategoryScore(category, score, categoryQuestions.Length);
+        var weight = questions.Sum(question => question.ScoringWeight);
+        var score = questions.Sum(question => ScoreQuestion(question) * question.ScoringWeight) / weight;
+        return new CategoryScore(category, score, questions.Count);
     }
 
     private static decimal ScoreQuestion(ScoringQuestion question)

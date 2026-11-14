@@ -18,7 +18,7 @@ public sealed class QuestionRequest
     [Required]
     public Guid CategoryId { get; set; }
 
-    [Range(typeof(decimal), "0", "1")]
+    [Range(typeof(decimal), "0", "1", MinimumIsExclusive = true, MaximumIsExclusive = true, ParseLimitsInInvariantCulture = true)]
     public decimal ScoringWeight { get; set; }
 
     public int SortOrder { get; set; }

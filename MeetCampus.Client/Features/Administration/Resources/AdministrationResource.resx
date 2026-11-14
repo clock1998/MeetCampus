@@ -19,7 +19,7 @@
   <data name="QuestionnaireAdmin_TypeMultipleChoice" xml:space="preserve"><value>Multiple choice</value></data>
   <data name="QuestionnaireAdmin_TypeScale" xml:space="preserve"><value>Scale</value></data>
   <data name="QuestionnaireAdmin_Category" xml:space="preserve"><value>Matching category</value></data>
-  <data name="QuestionnaireAdmin_ScoringWeight" xml:space="preserve"><value>Scoring weight (0–1)</value></data>
+	<data name="QuestionnaireAdmin_ScoringWeight" xml:space="preserve"><value>Scoring weight (greater than 0 and less than 1)</value></data>
   <data name="QuestionnaireAdmin_SortOrder" xml:space="preserve"><value>Display order</value></data>
   <data name="QuestionnaireAdmin_MaxSelections" xml:space="preserve"><value>Maximum selections</value></data>
   <data name="QuestionnaireAdmin_ScaleMin" xml:space="preserve"><value>Scale minimum</value></data>

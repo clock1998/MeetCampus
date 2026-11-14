@@ -47,7 +47,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
             CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
-            ScoringWeight = 1
+            ScoringWeight = 0.5m
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -82,6 +82,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         {
             Id = Guid.NewGuid(), Code = $"required-{Guid.NewGuid():N}", Type = QuestionType.Scale,
             CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
+            ScoringWeight = 0.5m,
         });
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
         var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
@@ -254,7 +255,7 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             Code = $"required-{Guid.NewGuid():N}",
             Type = QuestionType.SingleChoice,
             CategoryId = Guid.Parse("80000000-0000-0000-0000-000000000001"),
-            ScoringWeight = 1,
+            ScoringWeight = 0.5m,
             Options = [option]
         };
         dbContext.Questions.Add(question);

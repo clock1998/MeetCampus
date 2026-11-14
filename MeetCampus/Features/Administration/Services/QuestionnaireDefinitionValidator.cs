@@ -18,7 +18,7 @@ public sealed class QuestionnaireDefinitionValidator : AbstractValidator<Questio
                 .AnyAsync(category => category.Id == categoryId, cancellationToken))
             .WithMessage("Question category is not supported.");
         RuleFor(question => question.Type).IsInEnum();
-        RuleFor(question => question.ScoringWeight).InclusiveBetween(0, 1);
+        RuleFor(question => question.ScoringWeight).ExclusiveBetween(0, 1);
         RuleFor(question => question.Translations)
             .Must(HasEnglishAndFrenchTranslations)
             .WithMessage("Question prompts are required in English and French.");

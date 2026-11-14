@@ -1,3 +1,3 @@
 namespace MeetCampus.Features.Matching.Models;
 
-public sealed record CategoryScore(string Category, decimal? Score, int QuestionCount);
+public sealed record CategoryScore(string Category, decimal Score, int QuestionCount);
