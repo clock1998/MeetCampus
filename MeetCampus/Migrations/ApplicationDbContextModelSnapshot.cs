@@ -1881,13 +1881,13 @@ namespace MeetCampus.Migrations
                     b.HasOne("MeetCampus.Data.Questionnaire.Question", "Question")
                         .WithMany("Answers")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("MeetCampus.Data.Questionnaire.QuestionOption", "QuestionOption")
                         .WithMany()
                         .HasForeignKey("QuestionOptionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ApplicationUser");
 

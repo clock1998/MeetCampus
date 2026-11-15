@@ -235,7 +235,7 @@ namespace MeetCampus.Data
                 entity.HasOne(item => item.Question)
                     .WithMany(question => question.Answers)
                     .HasForeignKey(item => item.QuestionId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(item => item.ApplicationUser)
                     .WithMany()
                     .HasForeignKey(item => item.ApplicationUserId)
@@ -243,7 +243,7 @@ namespace MeetCampus.Data
                 entity.HasOne(item => item.QuestionOption)
                     .WithMany()
                     .HasForeignKey(item => item.QuestionOptionId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => new { item.ApplicationUserId, item.QuestionId, item.UpdatedAt });
             });
 
