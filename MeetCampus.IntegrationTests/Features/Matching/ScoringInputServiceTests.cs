@@ -13,6 +13,21 @@ namespace MeetCampus.IntegrationTests.Features.Matching;
 public sealed class ScoringInputServiceTests(PostgreSqlContainerFixture fixture) : IClassFixture<PostgreSqlContainerFixture>
 {
     [Fact]
+    public async Task WhenCategoriesAreLoadedThenNamesAndSortOrderArePreserved()
+    {
+        await using var db = await CreateContextAsync();
+        var first = AddUser(db);
+        var second = AddUser(db);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var input = await new ScoringInputService(db).LoadAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            ("interests", "Interests and activities", "Intérêts et activités", 0),
+            (input.Categories[0].Code, input.Categories[0].NameEn, input.Categories[0].NameFr, input.Categories[0].SortOrder));
+    }
+
+    [Fact]
     public async Task WhenBothMembersHaveCurrentAnswersThenEachAnswerIsLoadedForItsOwner()
     {
         await using var db = await CreateContextAsync();

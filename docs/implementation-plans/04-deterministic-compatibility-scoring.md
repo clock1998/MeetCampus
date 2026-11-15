@@ -86,15 +86,15 @@ Build a simple server-side service that compares two members' answers and calcul
 
 ### Feature 5: Explain a match
 
-**Status:** Pending. Use generic category-level explanations rather than exposing individual answers.
+**Status:** Server-side label and generic category explanation selection is implemented. Display and eligibility checks at the recommendation entry point remain for a later phase.
 
 **Outcome:** Members see a simple match label and explanations based only on approved information.
 
 **Implementation:**
-1. Convert the score to an agreed label without showing the exact number. Show an indication of how many questions both members answered; translate labels when they are displayed.
-2. Use generic category-level text, such as a similarity in values, only when both members' current answers support it and the information is approved for sharing. Never expose private answers, exact matching-only answers, or guessed sensitive traits.
-3. Choose explanations in a consistent order. Aim for two or three shared points and an optional conversation starter when the available information supports them.
-4. Agree on what to show when fewer than two shared points are available. Never invent an explanation. The recommendation page is part of a later phase.
+1. Map unrounded scores of 80–100 to Strong, 60–less than 80 to Good, and below 60 to Potential. A missing overall score returns no label or explanations.
+2. Select categories scoring at least 75 using their approved English and French names. The result does not contain numeric scores or individual answers.
+3. Sort by category display order, then code, and return at most three categories. When fewer qualify, return only those available. Conversation starters are deferred.
+4. Report complete coverage for the questions used in scoring. English and French resources provide generic presentation text; the recommendation page and its eligibility checks remain for a later phase.
 
 **Acceptance criteria:**
 - The same answers and rules produce the same label and explanations.
