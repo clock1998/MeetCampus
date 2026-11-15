@@ -16,18 +16,22 @@ namespace MeetCampus.IntegrationTests.Features.Matching;
 
 public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixture) : IClassFixture<PostgreSqlContainerFixture>
 {
-    [Fact]
-    public async Task WhenEligibleMembersShareAnIntentThenTheyCanMatch()
+    [Theory]
+    [InlineData("30000000-0000-0000-0000-000000000001")]
+    [InlineData("30000000-0000-0000-0000-000000000002")]
+    [InlineData("30000000-0000-0000-0000-000000000003")]
+    [InlineData("30000000-0000-0000-0000-000000000004")]
+    public async Task WhenEligibleMembersShareAnIntentThenTheyCanMatch(string intentId)
     {
         using var services = CreateServices();
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
-        var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
-        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+        var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), intentId);
+        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), intentId);
         var service = CreateMatchService(scope.ServiceProvider);
 
-        var result = await service.CanMatchAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await service.IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
 
         Assert.True(result);
     }
@@ -50,7 +54,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).CanMatchAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -68,24 +72,88 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         lifecycle.DiscoverabilityOptIn = false;
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).CanMatchAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+
+        Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData("30000000-0000-0000-0000-000000000001", "30000000-0000-0000-0000-000000000003")]
+    [InlineData("30000000-0000-0000-0000-000000000002", "30000000-0000-0000-0000-000000000001")]
+    [InlineData("30000000-0000-0000-0000-000000000001", "30000000-0000-0000-0000-000000000002")]
+    public async Task WhenMembersHaveDifferentIntentsThenTheyCannotMatch(string firstIntentId, string secondIntentId)
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), firstIntentId);
+        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), secondIntentId);
+
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
 
     [Fact]
-    public async Task WhenMembersHaveDifferentIntentsThenTheyCannotMatch()
+    public async Task WhenAnySelectedPairMatchesThenMembersCanMatch()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), "30000000-0000-0000-0000-000000000002");
+        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), "30000000-0000-0000-0000-000000000003");
+        var profiles = await db.UserProfiles.Where(profile => profile.ApplicationUserId == first.Id || profile.ApplicationUserId == second.Id)
+            .ToListAsync(TestContext.Current.CancellationToken);
+        db.UserProfileIntentions.AddRange(profiles.Select(profile => new UserProfileIntention
+        {
+            UserProfileId = profile.Id,
+            UserIntentionId = Guid.Parse("30000000-0000-0000-0000-000000000001")
+        }));
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task WhenMemberHasNoIntentsThenTheyCannotMatch()
     {
         using var services = CreateServices();
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
         var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
-        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), "30000000-0000-0000-0000-000000000003");
+        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+        var intentions = await db.UserProfileIntentions.Where(item => item.UserProfile.ApplicationUserId == first.Id)
+            .ToListAsync(TestContext.Current.CancellationToken);
+        db.UserProfileIntentions.RemoveRange(intentions);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).CanMatchAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
 
         Assert.False(result);
+    }
+
+    [Fact]
+    public async Task WhenIntentHasNoRuleThenConfigurationErrorIsThrownEvenIfAnotherPairMatches()
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+        var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+        var profile = await db.UserProfiles.SingleAsync(item => item.ApplicationUserId == first.Id, TestContext.Current.CancellationToken);
+        var unknownIntent = new UserIntention { Id = Guid.NewGuid(), Code = $"unknown-{Guid.NewGuid():N}", Name = "Unknown", DisplayKey = "Unknown" };
+        db.UserIntentions.Add(unknownIntent);
+        db.UserProfileIntentions.Add(new UserProfileIntention { UserProfileId = profile.Id, UserIntentionId = unknownIntent.Id });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => CreateMatchService(scope.ServiceProvider)
+            .IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -95,7 +163,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         await using var scope = services.CreateAsyncScope();
         var id = Guid.NewGuid();
 
-        var result = await CreateMatchService(scope.ServiceProvider).CanMatchAsync(id, id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(id, id, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
