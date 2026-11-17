@@ -328,23 +328,11 @@ namespace MeetCampus.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AlgorithmVersion")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
                     b.Property<DateOnly>("BatchDate")
                         .HasColumnType("date");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("ScoringConfigurationVersionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ScoringWeightsJson")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
 
                     b.Property<Guid>("ViewerUserId")
                         .HasColumnType("uuid");
@@ -359,6 +347,27 @@ namespace MeetCampus.Migrations
                     b.ToTable("RecommendationBatches");
                 });
 
+            modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationExplanationCategory", b =>
+                {
+                    b.Property<Guid>("RecommendationItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuestionCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RecommendationItemId", "QuestionCategoryId");
+
+                    b.HasIndex("QuestionCategoryId");
+
+                    b.HasIndex("RecommendationItemId", "SortOrder")
+                        .IsUnique();
+
+                    b.ToTable("RecommendationExplanationCategories");
+                });
+
             modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -367,10 +376,6 @@ namespace MeetCampus.Migrations
 
                     b.Property<Guid>("CandidateUserId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("CategoryScoresJson")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
 
                     b.Property<decimal>("CompatibilityScore")
                         .HasColumnType("numeric");
@@ -1779,6 +1784,25 @@ namespace MeetCampus.Migrations
                     b.Navigation("ViewerUser");
                 });
 
+            modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationExplanationCategory", b =>
+                {
+                    b.HasOne("MeetCampus.Data.Questionnaire.QuestionCategory", "QuestionCategory")
+                        .WithMany()
+                        .HasForeignKey("QuestionCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MeetCampus.Data.Matching.RecommendationItem", "RecommendationItem")
+                        .WithMany("ExplanationCategories")
+                        .HasForeignKey("RecommendationItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestionCategory");
+
+                    b.Navigation("RecommendationItem");
+                });
+
             modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationItem", b =>
                 {
                     b.HasOne("MeetCampus.Data.User.ApplicationUser", null)
@@ -2121,6 +2145,11 @@ namespace MeetCampus.Migrations
             modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationBatch", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("MeetCampus.Data.Matching.RecommendationItem", b =>
+                {
+                    b.Navigation("ExplanationCategories");
                 });
 
             modelBuilder.Entity("MeetCampus.Data.Questionnaire.Question", b =>
