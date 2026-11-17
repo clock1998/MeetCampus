@@ -103,15 +103,18 @@ Build a simple server-side service that compares two members' answers and calcul
 
 ### Feature 6: Prepare for recommendations
 
-**Status:** Pending. The existing recommendation item model has score and coverage fields, but recommendations are not generated or saved yet.
+**Status:** Server-side evaluation and selected-recommendation model preparation are implemented. Recommendations are not generated or saved yet; a user-managed migration is required.
 
 **Outcome:** Later phases can use the score safely without versioning or storing every evaluation.
 
 **Implementation:**
-1. Return the score, category results, coverage, and approved explanations to server code. Do not save each evaluation or keep an evaluation history. Keep private details out of client responses.
-2. Phase 5 may save the score, coverage, and approved explanation text needed to show a selected recommendation. Do not store scoring rules or their versions with the recommendation.
+1. `MatchEvaluationService` checks account eligibility, blocks, and intent compatibility before reporting incomplete answers or calculating a score. It returns an ineligible, incomplete-answer, unavailable-score, or completed status to server code, with scores and generic explanations only when applicable. It does not store evaluations or expose private answers.
+2. Phase 5 may save the selected score, coverage, and ordered qualifying category IDs. Resolve category names when displaying a recommendation; removing a category removes its reference, not the recommendation. Do not store scoring rules or their versions with the recommendation.
 3. Do not build a feature to reproduce old scores after answers or scoring code change. Keep only the recommendation data needed by the MVP.
 4. Phase 5 must check eligibility and safety before using scores to select recommendations. Phase 6 must check eligibility and intent again before processing interest.
+5. A future UI may prompt a member to complete or update their own answers. It must not reveal another member's answer status when a pair is blocked or otherwise ineligible, or expose exact scores or private answers.
+
+**Database change:** The user must create and apply a migration adding ordered recommendation-to-category references and removing `CategoryScoresJson`, `AlgorithmVersion`, `ScoringConfigurationVersionId`, and `ScoringWeightsJson` from the recommendation tables. Removed values will be lost unless the migration preserves them separately. Existing question-category deletion restrictions still apply.
 
 **Acceptance criteria:**
 - Selected recommendations save only the result information needed to show them to members.

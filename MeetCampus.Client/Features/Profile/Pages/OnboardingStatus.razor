@@ -34,23 +34,23 @@
             {
                 <p class="text-base-content/70 mb-4">@L["OnboardingStatus_Incomplete"]</p>
                 <ul class="space-y-3">
-                    @if (!eligibility.IsProfileComplete)
+                    @if (eligibility.Failures.HasFlag(AccountEligibilityFailure.ProfileIncomplete))
                     {
                         <li><a class="link link-primary" href="/profile/setup">@L["OnboardingStatus_ProfileLink"]</a></li>
                     }
-                    @if (!eligibility.HasUploadedProfileImage)
+                    @if (eligibility.Failures.HasFlag(AccountEligibilityFailure.ProfileImageMissing))
                     {
                         <li><a class="link link-primary" href="/profile/images">@L["OnboardingStatus_ImagesLink"]</a></li>
                     }
-                    @if (!eligibility.HasCompletedRequiredQuestions)
+                    @if (eligibility.Failures.HasFlag(AccountEligibilityFailure.AnswersIncomplete))
                     {
                         <li><a class="link link-primary" href="/questionnaire">@L["OnboardingStatus_QuestionnaireLink"]</a></li>
                     }
-                    @if (!eligibility.IsEmailVerified)
+                    @if (eligibility.Failures.HasFlag(AccountEligibilityFailure.EmailNotVerified))
                     {
                         <li><a class="link link-primary" href="/auth/manage/email">@L["OnboardingStatus_EmailLink"]</a></li>
                     }
-                    @if (!eligibility.DiscoverabilityOptIn)
+                    @if (eligibility.Failures.HasFlag(AccountEligibilityFailure.DiscoverabilityNotOptedIn))
                     {
                         <li>
                             <button class="btn btn-outline btn-sm" type="button" disabled="@isUpdatingOptIn" @onclick="EnableDiscoverabilityAsync">
@@ -58,7 +58,7 @@
                             </button>
                         </li>
                     }
-                    @if (!eligibility.IsAccountActive || !eligibility.HasRecipientCapacity || !eligibility.HasNoActiveModerationRestriction)
+                    @if ((eligibility.Failures & (AccountEligibilityFailure.AccountNotActive | AccountEligibilityFailure.RecipientCapacityReached | AccountEligibilityFailure.ModerationRestriction)) != AccountEligibilityFailure.None)
                     {
                         <li><p class="text-base-content/70">@L["OnboardingStatus_AccountRestriction"]</p></li>
                     }

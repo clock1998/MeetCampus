@@ -25,8 +25,7 @@ public sealed class AccountController(
         if (user is null)
             return Unauthorized();
 
-        var eligibility = await accountEligibilityService.GetEligibilityAsync(user.Id, cancellationToken);
-        return eligibility is null ? Unauthorized() : Ok(eligibility);
+        return Ok(await accountEligibilityService.GetEligibilityAsync(user, cancellationToken));
     }
 
     [HttpPost("lifecycle")]

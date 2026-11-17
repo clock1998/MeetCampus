@@ -8,7 +8,7 @@ public sealed class RecommendationItem
     public Guid CandidateUserId { get; set; }
     public decimal CompatibilityScore { get; set; }
     public decimal EvidenceCoverage { get; set; }
-    public string CategoryScoresJson { get; set; } = "{}";
+    public ICollection<RecommendationExplanationCategory> ExplanationCategories { get; set; } = [];
     public RecommendationDecision Decision { get; set; }
     public DateTimeOffset? DecidedAt { get; set; }
 }

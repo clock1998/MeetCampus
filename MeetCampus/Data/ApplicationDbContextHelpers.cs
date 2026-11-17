@@ -251,8 +251,6 @@ namespace MeetCampus.Data
             {
                 entity.HasKey(item => item.Id);
                 entity.Property(item => item.ViewerUserId).IsRequired();
-                entity.Property(item => item.AlgorithmVersion).HasMaxLength(64).IsRequired();
-                entity.Property(item => item.ScoringWeightsJson).HasColumnType("jsonb").IsRequired();
                 entity.HasOne(item => item.ViewerUser)
                     .WithMany()
                     .HasForeignKey(item => item.ViewerUserId)
@@ -267,7 +265,6 @@ namespace MeetCampus.Data
                 entity.Property(item => item.CandidateUserId).IsRequired();
                 entity.Property(item => item.Decision).HasConversion<string>().HasMaxLength(32);
                 entity.Property(item => item.EvidenceCoverage).HasPrecision(5, 4);
-                entity.Property(item => item.CategoryScoresJson).HasColumnType("jsonb").IsRequired();
                 entity.HasOne(item => item.RecommendationBatch)
                     .WithMany(batch => batch.Items)
                     .HasForeignKey(item => item.RecommendationBatchId)
@@ -281,6 +278,20 @@ namespace MeetCampus.Data
                 .WithMany()
                 .HasForeignKey(item => item.CandidateUserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<RecommendationExplanationCategory>(entity =>
+            {
+                entity.HasKey(item => new { item.RecommendationItemId, item.QuestionCategoryId });
+                entity.HasIndex(item => new { item.RecommendationItemId, item.SortOrder }).IsUnique();
+                entity.HasOne(item => item.RecommendationItem)
+                    .WithMany(item => item.ExplanationCategories)
+                    .HasForeignKey(item => item.RecommendationItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.QuestionCategory)
+                    .WithMany()
+                    .HasForeignKey(item => item.QuestionCategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             builder.Entity<ContactRequest>(entity =>
             {

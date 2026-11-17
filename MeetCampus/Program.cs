@@ -64,6 +64,7 @@ builder.Services.AddScoped<QuestionnaireAdministrationService>();
 builder.Services.AddScoped<QuestionnaireResponseService>();
 builder.Services.AddScoped<ScoringInputService>();
 builder.Services.AddScoped<MatchEligibilityService>();
+builder.Services.AddScoped<MatchEvaluationService>();
 builder.Services.AddScoped<IValidator<string>, QuestionnaireCultureValidator>();
 builder.Services.AddScoped<IValidator<SubmitQuestionnaireResponseRequest>, SubmitQuestionnaireResponseRequestValidator>();
 builder.Services.AddScoped<IValidator<QuestionnaireAnswerValidationContext>, QuestionnaireAnswerValidator>();

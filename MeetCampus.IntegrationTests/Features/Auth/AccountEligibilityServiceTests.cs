@@ -1,4 +1,5 @@
 ﻿using MeetCampus.Contracts.Features.Administration;
+using MeetCampus.Contracts.Features.Auth;
 using MeetCampus.Data;
 using MeetCampus.Data.Profiles;
 using MeetCampus.Data.Questionnaire;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Xunit;
 using MeetCampus.Configuration;
+using Npgsql;
 
 namespace MeetCampus.IntegrationTests.Features.Auth;
 
@@ -24,10 +26,10 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
     [Fact]
     public async Task WhenAccountHasNoEligibilityPrerequisitesThenStatusReportsIneligible()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var email = $"eligibility-{Guid.NewGuid():N}@example.edu";
@@ -55,27 +57,20 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
             dbContext,
             userManager,
             Options.Create(new ContactOptions()));
-        var response = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+        var response = await service.GetEligibilityAsync(user, TestContext.Current.CancellationToken);
 
         Assert.NotNull(response);
-        Assert.False(response.IsEmailVerified);
-        Assert.True(response.IsAccountActive);
-        Assert.False(response.IsProfileComplete);
-        Assert.False(response.HasUploadedProfileImage);
-        Assert.False(response.HasCompletedRequiredQuestions);
-        Assert.True(response.DiscoverabilityOptIn);
-        Assert.True(response.HasRecipientCapacity);
-        Assert.True(response.HasNoActiveModerationRestriction);
-        Assert.False(response.IsEligibleForDiscoverability);
+        Assert.Equal(AccountEligibilityFailure.EmailNotVerified | AccountEligibilityFailure.ProfileIncomplete
+            | AccountEligibilityFailure.ProfileImageMissing | AccountEligibilityFailure.AnswersIncomplete, response.Failures);
     }
 
     [Fact]
     public async Task WhenPreviouslyOptionalQuestionIsUnansweredThenMemberIsIneligible()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: true);
         dbContext.Questions.Add(new Question
@@ -87,19 +82,19 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
         var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
 
-        var result = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+        var result = await service.GetEligibilityAsync(user, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
-        Assert.False(result.HasCompletedRequiredQuestions);
+        Assert.True(result.Failures.HasFlag(AccountEligibilityFailure.AnswersIncomplete));
     }
 
     [Fact]
     public async Task WhenMemberIsEligibleThenRecommendationAvailabilityIsTrue()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: true);
         var controller = new RecommendationsController(
@@ -117,10 +112,10 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
     [Fact]
     public async Task WhenMemberIsIneligibleThenRecommendationAvailabilityIsFalse()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var email = $"ineligible-{Guid.NewGuid():N}@example.edu";
         var user = new ApplicationUser { UserName = email, Email = email };
@@ -151,15 +146,15 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
     [Fact]
     public async Task WhenMemberHasEveryCurrentPrerequisiteThenEligibilityReflectsPersistedChanges()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: true);
         var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
 
-        var eligibleResponse = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+        var eligibleResponse = await service.GetEligibilityAsync(user, TestContext.Current.CancellationToken);
 
         Assert.NotNull(eligibleResponse);
         Assert.True(eligibleResponse.IsEligibleForDiscoverability);
@@ -167,36 +162,42 @@ public sealed class AccountEligibilityServiceTests(PostgreSqlContainerFixture fi
         var lifecycle = await dbContext.AccountLifecycles.SingleAsync(item => item.ApplicationUserId == user.Id, TestContext.Current.CancellationToken);
         lifecycle.DiscoverabilityOptIn = false;
         await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-        var optedOutResponse = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+        var optedOutResponse = await service.GetEligibilityAsync(user, TestContext.Current.CancellationToken);
 
         Assert.NotNull(optedOutResponse);
-        Assert.False(optedOutResponse.DiscoverabilityOptIn);
+        Assert.True(optedOutResponse.Failures.HasFlag(AccountEligibilityFailure.DiscoverabilityNotOptedIn));
         Assert.False(optedOutResponse.IsEligibleForDiscoverability);
     }
 
     [Fact]
     public async Task WhenRequiredAnswerHasAnInvalidStoredShapeThenMemberIsIneligible()
     {
-        using var services = CreateServices();
+        using var services = await CreateServicesAsync();
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await dbContext.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await CreateEligibleMemberAsync(dbContext, userManager, validAnswer: false);
         var service = new AccountEligibilityService(dbContext, userManager, Options.Create(new ContactOptions()));
 
-        var response = await service.GetEligibilityAsync(user.Id, TestContext.Current.CancellationToken);
+        var response = await service.GetEligibilityAsync(user, TestContext.Current.CancellationToken);
 
         Assert.NotNull(response);
-        Assert.False(response.HasCompletedRequiredQuestions);
+        Assert.True(response.Failures.HasFlag(AccountEligibilityFailure.AnswersIncomplete));
         Assert.False(response.IsEligibleForDiscoverability);
     }
 
-    private ServiceProvider CreateServices()
+    private async Task<ServiceProvider> CreateServicesAsync()
     {
+        var databaseName = $"account_eligibility_{Guid.NewGuid():N}";
+        await using var connection = new NpgsqlConnection(fixture.ConnectionString);
+        await connection.OpenAsync(TestContext.Current.CancellationToken);
+        await using var command = new NpgsqlCommand($"CREATE DATABASE \"{databaseName}\"", connection);
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        var connectionString = new NpgsqlConnectionStringBuilder(fixture.ConnectionString) { Database = databaseName }.ConnectionString;
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(fixture.ConnectionString));
+        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();

@@ -48,7 +48,7 @@ public static class MatchExplanationService
             .OrderBy(category => category.SortOrder)
             .ThenBy(category => category.Code, StringComparer.Ordinal)
             .Take(3)
-            .Select(category => new MatchExplanationCategory(category.NameEn, category.NameFr))
+            .Select(category => new MatchExplanationCategory(category.Id, category.NameEn, category.NameFr))
             .ToArray();
 
         return new MatchExplanationResult(label, true, explanations);

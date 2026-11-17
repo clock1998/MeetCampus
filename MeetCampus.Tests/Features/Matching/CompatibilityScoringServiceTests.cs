@@ -167,11 +167,11 @@ public sealed class CompatibilityScoringServiceTests
 
     private static ScoringCategory[] Categories() =>
     [
-        new("interests", 0.25m, "Interests", "Intérêts", 0),
-        new("values", 0.30m, "Values", "Valeurs", 1),
-        new("social", 0.20m, "Social", "Social", 2),
-        new("lifestyle", 0.15m, "Lifestyle", "Mode de vie", 3),
-        new("connection-intent", 0.10m, "Connection intent", "Intentions relationnelles", 4)
+        new(Guid.NewGuid(), "interests", 0.25m, "Interests", "Intérêts", 0),
+        new(Guid.NewGuid(), "values", 0.30m, "Values", "Valeurs", 1),
+        new(Guid.NewGuid(), "social", 0.20m, "Social", "Social", 2),
+        new(Guid.NewGuid(), "lifestyle", 0.15m, "Lifestyle", "Mode de vie", 3),
+        new(Guid.NewGuid(), "connection-intent", 0.10m, "Connection intent", "Intentions relationnelles", 4)
     ];
 
     private static ScoringQuestion[] AllCategories() =>

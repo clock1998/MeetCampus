@@ -1,3 +1,3 @@
 namespace MeetCampus.Features.Matching.Models;
 
-public sealed record ScoringCategory(string Code, decimal MatchingWeight, string NameEn, string NameFr, int SortOrder);
+public sealed record ScoringCategory(Guid Id, string Code, decimal MatchingWeight, string NameEn, string NameFr, int SortOrder);

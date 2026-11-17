@@ -35,6 +35,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         public DbSet<UserProfileIntention> UserProfileIntentions => Set<UserProfileIntention>();
         public DbSet<RecommendationBatch> RecommendationBatches => Set<RecommendationBatch>();
         public DbSet<RecommendationItem> RecommendationItems => Set<RecommendationItem>();
+        public DbSet<RecommendationExplanationCategory> RecommendationExplanationCategories => Set<RecommendationExplanationCategory>();
         public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
         public DbSet<Conversation> Conversations => Set<Conversation>();
         public DbSet<ConversationMessage> ConversationMessages => Set<ConversationMessage>();

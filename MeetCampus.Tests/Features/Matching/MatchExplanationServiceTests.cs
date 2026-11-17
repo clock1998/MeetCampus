@@ -27,7 +27,7 @@ public sealed class MatchExplanationServiceTests
     {
         var score = new CompatibilityScoreResult(null, 0m, [new CategoryScore("values", 100m, 1)]);
 
-        var result = MatchExplanationService.Explain(score, [new ScoringCategory("values", 1m, "Values", "Valeurs", 0)]);
+        var result = MatchExplanationService.Explain(score, [new ScoringCategory(Guid.NewGuid(), "values", 1m, "Values", "Valeurs", 0)]);
 
         Assert.Null(result.Label);
     }
@@ -37,7 +37,7 @@ public sealed class MatchExplanationServiceTests
     {
         var score = new CompatibilityScoreResult(null, 0m, [new CategoryScore("values", 100m, 1)]);
 
-        var result = MatchExplanationService.Explain(score, [new ScoringCategory("values", 1m, "Values", "Valeurs", 0)]);
+        var result = MatchExplanationService.Explain(score, [new ScoringCategory(Guid.NewGuid(), "values", 1m, "Values", "Valeurs", 0)]);
 
         Assert.Empty(result.Categories);
     }
@@ -69,7 +69,7 @@ public sealed class MatchExplanationServiceTests
 
         var result = MatchExplanationService.Explain(score, categories);
 
-        Assert.Equal([new MatchExplanationCategory("B", "B fr")], result.Categories);
+        Assert.Equal([new MatchExplanationCategory(categories.Single(category => category.Code == "b").Id, "B", "B fr")], result.Categories);
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public sealed class MatchExplanationServiceTests
     public void WhenQualifyingCategoryHasNoApprovedNameThenExplanationIsRejected()
     {
         var score = new CompatibilityScoreResult(80m, 1m, [new CategoryScore("a", 75m, 1)]);
-        var categories = new[] { new ScoringCategory("a", 1m, "", "A fr", 0) };
+        var categories = new[] { new ScoringCategory(Guid.NewGuid(), "a", 1m, "", "A fr", 0) };
 
         Assert.Throws<ArgumentException>(() => MatchExplanationService.Explain(score, categories));
     }
@@ -126,9 +126,9 @@ public sealed class MatchExplanationServiceTests
 
     private static ScoringCategory[] Categories() =>
     [
-        new("d", 0.25m, "D", "D fr", 2),
-        new("b", 0.25m, "B", "B fr", 1),
-        new("c", 0.25m, "C", "C fr", 1),
-        new("a", 0.25m, "A", "A fr", 0)
+        new(Guid.NewGuid(), "d", 0.25m, "D", "D fr", 2),
+        new(Guid.NewGuid(), "b", 0.25m, "B", "B fr", 1),
+        new(Guid.NewGuid(), "c", 0.25m, "C", "C fr", 1),
+        new(Guid.NewGuid(), "a", 0.25m, "A", "A fr", 0)
     ];
 }

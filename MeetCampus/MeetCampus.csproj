@@ -45,4 +45,8 @@
     <ProjectReference Include="..\MeetCampus.Contracts\MeetCampus.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Account\Models\" />
+  </ItemGroup>
+
 </Project>

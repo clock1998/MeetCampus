@@ -31,7 +31,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), intentId);
         var service = CreateMatchService(scope.ServiceProvider);
 
-        var result = await service.IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await service.IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.True(result);
     }
@@ -54,7 +54,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -72,7 +72,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         lifecycle.DiscoverabilityOptIn = false;
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -90,7 +90,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         var first = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), firstIntentId);
         var second = await CreateEligibleUserAsync(db, scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(), secondIntentId);
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -113,7 +113,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         }));
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.True(result);
     }
@@ -132,7 +132,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         db.UserProfileIntentions.RemoveRange(intentions);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }
@@ -153,7 +153,7 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => CreateMatchService(scope.ServiceProvider)
-            .IsEligibleForMatchingAsync(first.Id, second.Id, TestContext.Current.CancellationToken));
+            .IsEligibleForMatchingAsync(first, second, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -161,11 +161,38 @@ public sealed class MatchEligibilityServiceTests(PostgreSqlContainerFixture fixt
     {
         using var services = CreateServices();
         await using var scope = services.CreateAsyncScope();
-        var id = Guid.NewGuid();
+        var user = new ApplicationUser { Id = Guid.NewGuid() };
 
-        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(id, id, TestContext.Current.CancellationToken);
+        var result = await CreateMatchService(scope.ServiceProvider).IsEligibleForMatchingAsync(user, user, TestContext.Current.CancellationToken);
 
         Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WhenEitherUserIsNullThenMatchingThrows(bool firstIsNull)
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var user = new ApplicationUser { Id = Guid.NewGuid() };
+
+        await Assert.ThrowsAsync<ArgumentNullException>(() => CreateMatchService(scope.ServiceProvider)
+            .IsEligibleForMatchingAsync(firstIsNull ? null! : user, firstIsNull ? user : null!, TestContext.Current.CancellationToken));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WhenEitherUserIdIsEmptyThenMatchingThrows(bool firstIsEmpty)
+    {
+        using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var empty = new ApplicationUser { Id = Guid.Empty };
+        var user = new ApplicationUser { Id = Guid.NewGuid() };
+
+        await Assert.ThrowsAsync<ArgumentException>(() => CreateMatchService(scope.ServiceProvider)
+            .IsEligibleForMatchingAsync(firstIsEmpty ? empty : user, firstIsEmpty ? user : empty, TestContext.Current.CancellationToken));
     }
 
     private ServiceProvider CreateServices()

@@ -28,7 +28,7 @@ public sealed class ScoringInputService(ApplicationDbContext dbContext)
             .AsNoTracking()
             .OrderBy(category => category.SortOrder)
             .ThenBy(category => category.Code)
-            .Select(category => new ScoringCategory(category.Code, category.MatchingWeight, category.NameEn, category.NameFr, category.SortOrder))
+            .Select(category => new ScoringCategory(category.Id, category.Code, category.MatchingWeight, category.NameEn, category.NameFr, category.SortOrder))
             .ToListAsync(cancellationToken);
         var answers = await dbContext.UserAnswers
             .AsNoTracking()

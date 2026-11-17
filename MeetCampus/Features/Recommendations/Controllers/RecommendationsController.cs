@@ -22,9 +22,7 @@ public sealed class RecommendationsController(
         if (user is null)
             return Unauthorized();
 
-        var eligibility = await accountEligibilityService.GetEligibilityAsync(user.Id, cancellationToken);
-        return eligibility is null
-            ? Unauthorized()
-            : Ok(new RecommendationAvailabilityResponse(eligibility.IsEligibleForDiscoverability));
+        var eligibility = await accountEligibilityService.GetEligibilityAsync(user, cancellationToken);
+        return Ok(new RecommendationAvailabilityResponse(eligibility.IsEligibleForDiscoverability));
     }
 }
