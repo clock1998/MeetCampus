@@ -16,6 +16,7 @@ using System.Threading.RateLimiting;
 using Serilog;
 using MeetCampus.Features.Account.Services;
 using MeetCampus.Configuration;
+using MeetCampus.Features.Recommendations.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
@@ -65,6 +66,7 @@ builder.Services.AddScoped<QuestionnaireResponseService>();
 builder.Services.AddScoped<ScoringInputService>();
 builder.Services.AddScoped<MatchEligibilityService>();
 builder.Services.AddScoped<MatchEvaluationService>();
+builder.Services.AddScoped<CandidateScreeningService>();
 builder.Services.AddScoped<IValidator<string>, QuestionnaireCultureValidator>();
 builder.Services.AddScoped<IValidator<SubmitQuestionnaireResponseRequest>, SubmitQuestionnaireResponseRequestValidator>();
 builder.Services.AddScoped<IValidator<QuestionnaireAnswerValidationContext>, QuestionnaireAnswerValidator>();
