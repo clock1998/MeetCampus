@@ -23,8 +23,6 @@ public sealed class CandidateScreeningService(
     {
         ArgumentNullException.ThrowIfNull(viewer);
         var viewerUserId = viewer.Id;
-        if (viewerUserId == Guid.Empty)
-            throw new ArgumentException("A viewer ID is required.", nameof(viewerUserId));
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(
             IsolationLevel.RepeatableRead,
